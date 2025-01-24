@@ -151,16 +151,16 @@ class Bootstrap {
         ]
     ];
 
-	// core Modules
-	private $Configurator;
-
     /**
      * Constructor.
      */
     public function __construct($scope){
 
+        // Set the global variable
+        global $CONFIG;
+
         // Initialize Configurator
-        $this->Configurator = new Configurator(['bootstrap']);
+        $CONFIG = new Config(['bootstrap']);
 
         // Retrieve the straps
         $straps = $this->Configurator->get('bootstrap');
