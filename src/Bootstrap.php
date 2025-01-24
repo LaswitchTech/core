@@ -163,7 +163,7 @@ class Bootstrap {
         $CONFIG = new Config(['bootstrap']);
 
         // Retrieve the straps
-        $straps = $this->Configurator->get('bootstrap');
+        $straps = $CONFIG->get('bootstrap');
 
         // Loop through the straps
         foreach(self::Default as $strap => $config){
