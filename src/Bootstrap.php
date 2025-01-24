@@ -189,9 +189,6 @@ class Bootstrap {
             // Initialize the Global Variable
             global ${$strap};
 
-            // Set default to null
-            ${$strap} = null;
-
             // Set Class
             $class = $config['class'];
 
@@ -200,6 +197,10 @@ class Bootstrap {
 
                 // Initialize the class in the global namespace
                 ${$strap} = new $class();
+            } else {
+
+                // Set default to null
+                ${$strap} = new Strap();
             }
         }
     }
