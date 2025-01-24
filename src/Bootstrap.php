@@ -11,7 +11,8 @@
 namespace LaswitchTech\Core;
 
 // Import additionnal class into the global namespace
-use LaswitchTech\coreConfigurator\Configurator;
+use LaswitchTech\Core\Configurator;
+use LaswitchTech\Core\Strap;
 use Exception;
 
 class Bootstrap {
