@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Core Framework - Command
+ * Core Framework - Request
  *
  * @license    MIT (https://mit-license.org/)
  * @author     Louis Ouellet <louis@laswitchtech.com>
@@ -16,35 +16,61 @@ use Exception;
 class Request {
 
     // Properties
-    protected $Error = null;
-    protected $QueryString = null;
-    protected $GET = null;
-    protected $POST = null;
-    protected $REQUEST = null;
+    private $Get;
+    private $Post;
+    private $Files;
+    private $Server;
+    private $Cookie;
+    private $Request;
 
     /**
      * Constructor
      */
-    public function __construct(){}
+    public function __construct(){
+        $this->Get = $_GET;
+        $this->Post = $_POST;
+        $this->Files = $_FILES;
+        $this->Server = $_SERVER;
+        $this->Cookie = $_COOKIE;
+        $this->Request = $_REQUEST;
+        unset($_SERVER, $_GET, $_POST, $_FILES, $_COOKIE, $_REQUEST);
+    }
+
+    /**
+     * Get the host
+     */
+    public function getHost() {
+        return $this->Server['HTTP_HOST'] ?? '';
+    }
+
+    /**
+     * Get the host
+     */
+    public function getHostSSL() {
+        return $this->Server['HTTPS'] == 'on' ? 'https://' : 'http://';
+    }
+
+    /**
+     * Get the host address
+     */
+    public function getHostAddress() {
+        return defined('STDIN') ? 'localhost' : $this->getHostSSL() . $this->getHost();
+    }
+
+    /**
+     * Get the URI
+     * @return string
+     */
+    public function getUri() {
+        return parse_url($this->Server['REQUEST_URI'] ?? '', PHP_URL_PATH);
+    }
 
     /**
      * Get the URI segments
      * @return array
      */
     public function getUriSegments() {
-
-        // Get the URI segments
-        $URI = parse_url($_SERVER['REQUEST_URI'] ?? '', PHP_URL_PATH);
-
-        // Convert the URI to an array
-        $URI = explode( '/', $URI );
-
-        // Remove the first two segments
-        array_shift($URI);
-        array_shift($URI);
-
-        // Return the URI segments
-        return $URI;
+        return array_filter(explode( '/', $this->getUri()));
     }
 
     /**
@@ -52,8 +78,58 @@ class Request {
      * @return string
      */
     public function getMethod() {
+        return $this->Server["REQUEST_METHOD"] ?? 'GET';
+    }
 
-        // Return the request method
-        return $_SERVER["REQUEST_METHOD"] ?? 'GET';
+    /**
+     * Get the query string parameters
+     * @return string
+     */
+    public function getQueryString() {
+        return $this->Server['QUERY_STRING'] ?? '';
+    }
+
+    /**
+     * Get the parameters
+     * @param string $type
+     * @param string $key
+     * @return mixed
+     */
+    public function getParams($type, $key = null){
+        switch(strtoupper($type)){
+            case 'GET':
+                $array = $this->Get;
+                break;
+            case 'POST':
+                $array = $this->Post;
+                break;
+            case 'FILES':
+                $array = $this->Files;
+                break;
+            case 'COOKIE':
+                $array = $this->Cookie;
+                break;
+            case 'SERVER':
+                $array = $this->Server;
+                break;
+            case 'QUERY':
+                parse_str($this->Server['QUERY_STRING'], $array);
+                break;
+            case 'REQUEST':
+                $array = $this->Request;
+                break;
+            default:
+                return null;
+        }
+        return !is_null($key) ? ($array[$key] ?? null) : $array;
+    }
+
+    /**
+     * Decode the REQUEST data
+     * @param string $string
+     * @return string
+     */
+    public function decode($string){
+        return urldecode(base64_decode($string));
     }
 }

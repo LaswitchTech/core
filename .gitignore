@@ -16,7 +16,6 @@ composer.phar
 
 # Exclude Files
 !/config/bootstrap.cfg
-!/config/requirements.cfg
 
 # Exclude Locales Configurations and Translations
 !Locale/*/*.cfg

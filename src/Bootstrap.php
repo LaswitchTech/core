@@ -11,22 +11,38 @@
 namespace LaswitchTech\Core;
 
 // Import additionnal class into the global namespace
-use LaswitchTech\coreConfigurator\Configurator;
+use LaswitchTech\Core\Configurator;
+use LaswitchTech\Core\Strap;
 use Exception;
 
 class Bootstrap {
 
     const Default = [
-        "CONFIGURATOR" => [
-            "class" => "\\LaswitchTech\\coreConfigurator\\Configurator",
+        "LOG" => [
+            "class" => "\\LaswitchTech\\Core\\Log",
             "scope" => [
                 "Router",
                 "API",
                 "CLI"
             ]
         ],
-        "LOGGER" => [
-            "class" => "\\LaswitchTech\\coreLogger\\Logger",
+        "REQUEST" => [
+            "class" => "\\LaswitchTech\\Core\\Request",
+            "scope" => [
+                "Router",
+                "API"
+            ]
+        ],
+        "INPUT" => [
+            "class" => "\\LaswitchTech\\Core\\Input",
+            "scope" => [
+                "Router",
+                "API",
+                "CLI"
+            ]
+        ],
+        "OUTPUT" => [
+            "class" => "\\LaswitchTech\\Core\\Output",
             "scope" => [
                 "Router",
                 "API",
@@ -100,29 +116,6 @@ class Bootstrap {
                 "CLI"
             ]
         ],
-        "OUTPUT" => [
-            "class" => "\\LaswitchTech\\Core\\Output",
-            "scope" => [
-                "Router",
-                "API",
-                "CLI"
-            ]
-        ],
-        "INPUT" => [
-            "class" => "\\LaswitchTech\\Core\\Input",
-            "scope" => [
-                "Router",
-                "API",
-                "CLI"
-            ]
-        ],
-        "REQUEST" => [
-            "class" => "\\LaswitchTech\\Core\\Request",
-            "scope" => [
-                "Router",
-                "API"
-            ]
-        ],
         "INSTALLER" => [
             "class" => "\\LaswitchTech\\coreInstaller\\Installer",
             "scope" => [
@@ -158,19 +151,19 @@ class Bootstrap {
         ]
     ];
 
-	// core Modules
-	private $Configurator;
-
     /**
      * Constructor.
      */
     public function __construct($scope){
 
+        // Set the global variable
+        global $CONFIG;
+
         // Initialize Configurator
-        $this->Configurator = new Configurator(['bootstrap']);
+        $CONFIG = new Config(['bootstrap']);
 
         // Retrieve the straps
-        $straps = $this->Configurator->get('bootstrap');
+        $straps = $CONFIG->get('bootstrap');
 
         // Loop through the straps
         foreach(self::Default as $strap => $config){
@@ -196,9 +189,6 @@ class Bootstrap {
             // Initialize the Global Variable
             global ${$strap};
 
-            // Set default to null
-            ${$strap} = null;
-
             // Set Class
             $class = $config['class'];
 
@@ -207,6 +197,10 @@ class Bootstrap {
 
                 // Initialize the class in the global namespace
                 ${$strap} = new $class();
+            } else {
+
+                // Set default to null
+                ${$strap} = new Strap();
             }
         }
     }
