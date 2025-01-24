@@ -18,16 +18,31 @@ use Exception;
 class Bootstrap {
 
     const Default = [
-        "CONFIGURATOR" => [
-            "class" => "\\LaswitchTech\\coreConfigurator\\Configurator",
+        "LOG" => [
+            "class" => "\\LaswitchTech\\Core\\Log",
             "scope" => [
                 "Router",
                 "API",
                 "CLI"
             ]
         ],
-        "LOGGER" => [
-            "class" => "\\LaswitchTech\\coreLogger\\Logger",
+        "REQUEST" => [
+            "class" => "\\LaswitchTech\\Core\\Request",
+            "scope" => [
+                "Router",
+                "API"
+            ]
+        ],
+        "INPUT" => [
+            "class" => "\\LaswitchTech\\Core\\Input",
+            "scope" => [
+                "Router",
+                "API",
+                "CLI"
+            ]
+        ],
+        "OUTPUT" => [
+            "class" => "\\LaswitchTech\\Core\\Output",
             "scope" => [
                 "Router",
                 "API",
@@ -99,29 +114,6 @@ class Bootstrap {
                 "Router",
                 "API",
                 "CLI"
-            ]
-        ],
-        "OUTPUT" => [
-            "class" => "\\LaswitchTech\\Core\\Output",
-            "scope" => [
-                "Router",
-                "API",
-                "CLI"
-            ]
-        ],
-        "INPUT" => [
-            "class" => "\\LaswitchTech\\Core\\Input",
-            "scope" => [
-                "Router",
-                "API",
-                "CLI"
-            ]
-        ],
-        "REQUEST" => [
-            "class" => "\\LaswitchTech\\Core\\Request",
-            "scope" => [
-                "Router",
-                "API"
             ]
         ],
         "INSTALLER" => [
