@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Core Framework - Command
+ * Core Framework - Output
  *
  * @license    MIT (https://mit-license.org/)
  * @author     Louis Ouellet <louis@laswitchtech.com>
@@ -46,8 +46,46 @@ class Output {
      * @param string $string
      * @return void
      */
-    public function print($string) {
-        print_r($string . PHP_EOL);
+    public function print($string, $httpHeaders=array()) {
+
+        // Check if the script is running in CLI mode
+        if(defined('STDIN')){
+
+            // Print to the console
+            print_r($string . PHP_EOL);
+        } else {
+
+            // Check if header information can be sent
+            if (!headers_sent()) {
+
+                // Remove the default Set-Cookie header
+                header_remove('Set-Cookie');
+
+                // Add the custom headers
+                if (is_array($httpHeaders) && count($httpHeaders)) {
+
+                    // Add the headers
+                    foreach ($httpHeaders as $httpHeader) {
+
+                        // Add the header
+                        header($httpHeader);
+                    }
+                }
+
+                // Check if the string is an array or object
+                if(is_array($string) || is_object($string)){
+
+                    // Convert the string to JSON
+                    $string = json_encode($string,JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT);
+                }
+
+                // Send the output
+                echo $string;
+
+                // Exit the script
+                exit;
+            }
+        }
     }
 
     /**
@@ -57,7 +95,7 @@ class Output {
      * @return void
      */
     public function set($string, $color = 'default'){
-        if(isset($this->Colors[$color])){
+        if(defined('STDIN') && isset($this->Colors[$color])){
             return $this->Colors[$color] . $string . $this->Colors['default'];
         } else {
             return $string;
@@ -70,7 +108,7 @@ class Output {
      * @return void
      */
     public function error($string) {
-        $this->output($this->set($string, 'red'));
+        $this->print($this->set($string, 'red'));
     }
 
     /**
@@ -79,7 +117,7 @@ class Output {
      * @return void
      */
     public function success($string) {
-        $this->output($this->set($string, 'green'));
+        $this->print($this->set($string, 'green'));
     }
 
     /**
@@ -88,7 +126,7 @@ class Output {
      * @return void
      */
     public function warning($string) {
-        $this->output($this->set($string, 'yellow'));
+        $this->print($this->set($string, 'yellow'));
     }
 
     /**
@@ -97,46 +135,6 @@ class Output {
      * @return void
      */
     public function info($string) {
-        $this->output($this->set($string, 'cyan'));
-    }
-
-    /**
-     * Output the data
-     * @param mixed $data
-     * @param array $httpHeaders
-     * @return void
-     */
-    public function json($data, $httpHeaders=array()) {
-
-        // Check if header information can be sent
-        if (!headers_sent()) {
-
-            // Remove the default Set-Cookie header
-            header_remove('Set-Cookie');
-
-            // Add the custom headers
-            if (is_array($httpHeaders) && count($httpHeaders)) {
-
-                // Add the headers
-                foreach ($httpHeaders as $httpHeader) {
-
-                    // Add the header
-                    header($httpHeader);
-                }
-            }
-
-            // Check if the data is an array or object
-            if(is_array($data) || is_object($data)){
-
-                // Convert the data to JSON
-                $data = json_encode($data,JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT);
-            }
-
-            // Send the output
-            echo $data;
-
-            // Exit the script
-            exit;
-        }
+        $this->print($this->set($string, 'cyan'));
     }
 }

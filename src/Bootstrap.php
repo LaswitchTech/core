@@ -11,7 +11,7 @@
 namespace LaswitchTech\Core;
 
 // Import additionnal class into the global namespace
-use LaswitchTech\Core\Configurator;
+use LaswitchTech\Core\Config;
 use LaswitchTech\Core\Strap;
 use Exception;
 
@@ -31,14 +31,6 @@ class Bootstrap {
             "scope" => [
                 "Router",
                 "API"
-            ]
-        ],
-        "INPUT" => [
-            "class" => "\\LaswitchTech\\Core\\Input",
-            "scope" => [
-                "Router",
-                "API",
-                "CLI"
             ]
         ],
         "OUTPUT" => [
