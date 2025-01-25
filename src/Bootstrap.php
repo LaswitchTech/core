@@ -33,14 +33,6 @@ class Bootstrap {
                 "API"
             ]
         ],
-        "INPUT" => [
-            "class" => "\\LaswitchTech\\Core\\Input",
-            "scope" => [
-                "Router",
-                "API",
-                "CLI"
-            ]
-        ],
         "OUTPUT" => [
             "class" => "\\LaswitchTech\\Core\\Output",
             "scope" => [
