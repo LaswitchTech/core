@@ -49,6 +49,30 @@ class Bootstrap {
                 "CLI"
             ]
         ],
+        "HELPERS" => [
+            "class" => "\\LaswitchTech\\Core\\Helpers",
+            "scope" => [
+                "Router",
+                "API",
+                "CLI"
+            ]
+        ],
+        "DATABASE" => [
+            "class" => "\\LaswitchTech\\coreDatabase\\Database",
+            "scope" => [
+                "Router",
+                "API",
+                "CLI"
+            ]
+        ],
+        "MODELS" => [
+            "class" => "\\LaswitchTech\\Core\\Models",
+            "scope" => [
+                "Router",
+                "API",
+                "CLI"
+            ]
+        ],
         "LOCALE" => [
             "class" => "\\LaswitchTech\\coreLocale\\Locale",
             "scope" => [
@@ -94,14 +118,6 @@ class Bootstrap {
         ],
         "IMAP" => [
             "class" => "\\LaswitchTech\\coreIMAP\\IMAP",
-            "scope" => [
-                "Router",
-                "API",
-                "CLI"
-            ]
-        ],
-        "DATABASE" => [
-            "class" => "\\LaswitchTech\\coreDatabase\\Database",
             "scope" => [
                 "Router",
                 "API",
