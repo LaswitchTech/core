@@ -152,7 +152,7 @@ class Bootstrap {
             ]
         ],
         "CLI" => [
-            "class" => "\\LaswitchTech\\coreCLI\\CLI",
+            "class" => "\\LaswitchTech\\Core\\CLI",
             "scope" => [
                 "CLI"
             ]
