@@ -77,6 +77,6 @@ class Controller {
     public function __call($name, $arguments) {
 
         // Send the output
-        $this->output('Endpoint "'.str_replace("Namespace>","",$this->Namespace).'" not Implemented', array('HTTP/1.1 501 Not Implemented'));
+        $this->Output->print('Endpoint "'.str_replace("Namespace>","",$this->Namespace).'" not Implemented', array('HTTP/1.1 501 Not Implemented'));
     }
 }

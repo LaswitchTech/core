@@ -39,15 +39,7 @@ class Command {
     public function __call($name, $arguments) {
 
         // Output Usage
-        $this->Output->print("Usage: ./cli " . strtolower(str_replace('Command','',__CLASS__)) . " " . $name . " [options]");
-
-        // List available methods that end with 'Action'
-        $this->Output->print("Available Methods:");
-        foreach(get_class_methods($this) as $method){
-            if(substr($method,-6) == 'Action'){
-                $this->Output->print(" - " . str_replace('Action','',$method));
-            }
-        }
+        $this->Output->help();
     }
 
     /**
