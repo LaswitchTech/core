@@ -17,7 +17,6 @@ class Controller {
 
     // Global Properties
     protected $Auth;
-    protected $Input;
     protected $Output;
     protected $Request;
 
