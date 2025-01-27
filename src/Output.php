@@ -137,4 +137,76 @@ class Output {
     public function info($string) {
         $this->print($this->set($string, 'cyan'));
     }
+
+    /**
+     * Output command-line help
+     * @param string $string
+     * @return void
+     */
+    public function help($string = null) {
+
+        // Check if the script is running in CLI mode
+        if(!defined('STDIN')){ return; }
+
+        // Retrieve Global Variables
+        global $REQUEST, $CONFIG;
+
+        // Retrieve the arguments
+        $arguments = $REQUEST->getArguments();
+
+        // Initialize Variables
+        $file = $arguments[0] ?? null;
+        $command = $arguments[1] ?? null;
+        $action = $arguments[2] ?? null;
+
+        // Check if a string is provided
+        if($string){ $this->print($string); }
+
+        // Check if the command is valid
+        if($command && !is_file($CONFIG->root() . "/Command/" . ucfirst($command . "Command" . ".php"))){
+            $command = null;
+        }
+        if($command && !class_exists(ucfirst($command) . "Command")){
+            $command = null;
+        }
+
+        // Check if the command is valid
+        if($command){
+
+            // Initialize the class
+            $class = ucfirst($command) . "Command";
+            $class = new $class();
+
+            // Check if the action is valid
+            if(!method_exists($class, $action . "Action")){
+                $action = null;
+            }
+
+            // Output Usage
+            $this->print("Usage: $file $command [action] [options]");
+
+            // List available actions
+            $this->print("Available Actions:");
+            foreach(get_class_methods($class) as $method){
+                if(substr($method,-6) == 'Action'){
+                    $this->print(" - " . strtolower(str_replace('Action','',$method)));
+                }
+            }
+        } else {
+
+            // Output Usage
+            $this->print("Usage: $file [command] [action] [options]");
+
+            // List available commands
+            $this->print("Available Commands:");
+            foreach(scandir($CONFIG->root() . "/Command/") as $command){
+                if(str_contains($command, 'Command.php')){
+                    $this->print(" - " . strtolower(str_replace('Command.php','',$command)));
+                }
+            }
+        }
+
+        // Stop execution and Exit the script
+        exit();
+    }
 }

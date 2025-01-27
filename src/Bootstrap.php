@@ -49,6 +49,30 @@ class Bootstrap {
                 "CLI"
             ]
         ],
+        "HELPERS" => [
+            "class" => "\\LaswitchTech\\Core\\Helpers",
+            "scope" => [
+                "Router",
+                "API",
+                "CLI"
+            ]
+        ],
+        "DATABASE" => [
+            "class" => "\\LaswitchTech\\coreDatabase\\Database",
+            "scope" => [
+                "Router",
+                "API",
+                "CLI"
+            ]
+        ],
+        "MODELS" => [
+            "class" => "\\LaswitchTech\\Core\\Models",
+            "scope" => [
+                "Router",
+                "API",
+                "CLI"
+            ]
+        ],
         "LOCALE" => [
             "class" => "\\LaswitchTech\\coreLocale\\Locale",
             "scope" => [
@@ -100,14 +124,6 @@ class Bootstrap {
                 "CLI"
             ]
         ],
-        "DATABASE" => [
-            "class" => "\\LaswitchTech\\coreDatabase\\Database",
-            "scope" => [
-                "Router",
-                "API",
-                "CLI"
-            ]
-        ],
         "INSTALLER" => [
             "class" => "\\LaswitchTech\\coreInstaller\\Installer",
             "scope" => [
@@ -136,7 +152,7 @@ class Bootstrap {
             ]
         ],
         "CLI" => [
-            "class" => "\\LaswitchTech\\coreCLI\\CLI",
+            "class" => "\\LaswitchTech\\Core\\CLI",
             "scope" => [
                 "CLI"
             ]
@@ -151,7 +167,7 @@ class Bootstrap {
         // Set the global variable
         global $CONFIG;
 
-        // Initialize Configurator
+        // Initialize Config
         $CONFIG = new Config(['bootstrap']);
 
         // Retrieve the straps

@@ -22,18 +22,27 @@ class Request {
     private $Server;
     private $Cookie;
     private $Request;
+    private $Arguments;
 
     /**
      * Constructor
      */
     public function __construct(){
+
+        // Import Global Variables
+        global $_GET, $_POST, $_FILES, $_SERVER, $_COOKIE, $_REQUEST, $argv;
+
+        // Set the properties
         $this->Get = $_GET;
         $this->Post = $_POST;
         $this->Files = $_FILES;
         $this->Server = $_SERVER;
         $this->Cookie = $_COOKIE;
         $this->Request = $_REQUEST;
-        unset($_SERVER, $_GET, $_POST, $_FILES, $_COOKIE, $_REQUEST);
+        $this->Arguments = $argv ?? [];
+
+        // Unset the global variables
+        unset($_SERVER, $_GET, $_POST, $_FILES, $_COOKIE, $_REQUEST, $argv);
     }
 
     /**
@@ -71,6 +80,17 @@ class Request {
      */
     public function getUriSegments() {
         return array_filter(explode( '/', $this->getUri()));
+    }
+
+    /**
+     * Set and Return the Namespace property
+     */
+    public function getNamespace(){
+        $namespace = "";
+        foreach($this->getUriSegments() as $Segment){
+            $namespace .= "/{$Segment}";
+        };
+        return $namespace;
     }
 
     /**
@@ -131,5 +151,14 @@ class Request {
      */
     public function decode($string){
         return urldecode(base64_decode($string));
+    }
+
+    /**
+     * Get the arguments
+     * @param int $index
+     * @return mixed
+     */
+    public function getArguments($index = null){
+        return !is_null($index) ? ($this->Arguments[$index] ?? null) : $this->Arguments;
     }
 }
