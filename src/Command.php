@@ -11,7 +11,6 @@
 namespace LaswitchTech\Core;
 
 // Import additionnal class into the global namespace
-use \LaswitchTech\Core\Output;
 use Exception;
 
 class Command {
