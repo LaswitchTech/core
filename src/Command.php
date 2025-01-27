@@ -16,7 +16,6 @@ use Exception;
 class Command {
 
     // Global Properties
-    protected $Input;
     protected $Output;
 
     /**
@@ -25,10 +24,9 @@ class Command {
     public function __construct(){
 
         // Import Global Variables
-        global $INPUT, $OUTPUT;
+        global $OUTPUT;
 
         // Initialize Properties
-        $this->Input = $INPUT;
         $this->Output = $OUTPUT;
     }
 
