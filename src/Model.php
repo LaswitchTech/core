@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Core Framework - Database Model
+ * Core Framework - Model
  *
  * @license    MIT (https://mit-license.org/)
  * @author     Louis Ouellet <louis@laswitchtech.com>
