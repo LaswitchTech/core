@@ -83,6 +83,17 @@ class Request {
     }
 
     /**
+     * Set and Return the Namespace property
+     */
+    public function getNamespace(){
+        $namespace = "";
+        foreach($this->getUriSegments() as $Segment){
+            $namespace .= "/{$Segment}";
+        };
+        return $namespace;
+    }
+
+    /**
      * Get the request method
      * @return string
      */
