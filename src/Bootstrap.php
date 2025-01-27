@@ -167,7 +167,7 @@ class Bootstrap {
         // Set the global variable
         global $CONFIG;
 
-        // Initialize Configurator
+        // Initialize Config
         $CONFIG = new Config(['bootstrap']);
 
         // Retrieve the straps
