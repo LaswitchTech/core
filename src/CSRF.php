@@ -55,7 +55,7 @@ class CSRF {
         $this->Rotate = $this->Config->get('csrf', 'rotate') ?? $this->Rotate;
 
         // Check if the method used should be validated
-        if(!define('STDIN') && in_array($this->Request->getMethod(), ['POST', 'PUT', 'PATCH', 'DELETE'])){
+        if(!defined('STDIN') && in_array($this->Request->getMethod(), ['POST', 'PUT', 'PATCH', 'DELETE'])){
             if(!$this->validate($this->Request->getParams('POST', $this->Field) ?? null)){
                 $this->Output->print(
                     'Invalid CSRF Token',
