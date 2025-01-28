@@ -160,7 +160,7 @@ class Output {
         $action = $arguments[2] ?? null;
 
         // Check if a string is provided
-        if($string){ $this->print($string); }
+        if($string){ $this->error($string); }
 
         // Check if the command is valid
         if($command){
