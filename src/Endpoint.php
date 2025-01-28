@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Core Framework - Command
+ * Core Framework - Endpoint
  *
  * @license    MIT (https://mit-license.org/)
  * @author     Louis Ouellet <louis@laswitchtech.com>
@@ -13,13 +13,15 @@ namespace LaswitchTech\Core;
 // Import additionnal class into the global namespace
 use Exception;
 
-class Command {
+class Endpoint {
 
     // Global Properties
-    protected $Modal;
-    protected $Helper;
+    protected $Auth;
     protected $Output;
     protected $Request;
+
+    // Properties
+    protected $Namespace = null; // Contains the namespace of the method
 
     /**
      * Constructor
@@ -27,11 +29,10 @@ class Command {
     public function __construct(){
 
         // Import Global Variables
-        global $MODAL, $HELPER, $OUTPUT, $REQUEST;
+        global $AUTH, $OUTPUT, $REQUEST;
 
         // Initialize Properties
-        $this->Modal = $MODAL;
-        $this->Helper = $HELPER;
+        $this->Auth = $AUTH;
         $this->Output = $OUTPUT;
         $this->Request = $REQUEST;
     }
@@ -44,7 +45,7 @@ class Command {
      */
     public function __call($name, $arguments) {
 
-        // Output Usage
-        $this->Output->help();
+        // Send the output
+        $this->Output->print('Endpoint "'.str_replace("Namespace>","",$this->Namespace).'" not Implemented', array('HTTP/1.1 501 Not Implemented'));
     }
 }
