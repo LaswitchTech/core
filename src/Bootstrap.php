@@ -49,7 +49,7 @@ class Bootstrap {
                 "CLI"
             ]
         ],
-        "HELPERS" => [
+        "HELPER" => [
             "class" => "\\LaswitchTech\\Core\\Helpers",
             "scope" => [
                 "Router",
@@ -65,7 +65,7 @@ class Bootstrap {
                 "CLI"
             ]
         ],
-        "MODELS" => [
+        "MODEL" => [
             "class" => "\\LaswitchTech\\Core\\Models",
             "scope" => [
                 "Router",
