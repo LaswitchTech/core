@@ -23,6 +23,7 @@ class CLI {
     // Properties
     protected $Arguments;
     protected $Class;
+    protected $Path;
     protected $Command;
     protected $Action;
 
@@ -55,11 +56,21 @@ class CLI {
                 $this->Command = ucfirst($this->Arguments[1] . "Command");
                 unset($this->Arguments[1]);
 
+                // Set Path
+                $this->Path = $this->Config->root() . "/Command/" . $this->Command . ".php";
+
+                // Check if the file exists
+                if(!is_file($this->Path)){
+
+                    // Set Plugin Path
+                    $this->Path = $this->Config->root() . "/lib/plugins/" . strtolower(str_replace('Command','',$this->Command)) . "/Command.php";
+                }
+
                 // Check if the required command is available
-                if(is_file($this->Config->root() . "/Command/" . $this->Command . ".php")){
+                if(is_file($this->Path)){
 
                     // Load Command File
-                    require_once $this->Config->root() . "/Command/" . $this->Command . ".php";
+                    require_once $this->Path;
 
                     // Check if command class exist
                     if(class_exists($this->Command)){
