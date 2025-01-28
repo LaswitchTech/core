@@ -53,6 +53,39 @@ class Models {
                 }
             }
         }
+
+        // Set Path
+        $this->Path = $CONFIG->root() . "/lib/plugins";
+
+        // Check if the plugins directory exists
+        if(is_dir($this->Path)){
+
+            // Loop through all the files in the directory
+            foreach(scandir($this->Path) as $plugin){
+
+                // Check if a Model already exist
+                if(!isset($this->Models[ucfirst($plugin)])){
+
+                    // Set Plugin path
+                    $path = $this->Path . "/" . $plugin . "/Model.php";
+
+                    // Check if the plugin includes a Model
+                    if(is_file($path)){
+
+                        // Get the Model Base Name and Class Name
+                        $baseName = ucfirst($plugin);
+                        $className = $baseName . 'Model';
+
+                        // Check if the class exists
+                        if (class_exists($className)) {
+
+                            // Create the Model
+                            $this->Models[$baseName] = new $className();
+                        }
+                    }
+                }
+            }
+        }
     }
 
     // Magic getter to retrieve a Model

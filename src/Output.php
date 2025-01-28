@@ -163,11 +163,26 @@ class Output {
         if($string){ $this->print($string); }
 
         // Check if the command is valid
-        if($command && !is_file($CONFIG->root() . "/Command/" . ucfirst($command . "Command" . ".php"))){
-            $command = null;
+        if($command){
+            $path = $CONFIG->root() . "/Command/" . ucfirst($command) . "Command" . ".php";
+            if(!is_file($path)){
+                $path = $CONFIG->root() . "/lib/plugins/" . ucfirst($command) . "/Command.php";
+                if(!is_file($path)){
+                    $command = null;
+                }
+            }
         }
-        if($command && !class_exists(ucfirst($command) . "Command")){
-            $command = null;
+        if($command){
+            if(!class_exists(ucfirst($command) . "Command")){
+
+                // Load Command File
+                require_once $path;
+
+                // Check if command class exist
+                if(!class_exists(ucfirst($command) . "Command")){
+                    $command = null;
+                }
+            }
         }
 
         // Check if the command is valid
@@ -201,6 +216,13 @@ class Output {
             $this->print("Available Commands:");
             foreach(scandir($CONFIG->root() . "/Command/") as $command){
                 if(str_contains($command, 'Command.php')){
+                    $this->print(" - " . strtolower(str_replace('Command.php','',$command)));
+                }
+            }
+
+            // List available commands
+            foreach(scandir($CONFIG->root() . "/lib/plugins/") as $command){
+                if(is_file($CONFIG->root() . "/lib/plugins/" . $command . "/Command.php")){
                     $this->print(" - " . strtolower(str_replace('Command.php','',$command)));
                 }
             }

@@ -43,13 +43,46 @@ class Helpers {
 
                 // Get the Helper Base Name and Class Name
                 $baseName = $matches[1];
-                $className      = $baseName . 'Helper';
+                $className = $baseName . 'Helper';
 
                 // Check if the class exists
                 if (class_exists($className)) {
 
                     // Create the Helper
                     $this->Helpers[$baseName] = new $className();
+                }
+            }
+        }
+
+        // Set Path
+        $this->Path = $CONFIG->root() . "/lib/plugins";
+
+        // Check if the plugins directory exists
+        if(is_dir($this->Path)){
+
+            // Loop through all the files in the directory
+            foreach(scandir($this->Path) as $plugin){
+
+                // Check if a Helper already exist
+                if(!isset($this->Helpers[ucfirst($plugin)])){
+
+                    // Set Plugin path
+                    $path = $this->Path . "/" . $plugin . "/Helper.php";
+
+                    // Check if the plugin includes a Helper
+                    if(is_file($path)){
+
+                        // Get the Helper Base Name and Class Name
+                        $baseName = ucfirst($plugin);
+                        $className = $baseName . 'Helper';
+
+                        // Check if the class exists
+                        if (class_exists($className)) {
+
+                            // Create the Helper
+                            $this->Helpers[$baseName] = new $className();
+                        }
+                    }
                 }
             }
         }
