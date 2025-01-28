@@ -21,6 +21,7 @@ class Request {
     private $Files;
     private $Server;
     private $Cookie;
+    private $Session;
     private $Request;
     private $Arguments;
 
@@ -30,7 +31,7 @@ class Request {
     public function __construct(){
 
         // Import Global Variables
-        global $_GET, $_POST, $_FILES, $_SERVER, $_COOKIE, $_REQUEST, $argv;
+        global $_GET, $_POST, $_FILES, $_SERVER, $_COOKIE, $_SESSION, $_REQUEST, $argv, $argc;
 
         // Set the properties
         $this->Get = $_GET;
@@ -38,11 +39,12 @@ class Request {
         $this->Files = $_FILES;
         $this->Server = $_SERVER;
         $this->Cookie = $_COOKIE;
+        $this->Session = $_SESSION;
         $this->Request = $_REQUEST;
         $this->Arguments = $argv ?? [];
 
         // Unset the global variables
-        unset($_SERVER, $_GET, $_POST, $_FILES, $_COOKIE, $_REQUEST, $argv);
+        unset($_SERVER, $_GET, $_POST, $_FILES, $_REQUEST, $argv, $argc);
     }
 
     /**
@@ -115,7 +117,7 @@ class Request {
      * @param string $key
      * @return mixed
      */
-    public function getParams($type, $key = null){
+    public function getParams(string $type, $key = null){
         switch(strtoupper($type)){
             case 'GET':
                 $array = $this->Get;
@@ -128,6 +130,9 @@ class Request {
                 break;
             case 'COOKIE':
                 $array = $this->Cookie;
+                break;
+            case 'SESSION':
+                $array = $this->Session;
                 break;
             case 'SERVER':
                 $array = $this->Server;
@@ -145,11 +150,32 @@ class Request {
     }
 
     /**
+     * Set the parameters
+     * @param string $type
+     * @param string $key
+     * @param string $value
+     * @return mixed
+     */
+    public function setParams(string $type, string $key, $value){
+        switch(strtoupper($type)){
+            case 'COOKIE':
+                $_COOKIE[$key] = $value;
+                break;
+            case 'SESSION':
+                $_SESSION[$key] = $value;
+                break;
+            default:
+                return null;
+        }
+        return $value;
+    }
+
+    /**
      * Decode the REQUEST data
      * @param string $string
      * @return string
      */
-    public function decode($string){
+    public function decode(string $string){
         return urldecode(base64_decode($string));
     }
 
@@ -169,7 +195,7 @@ class Request {
      * @param string $default
      * @return string
      */
-    public function request($string, $options = null, $default = null){
+    public function request(string $string, $options = null, $default = null){
         if(defined('STDIN')){
             $modes = ['select','text','string'];
             $mode = 'string';
