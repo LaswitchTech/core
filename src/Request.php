@@ -21,6 +21,7 @@ class Request {
     private $Files;
     private $Server;
     private $Cookie;
+    private $Session;
     private $Request;
     private $Arguments;
 
@@ -30,7 +31,7 @@ class Request {
     public function __construct(){
 
         // Import Global Variables
-        global $_GET, $_POST, $_FILES, $_SERVER, $_COOKIE, $_REQUEST, $argv;
+        global $_GET, $_POST, $_FILES, $_SERVER, $_COOKIE, $_SESSION, $_REQUEST, $argv, $argc;
 
         // Set the properties
         $this->Get = $_GET;
@@ -38,11 +39,12 @@ class Request {
         $this->Files = $_FILES;
         $this->Server = $_SERVER;
         $this->Cookie = $_COOKIE;
+        $this->Session = $_SESSION;
         $this->Request = $_REQUEST;
         $this->Arguments = $argv ?? [];
 
         // Unset the global variables
-        unset($_SERVER, $_GET, $_POST, $_FILES, $_COOKIE, $_REQUEST, $argv);
+        unset($_SERVER, $_GET, $_POST, $_FILES, $_REQUEST, $argv, $argc);
     }
 
     /**
@@ -128,6 +130,9 @@ class Request {
                 break;
             case 'COOKIE':
                 $array = $this->Cookie;
+                break;
+            case 'SESSION':
+                $array = $this->Session;
                 break;
             case 'SERVER':
                 $array = $this->Server;
