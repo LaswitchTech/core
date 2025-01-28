@@ -51,6 +51,20 @@ class Endpoint {
     public function __call($name, $arguments) {
 
         // Send the output
-        $this->Output->print('Endpoint "'.str_replace("Namespace>","",$this->Namespace).'" not Implemented', array('HTTP/1.1 501 Not Implemented'));
+        $this->Output->print('Endpoint not Implemented', array('HTTP/1.1 501 Not Implemented'));
+    }
+
+    /**
+     * Get the public status
+     */
+    public function getPublic() {
+        return $this->Public;
+    }
+
+    /**
+     * Get the level
+     */
+    public function getLevel() {
+        return $this->Level;
     }
 }
