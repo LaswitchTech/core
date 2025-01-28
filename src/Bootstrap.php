@@ -43,7 +43,7 @@ class Bootstrap {
             ]
         ],
         "NET" => [
-            "class" => "\\LaswitchTech\\coreNet\\Net",
+            "class" => "\\LaswitchTech\\Core\\Net",
             "scope" => [
                 "Router",
                 "API",
@@ -59,7 +59,7 @@ class Bootstrap {
             ]
         ],
         "DATABASE" => [
-            "class" => "\\LaswitchTech\\coreDatabase\\Database",
+            "class" => "\\LaswitchTech\\Core\\Database",
             "scope" => [
                 "Router",
                 "API",
@@ -75,7 +75,7 @@ class Bootstrap {
             ]
         ],
         "LOCALE" => [
-            "class" => "\\LaswitchTech\\coreLocale\\Locale",
+            "class" => "\\LaswitchTech\\Core\\Locale",
             "scope" => [
                 "Router",
                 "API",
@@ -83,18 +83,18 @@ class Bootstrap {
             ]
         ],
         "ENCRYPTION" => [
-            "class" => "\\LaswitchTech\\coreEncryption\\Encryption",
+            "class" => "\\LaswitchTech\\Core\\Encryption",
             "scope" => []
         ],
         "CSRF" => [
-            "class" => "\\LaswitchTech\\coreCSRF\\CSRF",
+            "class" => "\\LaswitchTech\\Core\\CSRF",
             "scope" => [
                 "Router",
                 "API"
             ]
         ],
         "SLS" => [
-            "class" => "\\LaswitchTech\\coreSLS\\SLS",
+            "class" => "\\LaswitchTech\\Core\\SLS",
             "scope" => [
                 "Router",
                 "API",
@@ -102,7 +102,7 @@ class Bootstrap {
             ]
         ],
         "SMS" => [
-            "class" => "\\LaswitchTech\\coreSMS\\SMS",
+            "class" => "\\LaswitchTech\\Core\\SMS",
             "scope" => [
                 "Router",
                 "API",
@@ -110,7 +110,7 @@ class Bootstrap {
             ]
         ],
         "SMTP" => [
-            "class" => "\\LaswitchTech\\coreSMTP\\SMTP",
+            "class" => "\\LaswitchTech\\Core\\SMTP",
             "scope" => [
                 "Router",
                 "API",
@@ -118,7 +118,7 @@ class Bootstrap {
             ]
         ],
         "IMAP" => [
-            "class" => "\\LaswitchTech\\coreIMAP\\IMAP",
+            "class" => "\\LaswitchTech\\Core\\IMAP",
             "scope" => [
                 "Router",
                 "API",
@@ -126,7 +126,15 @@ class Bootstrap {
             ]
         ],
         "INSTALLER" => [
-            "class" => "\\LaswitchTech\\coreInstaller\\Installer",
+            "class" => "\\LaswitchTech\\Core\\Installer",
+            "scope" => [
+                "Router",
+                "API",
+                "CLI"
+            ]
+        ],
+        "UPDATER" => [
+            "class" => "\\LaswitchTech\\Core\\Updater",
             "scope" => [
                 "Router",
                 "API",
@@ -134,20 +142,20 @@ class Bootstrap {
             ]
         ],
         "AUTH" => [
-            "class" => "\\LaswitchTech\\coreAuth\\Auth",
+            "class" => "\\LaswitchTech\\Core\\Auth",
             "scope" => [
                 "Router",
                 "API"
             ]
         ],
         "ROUTER" => [
-            "class" => "\\LaswitchTech\\coreRouter\\Router",
+            "class" => "\\LaswitchTech\\Core\\Router",
             "scope" => [
                 "Router"
             ]
         ],
         "API" => [
-            "class" => "\\LaswitchTech\\coreAPI\\API",
+            "class" => "\\LaswitchTech\\Core\\API",
             "scope" => [
                 "API"
             ]
