@@ -17,11 +17,14 @@ class Endpoint {
 
     // Global Properties
     protected $Auth;
+    protected $Model;
+    protected $Helper;
     protected $Output;
     protected $Request;
 
-    // Properties
-    protected $Namespace = null; // Contains the namespace of the method
+    // Auth Properties
+    protected $Level;
+    protected $Public;
 
     /**
      * Constructor
@@ -29,10 +32,12 @@ class Endpoint {
     public function __construct(){
 
         // Import Global Variables
-        global $AUTH, $OUTPUT, $REQUEST;
+        global $AUTH, $MODAL, $HELPER, $OUTPUT, $REQUEST;
 
         // Initialize Properties
         $this->Auth = $AUTH;
+        $this->Model = $MODAL;
+        $this->Helper = $HELPER;
         $this->Output = $OUTPUT;
         $this->Request = $REQUEST;
     }
