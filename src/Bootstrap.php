@@ -171,13 +171,13 @@ class Bootstrap {
     /**
      * Constructor.
      */
-    public function __construct($scope){
+    public function __construct(string $scope){
 
         // Set the global variable
         global $CONFIG;
 
         // Initialize Config
-        $CONFIG = new Config(['bootstrap']);
+        $CONFIG = new Config('bootstrap');
 
         // Retrieve the straps
         $straps = $CONFIG->get('bootstrap');
