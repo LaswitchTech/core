@@ -42,6 +42,13 @@ class CLI {
 
         // Retrieve Arguments
         $this->Arguments = $this->Request->getArguments();
+    }
+
+    /**
+     * Run the CLI
+     * @return void
+     */
+    public function run(){
 
         // Parse Standard Input
         if(count($this->Arguments) > 0){
