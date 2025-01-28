@@ -16,7 +16,7 @@ use Exception;
 class Command {
 
     // Global Properties
-    protected $Modal;
+    protected $Model;
     protected $Helper;
     protected $Output;
     protected $Request;
@@ -27,10 +27,10 @@ class Command {
     public function __construct(){
 
         // Import Global Variables
-        global $MODAL, $HELPER, $OUTPUT, $REQUEST;
+        global $MODEL, $HELPER, $OUTPUT, $REQUEST;
 
         // Initialize Properties
-        $this->Modal = $MODAL;
+        $this->Model = $MODEL;
         $this->Helper = $HELPER;
         $this->Output = $OUTPUT;
         $this->Request = $REQUEST;

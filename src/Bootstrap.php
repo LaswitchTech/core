@@ -30,7 +30,8 @@ class Bootstrap {
             "class" => "\\LaswitchTech\\Core\\Request",
             "scope" => [
                 "Router",
-                "API"
+                "API",
+                "CLI"
             ]
         ],
         "OUTPUT" => [
