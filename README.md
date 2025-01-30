@@ -9,6 +9,7 @@
 
 ## Description
 **Author(s)**: [Louis Ouellet](louis@laswitchtech.com)
+
 The `Core` package is a collection of classes that provide the basic functionality for the LaswitchTech Core Framework. The classes are designed to be extended and used in other projects. Additional `Core` packages can be added to extend the functionality of the framework.
 
 ## License
