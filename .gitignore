@@ -17,6 +17,7 @@ composer.phar
 # Exclude Files
 cli
 index.php
+api.php
 
 # Exclude Locales Configurations and Translations
 !Locale/*/*.cfg

@@ -17,11 +17,14 @@ class Endpoint {
 
     // Global Properties
     protected $Auth;
+    protected $Model;
+    protected $Helper;
     protected $Output;
     protected $Request;
 
-    // Properties
-    protected $Namespace = null; // Contains the namespace of the method
+    // Auth Properties
+    protected $Level;
+    protected $Public;
 
     /**
      * Constructor
@@ -29,10 +32,12 @@ class Endpoint {
     public function __construct(){
 
         // Import Global Variables
-        global $AUTH, $OUTPUT, $REQUEST;
+        global $AUTH, $MODAL, $HELPER, $OUTPUT, $REQUEST;
 
         // Initialize Properties
         $this->Auth = $AUTH;
+        $this->Model = $MODAL;
+        $this->Helper = $HELPER;
         $this->Output = $OUTPUT;
         $this->Request = $REQUEST;
     }
@@ -46,6 +51,20 @@ class Endpoint {
     public function __call($name, $arguments) {
 
         // Send the output
-        $this->Output->print('Endpoint "'.str_replace("Namespace>","",$this->Namespace).'" not Implemented', array('HTTP/1.1 501 Not Implemented'));
+        $this->Output->print('Endpoint not Implemented', array('HTTP/1.1 501 Not Implemented'));
+    }
+
+    /**
+     * Get the public status
+     */
+    public function getPublic() {
+        return $this->Public;
+    }
+
+    /**
+     * Get the level
+     */
+    public function getLevel() {
+        return $this->Level;
     }
 }

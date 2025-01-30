@@ -17,6 +17,7 @@ class Request {
 
     // Properties
     private $Get;
+    private $Env;
     private $Post;
     private $Files;
     private $Server;
@@ -31,10 +32,11 @@ class Request {
     public function __construct(){
 
         // Import Global Variables
-        global $_GET, $_POST, $_FILES, $_SERVER, $_COOKIE, $_SESSION, $_REQUEST, $argv, $argc;
+        global $_GET, $_ENV, $_POST, $_FILES, $_SERVER, $_COOKIE, $_SESSION, $_REQUEST, $argv, $argc;
 
         // Set the properties
         $this->Get = $_GET;
+        $this->Env = $_ENV;
         $this->Post = $_POST;
         $this->Files = $_FILES;
         $this->Server = $_SERVER;
@@ -44,7 +46,7 @@ class Request {
         $this->Arguments = $argv ?? [];
 
         // Unset the global variables
-        unset($_SERVER, $_GET, $_POST, $_FILES, $_REQUEST, $argv, $argc);
+        unset($_SERVER, $_GET, $_ENV, $_POST, $_FILES, $_REQUEST, $argv, $argc);
     }
 
     /**
@@ -90,7 +92,9 @@ class Request {
     public function getNamespace(){
         $namespace = "";
         foreach($this->getUriSegments() as $Segment){
-            $namespace .= "/{$Segment}";
+            if(strpos($Segment, '.') === false){
+                $namespace .= "/{$Segment}";
+            }
         };
         return $namespace;
     }
@@ -121,6 +125,9 @@ class Request {
         switch(strtoupper($type)){
             case 'GET':
                 $array = $this->Get;
+                break;
+            case 'ENV':
+                $array = $this->Env;
                 break;
             case 'POST':
                 $array = $this->Post;
