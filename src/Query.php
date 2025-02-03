@@ -163,7 +163,7 @@ class Query {
      * @param string $table
      * @return self
      */
-    public function from(string $table): self
+    public function table(string $table): self
     {
         $this->table = $table;
         return $this;
