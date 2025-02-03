@@ -104,7 +104,10 @@ class API {
                         }
 
                         // Call the method
-                        $object->{$method}();
+                        $results = $object->{$method}();
+
+                        // Send the output
+                        $this->Output->print($results['data'] ?? [], array('HTTP/1.1 ' . $results['status'] ?? 500 . ' '. $results['message'] ?? 'Internal Server Error'));
                     } else {
 
                         // Could not find the method, send not implemented
