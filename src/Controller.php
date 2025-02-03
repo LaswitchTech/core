@@ -13,7 +13,7 @@ namespace LaswitchTech\Core;
 // Import additionnal class into the global namespace
 use Exception;
 
-class Controller {
+abstract class Controller {
 
     // Global Properties
     protected $Auth;
