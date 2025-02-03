@@ -98,17 +98,6 @@ class Database {
     }
 
     /**
-     * Describe a table
-     *
-     * @param string $table
-     * @return mixed
-     */
-    public function describe(string $table)
-    {
-        return $this->connector->describe($table);
-    }
-
-    /**
      * Create a new Schema object
      *
      * @return Schema
