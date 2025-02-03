@@ -148,7 +148,7 @@ class Query {
      * SELECT query
      *
      * @param string $fields
-     * @return $this
+     * @return self
      */
     public function select(string $fields = '*'): self
     {
@@ -161,7 +161,7 @@ class Query {
      * FROM clause
      *
      * @param string $table
-     * @return $this
+     * @return self
      */
     public function from(string $table): self
     {
@@ -175,7 +175,7 @@ class Query {
      * @param string $table
      * @param string $on
      * @param string $type
-     * @return $this
+     * @return self
      */
     public function join(string $key, string $table, string $column, string $operator = '=', string $type = 'LEFT'): self
     {
@@ -196,7 +196,7 @@ class Query {
      * WHERE initiator
      *
      * @param string $conjunction
-     * @return $this
+     * @return self
      */
     public function filter(string $conjunction = 'AND'): self
     {
@@ -241,7 +241,7 @@ class Query {
      *
      * @param string $column
      * @param string $direction
-     * @return $this
+     * @return self
      */
     public function order(string $column, string $direction = 'ASC'): self
     {
@@ -258,7 +258,7 @@ class Query {
      * INDEX clause
      *
      * @param string $column
-     * @return $this
+     * @return self
      */
     public function index(string $column): self
     {
@@ -270,7 +270,7 @@ class Query {
      * LIMIT clause
      *
      * @param int $limit
-     * @return $this
+     * @return self
      */
     public function limit(int $limit): self
     {
@@ -283,7 +283,7 @@ class Query {
      *
      * @param string $table
      * @param array  $data
-     * @return $this
+     * @return self
      */
     public function insert(string $table, array $data): self
     {
@@ -298,7 +298,7 @@ class Query {
      *
      * @param string $table
      * @param array  $data
-     * @return $this
+     * @return self
      */
     public function update(string $table, array $data): self
     {
@@ -312,7 +312,7 @@ class Query {
      * DELETE query
      *
      * @param string $table
-     * @return $this
+     * @return self
      */
     public function delete(string $table): self
     {
