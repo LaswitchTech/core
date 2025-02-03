@@ -217,7 +217,7 @@ class Query {
      * @param mixed  $value
      * @param string $operator
      * @param string $conjunction
-     * @return $this
+     * @return self
      */
     public function where(string $column, $value, string $operator = '=', string $conjunction = 'AND'): self
     {
