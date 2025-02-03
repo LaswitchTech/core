@@ -163,7 +163,7 @@ class Query {
      * @param string $table
      * @return self
      */
-    public function from(string $table): self
+    public function table(string $table): self
     {
         $this->table = $table;
         return $this;
@@ -281,14 +281,12 @@ class Query {
     /**
      * INSERT query
      *
-     * @param string $table
      * @param array  $data
      * @return self
      */
-    public function insert(string $table, array $data): self
+    public function insert(array $data): self
     {
         $this->type = 'insert';
-        $this->table = $table;
         $this->values = $data;
         return $this;
     }
@@ -296,14 +294,12 @@ class Query {
     /**
      * UPDATE query
      *
-     * @param string $table
      * @param array  $data
      * @return self
      */
-    public function update(string $table, array $data): self
+    public function update(array $data): self
     {
         $this->type = 'update';
-        $this->table = $table;
         $this->values = $data;
         return $this;
     }
@@ -311,13 +307,11 @@ class Query {
     /**
      * DELETE query
      *
-     * @param string $table
      * @return self
      */
-    public function delete(string $table): self
+    public function delete(): self
     {
         $this->type = 'delete';
-        $this->table = $table;
         return $this;
     }
 

@@ -13,7 +13,7 @@ namespace LaswitchTech\Core;
 // Import additionnal class into the global namespace
 use Exception;
 
-class Command {
+abstract class Command {
 
     // Global Properties
     protected $Model;

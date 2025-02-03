@@ -13,7 +13,7 @@ namespace LaswitchTech\Core;
 // Import additionnal class into the global namespace
 use Exception;
 
-class Connector {
+abstract class Connector {
 
     /**
      * @var mixed
