@@ -159,5 +159,7 @@ class API {
             // Could not identify the Controller and/or Method, send bad request
             $this->Output->print('Could not identify the Controller and/or Action', array('HTTP/1.1 400 Bad Request'));
         }
+
+        return $this;
     }
 }
