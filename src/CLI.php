@@ -129,5 +129,7 @@ class CLI {
             // Display help
             $this->Output->help("Internal Error");
         }
+
+        return $this;
     }
 }
