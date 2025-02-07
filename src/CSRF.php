@@ -83,7 +83,8 @@ class CSRF {
      * Generate token.
      * @return $this
      */
-    protected function generate(){
+    protected function generate()
+    {
 
         // Retrieve the existing Token
         $token = $this->Request->getParams('SESSION', $this->Field) ?? $this->UUID->toString();
@@ -100,7 +101,8 @@ class CSRF {
      * Clear token.
      * @return $this
      */
-    protected function clear(){
+    protected function clear()
+    {
 
         // Check if rotate is enabled
         if($this->Rotate){
@@ -118,7 +120,8 @@ class CSRF {
      * Get token.
      * @return string $this->Token
      */
-    public function token(){
+    public function token()
+    {
         return $this->generate()->Token;
     }
 
@@ -139,7 +142,8 @@ class CSRF {
     /**
      * Generate a hidden input field.
      */
-    public function field(){
+    public function field()
+    {
         return '<input type="hidden" name="' . $this->Field . '" value="' . $this->token() . '">';
     }
 }
