@@ -17,7 +17,16 @@ use Exception;
 
 class Bootstrap {
 
+    // Constant
     const Default = [
+        "UUID" => [
+            "class" => "\\LaswitchTech\\Core\\UUID",
+            "scope" => [
+                "ROUTER",
+                "API",
+                "CLI"
+            ]
+        ],
         "REQUEST" => [
             "class" => "\\LaswitchTech\\Core\\Request",
             "scope" => [

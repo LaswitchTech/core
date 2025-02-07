@@ -15,7 +15,8 @@ use Exception;
 
 class CSRF {
 
-    const FIELD = 'csrf';
+    // Constants
+    const FIELD = '%UUID%';
     const LENGTH = 32;
     const ROTATION = true;
 
@@ -23,6 +24,7 @@ class CSRF {
     protected $Request;
     protected $Output;
 	protected $Config;
+    protected $UUID;
 
     // Properties
     protected $Token = null;
@@ -39,12 +41,13 @@ class CSRF {
     public function __construct(){
 
         // Import Global Variables
-        global $REQUEST, $OUTPUT, $CONFIG;
+        global $REQUEST, $OUTPUT, $CONFIG, $UUID;
 
         // Initialize Properties
         $this->Request = $REQUEST;
         $this->Output = $OUTPUT;
         $this->Config = $CONFIG;
+        $this->UUID = $UUID;
 
         // Add the csrf config file
         $this->Config->add('csrf');
@@ -66,13 +69,23 @@ class CSRF {
     }
 
     /**
+     * Parse a string
+     */
+    protected function parse(string $string): string
+    {
+        $string = str_replace('%SESSION%', session_id(), $string);
+        $string = str_replace('%UUID%', $this->UUID->toString("csrf-" . session_id()), $string);
+        return $string;
+    }
+
+    /**
      * Generate token.
      * @return $this
      */
     protected function generate(){
 
         // Retrieve the existing Token
-        $token = $this->Request->getParams('SESSION', $this->Field) ?? bin2hex(random_bytes((int) ($this->Length / 2)));
+        $token = $this->Request->getParams('SESSION', $this->Field) ?? $this->UUID->toString();
 
         // Store the token
         $this->Token = $token;
