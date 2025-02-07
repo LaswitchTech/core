@@ -177,10 +177,19 @@ class Bootstrap {
         ]
     ];
 
+    // Global Properties
+    private $Config;
+
+    // Properties
+    private $scope;
+
     /**
      * Constructor.
      */
-    public function __construct(string $scope){
+    public function __construct(string $scope)
+    {
+        // Set php time zone
+        date_default_timezone_set('America/Toronto');
 
         // Start the session
         if (!defined('STDIN') && session_status() === PHP_SESSION_NONE) {
@@ -194,9 +203,27 @@ class Bootstrap {
 
         // Initialize Config
         $CONFIG = new Config('bootstrap');
+        $this->Config = $CONFIG;
 
+        // Set the scope
+        $this->scope = strtoupper($scope);
+
+        // Load the Bootstrap
+        $this->load();
+
+        // Start the Bootstrap
+        $this->start();
+    }
+
+    /**
+     * Load the Bootstrap.
+     *
+     * @return self
+     */
+    private function load(): self
+    {
         // Retrieve the straps
-        $straps = $CONFIG->get('bootstrap');
+        $straps = $this->Config->get('bootstrap');
 
         // Loop through the straps
         foreach(self::Default as $strap => $config){
@@ -217,7 +244,10 @@ class Bootstrap {
             }
 
             // Check if strap is not the scope
-            if(!in_array($scope,$config['scope'])) continue;
+            if(!in_array($this->scope,$config['scope'])) continue;
+
+            // Check if the strap is already initialized
+            if(isset($GLOBALS[$strap]) || isset(${$strap})) continue;
 
             // Initialize the Global Variable
             global ${$strap};
@@ -236,5 +266,25 @@ class Bootstrap {
                 ${$strap} = new Module();
             }
         }
+
+        return $this;
+    }
+
+    /**
+     * Start the Bootstrap.
+     *
+     * @return self
+     */
+    private function start(): self
+    {
+        // Initialize the scope
+        global ${$this->scope};
+        if(!in_array(get_class(${$this->scope}),["Module","LaswitchTech\Core\Module"])){
+            if(method_exists(${$this->scope},'start')){
+                ${$this->scope}->start();
+            }
+        }
+
+        return $this;
     }
 }
