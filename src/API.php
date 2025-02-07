@@ -38,8 +38,11 @@ class API {
 
     /**
      * Execute the API Request
+     *
+     * @return self
      */
-    public function request(){
+    public function start(): self
+    {
 
         // Retrieve the namespace
         $namespace = $this->Request->getNamespace();
