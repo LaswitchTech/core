@@ -8,7 +8,7 @@
  */
 
 // Declaring namespace
-namespace LaswitchTech\Core\Connector;
+namespace LaswitchTech\Core\Connectors;
 
 // Import additionnal class into the global namespace
 use LaswitchTech\Core\Connector;

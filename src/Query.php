@@ -21,7 +21,7 @@ class Query {
      *
      * @var array
      */
-    const operators = ['=', '!=', '<>', '>', '<', '>=', '<=', 'LIKE', 'NOT LIKE', 'IS NULL', 'IS NOT NULL'];
+    const operators = ['=', '!=', '<>', '>', '<', '>=', '<=', 'LIKE', 'NOT LIKE', 'IS NULL', 'IS NOT NULL', 'CONTAINS'];
 
     /**
      * List of valid SQL conjunctions
@@ -507,8 +507,9 @@ class Query {
                     $col = "`{$condition['column']}`";
                 }
                 $op = $condition['operator'];
+                $condition['value'] = ($op === 'CONTAINS') ? json_encode($condition['value']) : $condition['value'];
                 $val = (in_array($op, ['IS NULL', 'IS NOT NULL'])) ? '' : $this->addParam($condition['value']);
-                $clause = "{$col} {$op} {$val}";
+                $clause = ($op == 'CONTAINS') ? "JSON_CONTAINS({$col}, {$val})" : "{$col} {$op} {$val}";
                 $clauses[] = ($i > 0) ? "{$conjunction} {$clause}" : $clause;
             }
             $filters .= ($filter > 0) ? " {$where['conjunction']} " : '';

@@ -121,7 +121,8 @@ class Request {
      * @param string $key
      * @return mixed
      */
-    public function getParams(string $type, $key = null){
+    public function getParams(string $type,?string $key = null): mixed
+    {
         switch(strtoupper($type)){
             case 'GET':
                 $array = $this->Get;
@@ -163,7 +164,8 @@ class Request {
      * @param string $value
      * @return mixed
      */
-    public function setParams(string $type, string $key, $value){
+    public function setParams(string $type, string $key,?string $value): mixed
+    {
         switch(strtoupper($type)){
             case 'COOKIE':
                 $_COOKIE[$key] = $value;
@@ -175,6 +177,51 @@ class Request {
                 return null;
         }
         return $value;
+    }
+
+    /**
+     * Set the parameters
+     * @param string $type
+     * @param string $key
+     * @return mixed
+     */
+    public function clearParams(string $type, string $key): bool
+    {
+        switch(strtoupper($type)){
+            case 'ENV':
+                if(isset($this->Env[$key])){ unset($this->Env[$key]); return true; }
+                break;
+            case 'SERVER':
+                if(isset($this->Server[$key])){ unset($this->Server[$key]); return true; }
+                break;
+            case 'GET':
+                if(isset($this->Get[$key])){ unset($this->Get[$key]); return true; }
+                break;
+            case 'POST':
+                if(isset($this->Post[$key])){ unset($this->Post[$key]); return true; }
+                break;
+            case 'FILES':
+                if(isset($this->Files[$key])){ unset($this->Files[$key]); return true; }
+                break;
+            case 'REQUEST':
+                if(isset($this->Request[$key])){ unset($this->Request[$key]); return true; }
+                break;
+            case 'COOKIE':
+                if(isset($this->Cookie[$key])){
+                    unset($this->Cookie[$key]);
+                    setcookie($key, '', time() - 3600, '/');
+                    return true;
+                }
+                break;
+            case 'SESSION':
+                if(isset($this->Session[$key])){
+                    unset($this->Session[$key]);
+                    unset($_SESSION[$key]);
+                    return true;
+                }
+                break;
+        }
+        return false;
     }
 
     /**
