@@ -55,6 +55,9 @@ class CSRF {
         $this->Length = $this->Config->get('csrf', 'length') ?? $this->Length;
         $this->Rotate = $this->Config->get('csrf', 'rotate') ?? $this->Rotate;
 
+        // Parse the field
+        $this->Field = $this->parse($this->Field);
+
         // Check if the method used should be validated
         if(!defined('STDIN') && in_array($this->Request->getMethod(), ['POST', 'PUT', 'PATCH', 'DELETE'])){
             if(!$this->validate($this->Request->getParams('POST', $this->Field) ?? null)){
