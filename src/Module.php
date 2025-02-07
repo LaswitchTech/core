@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Core Framework - Strap
+ * Core Framework - Module
  *
  * @license    MIT (https://mit-license.org/)
  * @author     Louis Ouellet <louis@laswitchtech.com>
@@ -13,7 +13,7 @@ namespace LaswitchTech\Core;
 // Import additionnal class into the global namespace
 use Exception;
 
-class Strap {
+class Module {
 
     /**
      * Call

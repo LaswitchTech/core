@@ -12,7 +12,7 @@ namespace LaswitchTech\Core;
 
 // Import additionnal class into the global namespace
 use LaswitchTech\Core\Config;
-use LaswitchTech\Core\Strap;
+use LaswitchTech\Core\Module;
 use Exception;
 
 class Bootstrap {
@@ -224,7 +224,7 @@ class Bootstrap {
             } else {
 
                 // Set default to null
-                ${$strap} = new Strap();
+                ${$strap} = new Module();
             }
         }
     }
