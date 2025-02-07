@@ -89,19 +89,47 @@ class API {
                         $permission = "Endpoint>" . $namespace;
 
                         // Check if Auth is available and if the endpoint is public
-                        if(get_class($this->Auth) !== "Strap" && !$public){
+                        if(get_class($this->Auth) !== "Module" && !$public){
+
+                            // Check if the user is loaded
+                            if(!$this->Auth->isLoaded()){
+
+                                // Send Unauthorized
+                                $this->Output->print('Unauthorized', array('HTTP/1.1 401 Unauthorized'));
+                            }
+
+                            // Check if the user is deleted
+                            if($this->Auth->user->deleted()){
+
+                                // Send Unauthorized
+                                $this->Output->print('Unauthorized', array('HTTP/1.1 401 Unauthorized'));
+                            }
+
+                            // Check if the user is banned
+                            if($this->Auth->user->banned()){
+
+                                // Send Forbidden
+                                $this->Output->print('Forbidden', array('HTTP/1.1 403 Forbidden'));
+                            }
+
+                            // Check if the user is verified
+                            if(!$this->Auth->user->verified()){
+
+                                // Send Unverified
+                                $this->Output->print('Unverified', array('HTTP/1.1 428 Unverified'));
+                            }
 
                             // Check if the user is authenticated
                             if(!$this->Auth->isAuthenticated()){
 
-                                // Send unauthorized
+                                // Send Unauthorized
                                 $this->Output->print('Unauthorized', array('HTTP/1.1 401 Unauthorized'));
                             }
 
                             // Check if the user has the required permission
-                            if(!$this->Auth->hasPermission($permission, $level)){
+                            if(!$this->Auth->isAuthorized($permission, $level)){
 
-                                // Send forbidden
+                                // Send Forbidden
                                 $this->Output->print('Forbidden', array('HTTP/1.1 403 Forbidden'));
                             }
                         }
