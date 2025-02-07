@@ -33,12 +33,10 @@ class CSRF {
     protected $Rotate = self::ROTATION;
 
     /**
-     * Create a new CSRF instance.
-     *
-     * @param  string|null  $field
-     * @return void
+     * Constructor
      */
-    public function __construct(){
+    public function __construct()
+    {
 
         // Import Global Variables
         global $REQUEST, $OUTPUT, $CONFIG, $UUID;
