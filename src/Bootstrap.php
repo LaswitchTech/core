@@ -21,7 +21,7 @@ class Bootstrap {
         "REQUEST" => [
             "class" => "\\LaswitchTech\\Core\\Request",
             "scope" => [
-                "Router",
+                "ROUTER",
                 "API",
                 "CLI"
             ]
@@ -29,7 +29,7 @@ class Bootstrap {
         "OUTPUT" => [
             "class" => "\\LaswitchTech\\Core\\Output",
             "scope" => [
-                "Router",
+                "ROUTER",
                 "API",
                 "CLI"
             ]
@@ -37,7 +37,7 @@ class Bootstrap {
         "LOG" => [
             "class" => "\\LaswitchTech\\Core\\Log",
             "scope" => [
-                "Router",
+                "ROUTER",
                 "API",
                 "CLI"
             ]
@@ -45,14 +45,14 @@ class Bootstrap {
         "CSRF" => [
             "class" => "\\LaswitchTech\\Core\\CSRF",
             "scope" => [
-                "Router",
+                "ROUTER",
                 "API"
             ]
         ],
         "NET" => [
             "class" => "\\LaswitchTech\\Core\\Net",
             "scope" => [
-                "Router",
+                "ROUTER",
                 "API",
                 "CLI"
             ]
@@ -60,7 +60,7 @@ class Bootstrap {
         "HELPER" => [
             "class" => "\\LaswitchTech\\Core\\Helpers",
             "scope" => [
-                "Router",
+                "ROUTER",
                 "API",
                 "CLI"
             ]
@@ -68,7 +68,7 @@ class Bootstrap {
         "DATABASE" => [
             "class" => "\\LaswitchTech\\Core\\Database",
             "scope" => [
-                "Router",
+                "ROUTER",
                 "API",
                 "CLI"
             ]
@@ -76,7 +76,7 @@ class Bootstrap {
         "MODEL" => [
             "class" => "\\LaswitchTech\\Core\\Models",
             "scope" => [
-                "Router",
+                "ROUTER",
                 "API",
                 "CLI"
             ]
@@ -84,7 +84,7 @@ class Bootstrap {
         "LOCALE" => [
             "class" => "\\LaswitchTech\\Core\\Locale",
             "scope" => [
-                "Router",
+                "ROUTER",
                 "API",
                 "CLI"
             ]
@@ -96,7 +96,7 @@ class Bootstrap {
         "SLS" => [
             "class" => "\\LaswitchTech\\Core\\SLS",
             "scope" => [
-                "Router",
+                "ROUTER",
                 "API",
                 "CLI"
             ]
@@ -104,7 +104,7 @@ class Bootstrap {
         "SMS" => [
             "class" => "\\LaswitchTech\\Core\\SMS",
             "scope" => [
-                "Router",
+                "ROUTER",
                 "API",
                 "CLI"
             ]
@@ -112,7 +112,7 @@ class Bootstrap {
         "SMTP" => [
             "class" => "\\LaswitchTech\\Core\\SMTP",
             "scope" => [
-                "Router",
+                "ROUTER",
                 "API",
                 "CLI"
             ]
@@ -120,7 +120,7 @@ class Bootstrap {
         "IMAP" => [
             "class" => "\\LaswitchTech\\Core\\IMAP",
             "scope" => [
-                "Router",
+                "ROUTER",
                 "API",
                 "CLI"
             ]
@@ -128,7 +128,7 @@ class Bootstrap {
         "INSTALLER" => [
             "class" => "\\LaswitchTech\\Core\\Installer",
             "scope" => [
-                "Router",
+                "ROUTER",
                 "API",
                 "CLI"
             ]
@@ -136,7 +136,7 @@ class Bootstrap {
         "UPDATER" => [
             "class" => "\\LaswitchTech\\Core\\Updater",
             "scope" => [
-                "Router",
+                "ROUTER",
                 "API",
                 "CLI"
             ]
@@ -144,14 +144,14 @@ class Bootstrap {
         "AUTH" => [
             "class" => "\\LaswitchTech\\Core\\Auth",
             "scope" => [
-                "Router",
+                "ROUTER",
                 "API"
             ]
         ],
         "ROUTER" => [
             "class" => "\\LaswitchTech\\Core\\Router",
             "scope" => [
-                "Router"
+                "ROUTER"
             ]
         ],
         "API" => [
