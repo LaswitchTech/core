@@ -126,6 +126,15 @@ class CSRF {
     }
 
     /**
+     * Get key.
+     * @return string $this->Field
+     */
+    public function key()
+    {
+        return $this->Field;
+    }
+
+    /**
      * Validate a token.
      * @param  string  $token
      * @return boolean
