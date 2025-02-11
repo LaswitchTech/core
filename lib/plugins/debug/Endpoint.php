@@ -8,7 +8,7 @@
  */
 
 // Import additionnal class into the global namespace
-use \LaswitchTech\Core\Endpoint;
+use \LaswitchTech\Core\Abstracts\Endpoint;
 
 class DebugEndpoint extends Endpoint {
 

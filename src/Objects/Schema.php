@@ -8,11 +8,11 @@
  */
 
 // Declaring namespace
-namespace LaswitchTech\Core;
+namespace LaswitchTech\Core\Objects;
 
 // Import additionnal class into the global namespace
-use LaswitchTech\Core\Definition;
-use LaswitchTech\Core\Connector;
+use LaswitchTech\Core\Objects\Definition;
+use LaswitchTech\Core\Abstracts\Connector;
 use Exception;
 
 class Schema {

@@ -8,9 +8,9 @@
  */
 
 // Declaring namespace
-namespace LaswitchTech\Core;
+namespace LaswitchTech\Core\Abstracts;
 
 // Import additionnal class into the global namespace
 use Exception;
 
-class Helper {}
+abstract class Helper {}

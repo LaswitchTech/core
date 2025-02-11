@@ -8,7 +8,7 @@
  */
 
 // Import additionnal class into the global namespace
-use \LaswitchTech\Core\Command;
+use LaswitchTech\Core\Abstracts\Command;
 
 class DebugCommand extends Command {
 

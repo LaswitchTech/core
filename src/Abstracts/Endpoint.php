@@ -8,7 +8,7 @@
  */
 
 // Declaring namespace
-namespace LaswitchTech\Core;
+namespace LaswitchTech\Core\Abstracts;
 
 // Import additionnal class into the global namespace
 use Exception;
@@ -51,7 +51,7 @@ abstract class Endpoint {
     public function __call($name, $arguments) {
 
         // Send the output
-        $this->Output->print('Endpoint not Implemented', array('HTTP/1.1 501 Not Implemented'));
+        $this->Output->print('Endpoint Action not Implemented', array('HTTP/1.1 501 Not Implemented'));
     }
 
     /**

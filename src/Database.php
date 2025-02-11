@@ -11,6 +11,7 @@
 namespace LaswitchTech\Core;
 
 // Import additionnal class into the global namespace
+use LaswitchTech\Core\Objects;
 use LaswitchTech\Core\Connectors;
 use Exception;
 
@@ -88,20 +89,20 @@ class Database {
     /**
      * Create a new Query object
      *
-     * @return Query
+     * @return Objects\Query
      */
-    public function query(): Query
+    public function query(): Objects\Query
     {
-        return new Query($this->connector);
+        return new Objects\Query($this->connector);
     }
 
     /**
      * Create a new Schema object
      *
-     * @return Schema
+     * @return Objects\Schema
      */
-    public function schema(): Schema
+    public function schema(): Objects\Schema
     {
-        return new Schema($this->connector);
+        return new Objects\Schema($this->connector);
     }
 }

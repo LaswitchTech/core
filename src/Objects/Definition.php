@@ -8,7 +8,7 @@
  */
 
 // Declaring namespace
-namespace LaswitchTech\Core;
+namespace LaswitchTech\Core\Objects;
 
 // Import additionnal class into the global namespace
 use Exception;

@@ -11,7 +11,7 @@
 namespace LaswitchTech\Core\Backends;
 
 // Import additionnal class into the global namespace
-use LaswitchTech\Core\Backend;
+use LaswitchTech\Core\Abstracts\Backend;
 use Exception;
 
 class Local extends Backend {

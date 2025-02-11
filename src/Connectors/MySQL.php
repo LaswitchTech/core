@@ -11,7 +11,7 @@
 namespace LaswitchTech\Core\Connectors;
 
 // Import additionnal class into the global namespace
-use LaswitchTech\Core\Connector;
+use LaswitchTech\Core\Abstracts\Connector;
 use Exception;
 use mysqli;
 
