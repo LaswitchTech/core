@@ -214,9 +214,6 @@ class Bootstrap {
      */
     public function __construct(string $scope)
     {
-        // Set php time zone
-        date_default_timezone_set('America/Toronto');
-
         // Start the session
         if (!defined('STDIN') && session_status() === PHP_SESSION_NONE) {
             ini_set('session.cookie_samesite', 'Strict');
