@@ -99,21 +99,21 @@ class API {
                             }
 
                             // Check if the user is deleted
-                            if($this->Auth->user->deleted()){
+                            if($this->Auth->user()->deleted()){
 
                                 // Send Unauthorized
                                 $this->Output->print('Unauthorized', array('HTTP/1.1 401 Unauthorized'));
                             }
 
                             // Check if the user is banned
-                            if($this->Auth->user->banned()){
+                            if($this->Auth->user()->banned()){
 
                                 // Send Forbidden
                                 $this->Output->print('Forbidden', array('HTTP/1.1 403 Forbidden'));
                             }
 
                             // Check if the user is verified
-                            if(!$this->Auth->user->verified()){
+                            if(!$this->Auth->user()->verified()){
 
                                 // Send Unverified
                                 $this->Output->print('Unverified', array('HTTP/1.1 428 Unverified'));
