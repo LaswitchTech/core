@@ -46,9 +46,11 @@ class CLI {
 
     /**
      * Run the CLI
-     * @return void
+     *
+     * @return self
      */
-    public function run(){
+    public function start(): self
+    {
 
         // Parse Standard Input
         if(count($this->Arguments) > 0){
@@ -127,5 +129,7 @@ class CLI {
             // Display help
             $this->Output->help("Internal Error");
         }
+
+        return $this;
     }
 }

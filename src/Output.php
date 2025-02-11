@@ -46,7 +46,8 @@ class Output {
      * @param string $string
      * @return void
      */
-    public function print($string, $httpHeaders=array()) {
+    public function print($string, $httpHeaders=array())
+    {
 
         // Check if the script is running in CLI mode
         if(defined('STDIN')){
@@ -55,36 +56,90 @@ class Output {
             print_r($string . PHP_EOL);
         } else {
 
-            // Check if header information can be sent
-            if (!headers_sent()) {
+            // Check if the string is an array or object
+            if(is_array($string) || is_object($string)){
 
-                // Remove the default Set-Cookie header
-                header_remove('Set-Cookie');
-
-                // Add the custom headers
-                if (is_array($httpHeaders) && count($httpHeaders)) {
-
-                    // Add the headers
-                    foreach ($httpHeaders as $httpHeader) {
-
-                        // Add the header
-                        header($httpHeader);
-                    }
-                }
-
-                // Check if the string is an array or object
-                if(is_array($string) || is_object($string)){
-
-                    // Convert the string to JSON
-                    $string = json_encode($string,JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT);
-                }
-
-                // Send the output
-                echo $string;
-
-                // Exit the script
-                exit;
+                // Convert the string to JSON
+                $string = json_encode($string,JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT);
             }
+
+            // Send the output
+            echo $string;
+
+            // Check if headers are present
+            if(!empty($httpHeaders)){
+
+                // Check if header information can be sent
+                if (!headers_sent()) {
+
+                    // Remove the default Set-Cookie header
+                    header_remove('Set-Cookie');
+
+                    // Add the custom headers
+                    if (is_array($httpHeaders) && count($httpHeaders)) {
+
+                        // Add the headers
+                        foreach ($httpHeaders as $httpHeader) {
+
+                            // Add the header
+                            header($httpHeader);
+                        }
+                    }
+
+                    // Exit the script
+                    exit;
+                }
+            }
+        }
+    }
+
+    /**
+     * Print the backtrace result from debug_backtrace() in a readable format
+     *
+     * @param array $array
+     * @return void
+     */
+    public function trace($array,$error=false)
+    {
+        $string = "<strong>Stack Trace</strong>:".PHP_EOL;
+        foreach($array as $key => $value){
+            $file = $value['file'] ?? null;
+            $line = $value['line'] ?? null;
+            $in = "{$file}({$line})";
+            $class = $value['class'] ?? null;
+            $type = $value['type'] ?? null;
+            $function = $value['function'] ?? null;
+            $by = $class ? "{$class}{$type}{$function}" : $function;
+            $args = '';
+            foreach($value['args'] as $arg){
+                $args .= gettype($arg);
+                switch(gettype($arg)){
+                    case 'string':
+                        $args .= ' "'.$arg.'"';
+                        break;
+                    case 'array':
+                        $args .= "(Array)";
+                        break;
+                    case 'object':
+                        $args .= "(Object)";
+                        break;
+                    default:
+                        $args .= "{$arg}";
+                        break;
+                }
+                $args .= ', ';
+            }
+            $args = trim($args, ', ');
+            $string .= "  <strong>#$key</strong> {$in}: {$by}({$args})".PHP_EOL;
+        }
+        $trace = debug_backtrace()[0];
+        $file = $trace['file'] ?? null;
+        $line = $trace['line'] ?? null;
+        $string .= "    <strong>thrown in</strong> {$file} on line <strong>{$line}</strong>".PHP_EOL;
+        if($error){
+            $this->error($string);
+        } else {
+            $this->print($string);
         }
     }
 
@@ -108,6 +163,7 @@ class Output {
      * @return void
      */
     public function error($string) {
+        error_log(strip_tags($string));
         $this->print($this->set($string, 'red'));
     }
 

@@ -1,0 +1,70 @@
+<?php
+
+/**
+ * Core Framework - Controller
+ *
+ * @license    MIT (https://mit-license.org/)
+ * @author     Louis Ouellet <louis@laswitchtech.com>
+ */
+
+// Declaring namespace
+namespace LaswitchTech\Core\Abstracts;
+
+// Import additionnal class into the global namespace
+use Exception;
+
+abstract class Controller {
+
+    // Global Properties
+    protected $Auth;
+    protected $Model;
+    protected $Helper;
+    protected $Output;
+    protected $Request;
+
+    // Auth Properties
+    protected $Level;
+    protected $Public;
+
+    /**
+     * Constructor
+     */
+    public function __construct(){
+
+        // Import Global Variables
+        global $AUTH, $MODAL, $HELPER, $OUTPUT, $REQUEST;
+
+        // Initialize Properties
+        $this->Auth = $AUTH;
+        $this->Model = $MODAL;
+        $this->Helper = $HELPER;
+        $this->Output = $OUTPUT;
+        $this->Request = $REQUEST;
+    }
+
+    /**
+     * Magic Method to catch all undefined methods
+     * @param string $name
+     * @param array $arguments
+     * @return void
+     */
+    public function __call($name, $arguments) {
+
+        // Send the output
+        $this->Output->print('Controller Action not Implemented', array('HTTP/1.1 501 Not Implemented'));
+    }
+
+    /**
+     * Get the public status
+     */
+    public function getPublic() {
+        return $this->Public;
+    }
+
+    /**
+     * Get the level
+     */
+    public function getLevel() {
+        return $this->Level;
+    }
+}

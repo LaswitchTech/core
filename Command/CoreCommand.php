@@ -1,0 +1,158 @@
+<?php
+
+/**
+ * Core Framework - CoreCommand
+ *
+ * @license    MIT (https://mit-license.org/)
+ * @author     Louis Ouellet <louis@laswitchtech.com>
+ */
+
+// Import additionnal class into the global namespace
+use LaswitchTech\Core\Abstracts\Command;
+
+class CoreCommand extends Command {
+
+    /**
+     * Constructor
+     */
+    public function __construct()
+    {
+        parent::__construct();
+    }
+
+    /**
+     * Initialize the framework
+     */
+    public function initAction()
+    {
+        // Global Variables
+        global $CONFIG;
+
+        // Initialize the framework
+        $this->Output->print("Initializing...");
+
+        // Path to file
+        $htaccess = $CONFIG->root() . DIRECTORY_SEPARATOR . ".htaccess";
+
+        // Check if file exists
+        if(!is_file($htaccess)) {
+
+            // Output
+            $this->Output->print("Creating {$htaccess} file...");
+
+            // Create content
+            $content = "AddType application/javascript .mjs" . PHP_EOL . PHP_EOL;
+            $content .= "<IfModule mod_headers.c>" . PHP_EOL;
+            $content .= "    RequestHeader unset Proxy" . PHP_EOL;
+            $content .= "</IfModule>" . PHP_EOL . PHP_EOL;
+            $content .= "<IfModule mod_rewrite.c>" . PHP_EOL;
+            $content .= "    RewriteEngine on" . PHP_EOL;
+            $content .= "    RewriteRule .* - [E=MOD_REWRITE:1]" . PHP_EOL;
+            $content .= "    RewriteRule ^ - [E=HAS_MOD_REWRITE:true]" . PHP_EOL;
+            $content .= "    RewriteRule ^(\.well-known/.*)$ $1 [L]" . PHP_EOL;
+            $content .= "    RewriteRule ^$ webroot/ [L]" . PHP_EOL;
+            $content .= "    RewriteRule (.*) webroot/$1 [L]" . PHP_EOL;
+            $content .= "</IfModule>";
+
+            // Create file
+            file_put_contents($htaccess, $content);
+        }
+
+        // Path to file
+        $webroot = $CONFIG->root() . DIRECTORY_SEPARATOR . "webroot";
+
+        // Check if directory exists
+        if(!is_dir($webroot)) {
+
+            // Output
+            $this->Output->print("Creating {$webroot} directory...");
+
+            // Create directory
+            mkdir($webroot, 0755, true);
+        }
+
+        // Path to file
+        $htaccess = $webroot . DIRECTORY_SEPARATOR . ".htaccess";
+
+        // Check if file exists
+        if(!is_file($htaccess)) {
+
+            // Output
+            $this->Output->print("Creating {$htaccess} file...");
+
+            // Create content
+            $content = "AddType application/javascript .mjs" . PHP_EOL . PHP_EOL;
+            $content .= "<IfModule mod_headers.c>" . PHP_EOL;
+            $content .= "    RequestHeader unset Proxy" . PHP_EOL;
+            $content .= "</IfModule>" . PHP_EOL . PHP_EOL;
+            $content .= "<IfModule mod_rewrite.c>" . PHP_EOL;
+            $content .= "    RewriteEngine on" . PHP_EOL;
+            $content .= "    RewriteRule .* - [E=MOD_REWRITE:1]" . PHP_EOL;
+            $content .= "    RewriteBase /" . PHP_EOL;
+            $content .= "    RewriteCond %{REQUEST_FILENAME} !-d" . PHP_EOL;
+            $content .= "    RewriteCond %{REQUEST_FILENAME} !-f" . PHP_EOL;
+            $content .= "    RewriteRule ^ - [E=HAS_MOD_REWRITE:true]" . PHP_EOL;
+            $content .= "    RewriteRule ^(.+)$ index.php [QSA,L]" . PHP_EOL;
+            $content .= "    RewriteRule ^cli - [F,L]" . PHP_EOL;
+            $content .= "    RewriteRule ^.htaccess - [F,L]" . PHP_EOL;
+            $content .= "</IfModule>";
+
+            // Create file
+            file_put_contents($htaccess, $content);
+        }
+
+        // Path to file
+        $index = $webroot . DIRECTORY_SEPARATOR . "index.php";
+
+        // Check if file exists
+        if(!is_file($index)) {
+
+            // Output
+            $this->Output->print("Creating {$index} file...");
+
+            // Create content
+            $content = '<?php' . PHP_EOL;
+            $content .= '// Load Composer\'s autoloader' . PHP_EOL;
+            $content .= 'require_once dirname(__DIR__) . "/vendor/autoload.php";' . PHP_EOL . PHP_EOL;
+            $content .= '// Initiate Bootstrap' . PHP_EOL;
+            $content .= '$BOOTSTRAP = new LaswitchTech\Core\Bootstrap("ROUTER");' . PHP_EOL;
+
+            // Create file
+            file_put_contents($index, $content);
+        }
+
+        // Path to file
+        $api = $webroot . DIRECTORY_SEPARATOR . "api.php";
+
+        // Check if file exists
+        if(!is_file($api)) {
+
+            // Output
+            $this->Output->print("Creating {$api} file...");
+
+            // Create content
+            $content = '<?php' . PHP_EOL;
+            $content .= '// Load Composer\'s autoloader' . PHP_EOL;
+            $content .= 'require_once dirname(__DIR__) . "/vendor/autoload.php";' . PHP_EOL . PHP_EOL;
+            $content .= '// Initiate Bootstrap' . PHP_EOL;
+            $content .= '$BOOTSTRAP = new LaswitchTech\Core\Bootstrap("API");' . PHP_EOL;
+
+            // Create file
+            file_put_contents($api, $content);
+        }
+
+        // Path to file
+        $favicon = $webroot . DIRECTORY_SEPARATOR . "favicon.ico";
+        $icon = $CONFIG->root() . DIRECTORY_SEPARATOR . "src" . DIRECTORY_SEPARATOR . "icons". DIRECTORY_SEPARATOR . "icon.ico";
+
+        // Check if file exists
+        if(!is_file($favicon)) {
+
+            // Output
+            $this->Output->print("Creating {$favicon} file...");
+
+            // Create symbolic link
+            symlink($icon, $favicon);
+        }
+    }
+}

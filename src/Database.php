@@ -11,9 +11,8 @@
 namespace LaswitchTech\Core;
 
 // Import additionnal class into the global namespace
-use LaswitchTech\Core\Connector\MySQL;
-use LaswitchTech\Core\Connector\PostgreSQL;
-use LaswitchTech\Core\Connector\SQLite;
+use LaswitchTech\Core\Objects;
+use LaswitchTech\Core\Connectors;
 use Exception;
 
 class Database {
@@ -46,7 +45,7 @@ class Database {
         // Instantiate the appropriate connector
         switch($this->Config->get('database', 'connector')) {
             case 'mysql':
-                $this->connector = new MySQL();
+                $this->connector = new Connectors\MySQL();
                 break;
             default:
                 throw new Exception('Invalid database connector');
@@ -90,20 +89,20 @@ class Database {
     /**
      * Create a new Query object
      *
-     * @return Query
+     * @return Objects\Query
      */
-    public function query(): Query
+    public function query(): Objects\Query
     {
-        return new Query($this->connector);
+        return new Objects\Query($this->connector);
     }
 
     /**
      * Create a new Schema object
      *
-     * @return Schema
+     * @return Objects\Schema
      */
-    public function schema(): Schema
+    public function schema(): Objects\Schema
     {
-        return new Schema($this->connector);
+        return new Objects\Schema($this->connector);
     }
 }

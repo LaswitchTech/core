@@ -1,4 +1,4 @@
-<p align="center"><img src="dist/img/logo.png" /></p>
+<p align="center"><img src="src/icons/icon.png" /></p>
 
 # Core
 ![License](https://img.shields.io/github/license/LaswitchTech/core?style=for-the-badge)

@@ -17,6 +17,7 @@ use ReflectionClass;
 
 class Log {
 
+    // Constants
     const DEBUG_LABEL = 'DEBUG';
     const INFO_LABEL = 'INFO';
     const SUCCESS_LABEL = 'SUCCESS';
@@ -29,6 +30,10 @@ class Log {
     const ERROR_LEVEL = 1;
     const Extension = '.log';
     const Dir = '/log';
+
+    // Global Properties
+    protected $Config;
+    protected $Request;
 
     // Properties
     private $Path = null;
@@ -47,13 +52,18 @@ class Log {
      * @return void
      * @throws Exception
      */
-    public function __construct(){
+    public function __construct()
+    {
 
         // Global Variables
-        global $CONFIG;
+        global $CONFIG, $REQUEST;
+
+        // Set Properties
+        $this->Config = $CONFIG;
+        $this->Request = $REQUEST;
 
         // Add a log configuration file
-        $CONFIG->add('log');
+        $this->Config->add('log');
 
         // Set Properties
         $this->Path = $CONFIG->root();
@@ -71,15 +81,13 @@ class Log {
     }
 
     /**
-     * Configure PHP.
+     * Configure Log Level.
      *
-     * @param  string  $option
-     * @param  bool|int  $value
-     * @return void
-     * @throws Exception
+     * @param  int  $level
+     * @return self
      */
-    public function config($level = null){
-
+    public function config(?int $level = null): self
+    {
         // Set Level
         $this->Level = $level ?: $this->Level;
 
@@ -120,26 +128,41 @@ class Log {
      *
      * @return string $ip
      */
-	public function ip(){
+	public function ip(): string
+    {
+
+        // Retrieve the Server Variables
+        $SERVER = $this->Request->getParams('SERVER');
+
+        // Retrieve the Server Variables
+        $ENV = $this->Request->getParams('ENV');
+
+        // Merge both arrays in $VARS
+        $VARS = array_merge($SERVER, $ENV);
+
+        // Retrieve the IP
         $ip = '';
-        if(getenv('HTTP_CLIENT_IP')){
-            $ip = getenv('HTTP_CLIENT_IP');
-        } elseif(getenv('HTTP_X_FORWARDED_FOR')){
-            $ip = getenv('HTTP_X_FORWARDED_FOR');
-        } elseif(getenv('HTTP_X_FORWARDED')){
-            $ip = getenv('HTTP_X_FORWARDED');
-        } elseif(getenv('HTTP_FORWARDED_FOR')){
-            $ip = getenv('HTTP_FORWARDED_FOR');
-        } elseif(getenv('HTTP_FORWARDED')){
-            $ip = getenv('HTTP_FORWARDED');
-        } elseif(getenv('REMOTE_ADDR')){
-            $ip = getenv('REMOTE_ADDR');
+        if(isset($VARS['HTTP_CLIENT_IP'])){
+            $ip = $VARS['HTTP_CLIENT_IP'];
+        } elseif(isset($VARS['HTTP_X_FORWARDED_FOR'])){
+            $ip = $VARS['HTTP_X_FORWARDED_FOR'];
+        } elseif(isset($VARS['HTTP_X_FORWARDED'])){
+            $ip = $VARS['HTTP_X_FORWARDED'];
+        } elseif(isset($VARS['HTTP_FORWARDED_FOR'])){
+            $ip = $VARS['HTTP_FORWARDED_FOR'];
+        } elseif(isset($VARS['HTTP_FORWARDED'])){
+            $ip = $VARS['HTTP_FORWARDED'];
+        } elseif(isset($VARS['REMOTE_ADDR'])){
+            $ip = $VARS['REMOTE_ADDR'];
         } elseif(defined('STDIN')){
             $ip = 'LOCALHOST';
         } else {
             $ip = 'UNKNOWN';
         }
+
+        // Check for localhost
         if(in_array($ip,['127.0.0.1','127.0.1.1','::1'])){ $ip = 'LOCALHOST'; }
+
 	    return $ip;
 	}
 
@@ -148,16 +171,19 @@ class Log {
      *
      * @return string $agent
      */
-    public function agent(){
-
+    public function agent(): string
+    {
         // Retrieve the User Agent
         $agent = 'Unknown';
 
+        // Retrieve the Server Variables
+        $SERVER = $this->Request->getParams('SERVER');
+
         // Check for a web agent
-        $agent = isset($_SERVER['HTTP_USER_AGENT']) ? json_encode($_SERVER['HTTP_USER_AGENT']) : $agent;
+        $agent = isset($SERVER['HTTP_USER_AGENT']) ? json_encode($SERVER['HTTP_USER_AGENT']) : $agent;
 
         // Check for a command line agent
-        $agent = defined('STDIN') ? json_encode(["Terminal" => $_SERVER['TERM'], "Program" => $_SERVER['TERM_PROGRAM']]) : $agent;
+        $agent = defined('STDIN') ? json_encode(["Terminal" => $SERVER['TERM'], "Program" => $SERVER['TERM_PROGRAM']]) : $agent;
 
         // Return
         return $agent;
@@ -168,11 +194,10 @@ class Log {
      *
      * @param  string  $name
      * @param  string  $path
-     * @return void
-     * @throws Exception
+     * @return self
      */
-    public function add($name, $path = null){
-
+    public function add($name, $path = null): self
+    {
         // If not already saved, add File in the list
         if(!isset($this->Files[$name])){
 
@@ -203,10 +228,10 @@ class Log {
      * Set the current log file.
      *
      * @param  string  $name
-     * @return void
-     * @throws Exception
+     * @return self
      */
-    public function set($name){
+    public function set($name): self
+    {
 
         // Set Log File
         $this->File = is_string($name) && isset($this->Files[$name]) ? $name : $this->File;
@@ -219,11 +244,10 @@ class Log {
      * Clear a log file.
      *
      * @param  string  $Name
-     * @return void
-     * @throws Exception
+     * @return self
      */
-    public function clear($name = null){
-
+    public function clear($name = null): self
+    {
         // Set name
         $name = $name ?: $this->File;
 
@@ -244,7 +268,8 @@ class Log {
      * @param  string  $name
      * @return array
      */
-    public function read($name = null) {
+    public function read($name = null): array
+    {
 
         // Set name
         $name = $name ?: $this->File;
@@ -262,7 +287,8 @@ class Log {
      *
      * @return array
      */
-    public function list(){
+    public function list(): array
+    {
         return array_keys($this->Files);
     }
 
@@ -272,9 +298,10 @@ class Log {
      * @param  mixed  $message
      * @param  string  $level
      * @param  string|null  $name
-     * @return void
+     * @return self
      */
-    public function log($message, $level = self::LEVEL_INFO, $name = null){
+    public function log($message, $level = self::LEVEL_INFO, $name = null): self
+    {
 
         // Validate log level
         if(isset($this->Levels[$level]) && $level <= $this->Level){
@@ -342,9 +369,10 @@ class Log {
      *
      * @param  mixed  $message
      * @param  string|null  $name
-     * @return void
+     * @return self
      */
-    public function debug($message, $name = null){
+    public function debug($message, $name = null): self
+    {
         return $this->log($message, $level = self::DEBUG_LEVEL, $name);
     }
 
@@ -353,9 +381,10 @@ class Log {
      *
      * @param  mixed  $message
      * @param  string|null  $name
-     * @return void
+     * @return self
      */
-    public function info($message, $name = null){
+    public function info($message, $name = null): self
+    {
         return $this->log($message, $level = self::INFO_LEVEL, $name);
     }
 
@@ -364,9 +393,10 @@ class Log {
      *
      * @param  mixed  $message
      * @param  string|null  $name
-     * @return void
+     * @return self
      */
-    public function success($message, $name = null){
+    public function success($message, $name = null): self
+    {
         return $this->log($message, $level = self::SUCCESS_LEVEL, $name);
     }
 
@@ -375,9 +405,10 @@ class Log {
      *
      * @param  mixed  $message
      * @param  string|null  $name
-     * @return void
+     * @return self
      */
-    public function warning($message, $name = null){
+    public function warning($message, $name = null): self
+    {
         return $this->log($message, $level = self::WARNING_LEVEL, $name);
     }
 
@@ -386,13 +417,20 @@ class Log {
      *
      * @param  mixed  $message
      * @param  string|null  $name
-     * @return void
+     * @return self
      */
-    public function error($message, $name = null){
+    public function error($message, $name = null): self
+    {
         return $this->log($message, $level = self::ERROR_LEVEL, $name);
     }
 
-    public function fatal(){
+    /**
+     * Halt all execution.
+     *
+     * @return self
+     */
+    public function fatal(): self
+    {
 
         // Store the last message in error log
         error_log($this->Message);

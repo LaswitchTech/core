@@ -1,0 +1,418 @@
+<?php
+
+/**
+ * Core Framework - Route
+ *
+ * @license    MIT (https://mit-license.org/)
+ * @author     Louis Ouellet <louis@laswitchtech.com>
+ */
+
+// Declaring namespace
+namespace LaswitchTech\Core\Objects;
+
+// Import additionnal class into the global namespace
+use Exception;
+
+class Route {
+
+    // Global Properties
+    private $Config;
+    private $Auth;
+    private $Locale;
+    private $Request;
+    private $Output;
+    private $CSRF;
+    private $Helper;
+    private $Builder;
+
+    // Properties
+    private $Route;
+    private $Template;
+    private $View;
+    private $Public = true;
+    private $Location = [];
+    private $Level = 0;
+    private $Parent;
+    private $Label;
+    private $Icon;
+    private $Color;
+    private $Action;
+    private $Call;
+
+    /**
+     * Constructor
+     *
+     * @param string $route
+     * @param array|null $data
+     */
+    public function __construct(string $route, ?array $data = null)
+    {
+        // Global Variables
+        global $CONFIG, $REQUEST, $OUTPUT, $LOCALE , $AUTH, $CSRF, $HELPER, $BUILDER;
+
+        // Set Global Properties
+        $this->Config = $CONFIG;
+        $this->Auth = $AUTH;
+        $this->Locale = $LOCALE;
+        $this->Request = $REQUEST;
+        $this->Output = $OUTPUT;
+        $this->CSRF = $CSRF;
+        $this->Helper = $HELPER;
+        $this->Builder = $BUILDER;
+
+        // Set Properties
+        $this->Route = $route;
+
+        // Set Data
+        if(!is_null($data) && !empty($data)){
+            $this->set($data);
+        }
+    }
+
+    /**
+     * Destructor
+     */
+    public function __destruct()
+    {
+        // Save Route
+        $this->save();
+    }
+
+    /**
+     * Set Route Data
+     *
+     * @param array $data
+     * @return self
+     */
+    public function set(array $data): self
+    {
+        // Set Data
+        foreach($data as $key => $value){
+            if(!is_null($value)){
+                switch($key){
+                    case "template":
+                        $this->template($value);
+                        break;
+                    case "view":
+                        $this->view($value);
+                        break;
+                    case "public":
+                        $this->public($value);
+                        break;
+                    case "location":
+                        foreach($value as $location){
+                            $this->location($location);
+                        }
+                        break;
+                    case "level":
+                        $this->level($value);
+                        break;
+                    case "parent":
+                        $this->parent($value);
+                        break;
+                    case "label":
+                        $this->label($value);
+                        break;
+                    case "icon":
+                        $this->icon($value);
+                        break;
+                    case "color":
+                        $this->color($value);
+                        break;
+                    case "action":
+                        $this->action($value);
+                        break;
+                }
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * Get or Set Template File.
+     *
+     * @param string|null $template
+     * @return string
+     */
+    public function template(?string $template = null): ?string
+    {
+        // Set Template
+        if(!is_null($template)){
+
+            // Check if the template is a file
+            if(!is_file($this->Config->root() . DIRECTORY_SEPARATOR . $template)){
+                $template = 'Template' . DIRECTORY_SEPARATOR . $template . '.php';
+            }
+
+            // Create the file if it does not exist
+            if(!is_file($this->Config->root() . DIRECTORY_SEPARATOR . $template)){
+                $content = "<!--" . PHP_EOL;
+                $content .= "  Core Framework - View File" . PHP_EOL . PHP_EOL;
+                $content .= "  @license    MIT (https://mit-license.org/)" . PHP_EOL;
+                $content .= "  @author     Full Name <user@domain.com>" . PHP_EOL;
+                $content .= "-->" . PHP_EOL;
+                file_put_contents($this->Config->root() . DIRECTORY_SEPARATOR . $template, $content);
+            }
+            $this->Template = $template;
+        }
+
+        return $this->Template;
+    }
+
+    /**
+     * Get or Set View File.
+     *
+     * @param string|null $view
+     * @return string
+     */
+    public function view(?string $view = null): ?string
+    {
+        // Set Template
+        if(!is_null($view)){
+
+            // Check if the view is a file
+            if(!is_file($this->Config->root() . DIRECTORY_SEPARATOR . $view)){
+                $view = 'View' . DIRECTORY_SEPARATOR . $view . '.php';
+            }
+
+            // Create the file if it does not exist
+            if(!is_file($this->Config->root() . DIRECTORY_SEPARATOR . $view)){
+                $content = "<!--" . PHP_EOL;
+                $content .= "  Core Framework - View File" . PHP_EOL . PHP_EOL;
+                $content .= "  @license    MIT (https://mit-license.org/)" . PHP_EOL;
+                $content .= "  @author     Full Name <user@domain.com>" . PHP_EOL;
+                $content .= "-->" . PHP_EOL;
+                file_put_contents($this->Config->root() . DIRECTORY_SEPARATOR . $view, $content);
+            }
+            $this->View = $view;
+        }
+
+        return $this->View;
+    }
+
+    /**
+     * Get or Set Namespace.
+     *
+     * @param string|null $namespace
+     * @return string
+     */
+    public function namespace(): ?string
+    {
+        return $this->Route;
+    }
+
+    /**
+     * Get or Set Public.
+     *
+     * @param bool|null $public
+     * @return bool
+     */
+    public function public(?bool $public = null): ?bool
+    {
+        if(!is_null($public)){
+            $this->Public = $public;
+        }
+        return $this->Public;
+    }
+
+    /**
+     * Get or Set Location.
+     *
+     * @param string|null $location
+     * @return array
+     */
+    public function location(?string $location = null): ?array
+    {
+        // Add Location
+        if(!is_null($location)){
+            $this->Location[] = $location;
+        }
+
+        // Filter and Unique
+        $this->Location = array_filter($this->Location);
+        $this->Location = array_unique($this->Location);
+
+        return $this->Location;
+    }
+
+    /**
+     * Get or Set Level.
+     *
+     * @param int|null $level
+     * @return int
+     */
+    public function level(?int $level = null): int
+    {
+        if(!is_null($level)){
+            $this->Level = $level;
+        }
+        return $this->Level;
+    }
+
+    /**
+     * Get or Set Parent.
+     *
+     * @param string|null $parent
+     * @return string
+     */
+    public function parent(?string $parent = null): ?string
+    {
+        if(!is_null($parent)){
+            $this->Parent = $parent;
+        }
+        return $this->Parent;
+    }
+
+    /**
+     * Get or Set Label.
+     *
+     * @param string|null $label
+     * @return string
+     */
+    public function label(?string $label = null): ?string
+    {
+        if(!is_null($label)){
+            $this->Label = $label;
+        }
+        return $this->Label;
+    }
+
+    /**
+     * Get or Set Icon.
+     *
+     * @param string|null $icon
+     * @return string
+     */
+    public function icon(?string $icon = null): ?string
+    {
+        if(!is_null($icon)){
+            $this->Icon = $icon;
+        }
+        return $this->Icon;
+    }
+
+    /**
+     * Get or Set Color.
+     *
+     * @param string|null $color
+     * @return string
+     */
+    public function color(?string $color = null): ?string
+    {
+        if(!is_null($color)){
+            $this->Color = $color;
+        }
+        return $this->Color;
+    }
+
+    /**
+     * Get or Set Action.
+     *
+     * @param string|null $action
+     * @return string
+     */
+    public function action(?string $action = null): ?string
+    {
+        if(!is_null($action)){
+            $this->Action = $action;
+        }
+        return $this->Action;
+    }
+
+    /**
+     * Save Route to Config
+     *
+     * @return self
+     */
+    public function save(): self
+    {
+        // Save Route to Config
+        $this->Config->set('routes', $this->Route, [
+            'template' => $this->Template,
+            'view' => $this->View,
+            'public' => $this->Public,
+            'location' => $this->Location,
+            'level' => $this->Level,
+            'parent' => $this->Parent,
+            'label' => $this->Label,
+            'icon' => $this->Icon,
+        ]);
+
+        return $this;
+    }
+
+    /**
+     * Call an action
+     */
+    private function call(): mixed
+    {
+        // Check if the action was already called
+        if(!empty($this->Call)){
+
+            // Check if the action is set
+            if($this->Action){
+
+                // Convert the action to an array
+                $parts = explode('/', strtolower($this->Action));
+                $controller = $parts[0] ?? null;
+                $action = $parts[1] ?? null;
+
+                // Check if the controller and action are set
+                if(!is_null($controller) && !is_null($action)){
+
+                    // Set the controller and action names
+                    $controllerName = ucfirst($controller) . 'Controller';
+                    $actionName = $action . 'Action';
+
+                    // Check if the controller file exists
+                    $path = $this->Config->root() . DIRECTORY_SEPARATOR . 'Controller' . DIRECTORY_SEPARATOR . $controllerName . '.php';
+                    if(!is_file($path)){
+                        $path = $this->Config->root() . DIRECTORY_SEPARATOR . 'lib' . DIRECTORY_SEPARATOR . $controller . DIRECTORY_SEPARATOR . 'Controller.php';
+                    }
+
+                    // Check if the controller file exists
+                    if(is_file($path)){
+
+                        // Load the controller
+                        require_once $path;
+
+                        // Check if the class exists
+                        if(class_exists($controllerName)){
+
+                            // Initialize the class
+                            $class = new $controllerName();
+
+                            // Check if the method exists
+                            if(method_exists($class, $actionName)){
+
+                                // Call the method
+                                $this->Call = $class->$actionName();
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        return $this->Call;
+    }
+
+    /**
+     * Render the route
+     */
+    public function render(): self
+    {
+        // Load the template
+        if($this->Template){
+            require_once $this->Config->root() . DIRECTORY_SEPARATOR . $this->Template;
+        }
+
+        // Load the view
+        if($this->View){
+            require_once $this->Config->root() . DIRECTORY_SEPARATOR . $this->View;
+        }
+
+        return $this;
+    }
+}

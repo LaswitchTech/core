@@ -1,0 +1,18 @@
+AddType application/javascript .mjs
+
+<IfModule mod_headers.c>
+  RequestHeader unset Proxy
+</IfModule>
+
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteRule .* - [E=MOD_REWRITE:1]
+  RewriteBase /
+  # Ignore existing files
+  RewriteCond %{REQUEST_FILENAME} !-d
+  RewriteCond %{REQUEST_FILENAME} !-f
+# Rewrite all other URLs to index.php/URL
+  RewriteRule ^(.+)$ index.php [QSA,L]
+  RewriteRule ^cli - [F,L]
+  RewriteRule ^.htaccess - [F,L]
+</IfModule>

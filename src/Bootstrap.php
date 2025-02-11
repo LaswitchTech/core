@@ -12,79 +12,18 @@ namespace LaswitchTech\Core;
 
 // Import additionnal class into the global namespace
 use LaswitchTech\Core\Config;
-use LaswitchTech\Core\Strap;
+use LaswitchTech\Core\Module;
 use Exception;
 
 class Bootstrap {
 
+    // Constant
     const Default = [
-        "REQUEST" => [
-            "class" => "\\LaswitchTech\\Core\\Request",
+        // Utilities
+        "UUID" => [
+            "class" => "\\LaswitchTech\\Core\\UUID",
             "scope" => [
-                "Router",
-                "API",
-                "CLI"
-            ]
-        ],
-        "OUTPUT" => [
-            "class" => "\\LaswitchTech\\Core\\Output",
-            "scope" => [
-                "Router",
-                "API",
-                "CLI"
-            ]
-        ],
-        "LOG" => [
-            "class" => "\\LaswitchTech\\Core\\Log",
-            "scope" => [
-                "Router",
-                "API",
-                "CLI"
-            ]
-        ],
-        "CSRF" => [
-            "class" => "\\LaswitchTech\\Core\\CSRF",
-            "scope" => [
-                "Router",
-                "API"
-            ]
-        ],
-        "NET" => [
-            "class" => "\\LaswitchTech\\Core\\Net",
-            "scope" => [
-                "Router",
-                "API",
-                "CLI"
-            ]
-        ],
-        "HELPER" => [
-            "class" => "\\LaswitchTech\\Core\\Helpers",
-            "scope" => [
-                "Router",
-                "API",
-                "CLI"
-            ]
-        ],
-        "DATABASE" => [
-            "class" => "\\LaswitchTech\\Core\\Database",
-            "scope" => [
-                "Router",
-                "API",
-                "CLI"
-            ]
-        ],
-        "MODEL" => [
-            "class" => "\\LaswitchTech\\Core\\Models",
-            "scope" => [
-                "Router",
-                "API",
-                "CLI"
-            ]
-        ],
-        "LOCALE" => [
-            "class" => "\\LaswitchTech\\Core\\Locale",
-            "scope" => [
-                "Router",
+                "ROUTER",
                 "API",
                 "CLI"
             ]
@@ -93,18 +32,88 @@ class Bootstrap {
             "class" => "\\LaswitchTech\\Core\\Encryption",
             "scope" => []
         ],
-        "SLS" => [
-            "class" => "\\LaswitchTech\\Core\\SLS",
+        // Input/Output
+        "REQUEST" => [
+            "class" => "\\LaswitchTech\\Core\\Request",
             "scope" => [
-                "Router",
+                "ROUTER",
                 "API",
                 "CLI"
             ]
         ],
+        "OUTPUT" => [
+            "class" => "\\LaswitchTech\\Core\\Output",
+            "scope" => [
+                "ROUTER",
+                "API",
+                "CLI"
+            ]
+        ],
+        // Logging
+        "LOG" => [
+            "class" => "\\LaswitchTech\\Core\\Log",
+            "scope" => [
+                "ROUTER",
+                "API",
+                "CLI"
+            ]
+        ],
+        // Locale
+        "LOCALE" => [
+            "class" => "\\LaswitchTech\\Core\\Locales",
+            "scope" => [
+                "ROUTER",
+                "API",
+                "CLI"
+            ]
+        ],
+        // Network and Security
+        "CSRF" => [
+            "class" => "\\LaswitchTech\\Core\\CSRF",
+            "scope" => [
+                "ROUTER",
+                "API"
+            ]
+        ],
+        "NET" => [
+            "class" => "\\LaswitchTech\\Core\\Net",
+            "scope" => [
+                "ROUTER",
+                "API",
+                "CLI"
+            ]
+        ],
+        // Helpers
+        "HELPER" => [
+            "class" => "\\LaswitchTech\\Core\\Helpers",
+            "scope" => [
+                "ROUTER",
+                "API",
+                "CLI"
+            ]
+        ],
+        // Database
+        "DATABASE" => [
+            "class" => "\\LaswitchTech\\Core\\Database",
+            "scope" => [
+                "ROUTER",
+                "API",
+                "CLI"
+            ]
+        ],
+        "MODEL" => [
+            "class" => "\\LaswitchTech\\Core\\Models",
+            "scope" => [
+                "ROUTER",
+                "API",
+                "CLI"
+            ]
+        ],
+        // Communications
         "SMS" => [
             "class" => "\\LaswitchTech\\Core\\SMS",
             "scope" => [
-                "Router",
+                "ROUTER",
                 "API",
                 "CLI"
             ]
@@ -112,7 +121,7 @@ class Bootstrap {
         "SMTP" => [
             "class" => "\\LaswitchTech\\Core\\SMTP",
             "scope" => [
-                "Router",
+                "ROUTER",
                 "API",
                 "CLI"
             ]
@@ -120,15 +129,39 @@ class Bootstrap {
         "IMAP" => [
             "class" => "\\LaswitchTech\\Core\\IMAP",
             "scope" => [
-                "Router",
+                "ROUTER",
                 "API",
                 "CLI"
             ]
         ],
+        // Licensing
+        "SLS" => [
+            "class" => "\\LaswitchTech\\Core\\SLS",
+            "scope" => [
+                "ROUTER",
+                "API",
+                "CLI"
+            ]
+        ],
+        // Styles and Scripts
+        "STYLE" => [
+            "class" => "\\LaswitchTech\\Core\\Style",
+            "scope" => [
+                "ROUTER"
+            ]
+        ],
+        // Styles and Scripts
+        "BUILDER" => [
+            "class" => "\\LaswitchTech\\Core\\Builder",
+            "scope" => [
+                "ROUTER"
+            ]
+        ],
+        // Installation and Update
         "INSTALLER" => [
             "class" => "\\LaswitchTech\\Core\\Installer",
             "scope" => [
-                "Router",
+                "ROUTER",
                 "API",
                 "CLI"
             ]
@@ -136,22 +169,24 @@ class Bootstrap {
         "UPDATER" => [
             "class" => "\\LaswitchTech\\Core\\Updater",
             "scope" => [
-                "Router",
+                "ROUTER",
                 "API",
                 "CLI"
             ]
         ],
+        // Authentication
         "AUTH" => [
             "class" => "\\LaswitchTech\\Core\\Auth",
             "scope" => [
-                "Router",
+                "ROUTER",
                 "API"
             ]
         ],
+        // Routing
         "ROUTER" => [
             "class" => "\\LaswitchTech\\Core\\Router",
             "scope" => [
-                "Router"
+                "ROUTER"
             ]
         ],
         "API" => [
@@ -168,11 +203,17 @@ class Bootstrap {
         ]
     ];
 
+    // Global Properties
+    private $Config;
+
+    // Properties
+    private $scope;
+
     /**
      * Constructor.
      */
-    public function __construct(string $scope){
-
+    public function __construct(string $scope)
+    {
         // Start the session
         if (!defined('STDIN') && session_status() === PHP_SESSION_NONE) {
             ini_set('session.cookie_samesite', 'Strict');
@@ -185,9 +226,27 @@ class Bootstrap {
 
         // Initialize Config
         $CONFIG = new Config('bootstrap');
+        $this->Config = $CONFIG;
 
+        // Set the scope
+        $this->scope = strtoupper($scope);
+
+        // Load the Bootstrap
+        $this->load();
+
+        // Start the Bootstrap
+        $this->start();
+    }
+
+    /**
+     * Load the Bootstrap.
+     *
+     * @return self
+     */
+    private function load(): self
+    {
         // Retrieve the straps
-        $straps = $CONFIG->get('bootstrap');
+        $straps = $this->Config->get('bootstrap');
 
         // Loop through the straps
         foreach(self::Default as $strap => $config){
@@ -208,7 +267,10 @@ class Bootstrap {
             }
 
             // Check if strap is not the scope
-            if(!in_array($scope,$config['scope'])) continue;
+            if(!in_array($this->scope,$config['scope'])) continue;
+
+            // Check if the strap is already initialized
+            if(isset($GLOBALS[$strap]) || isset(${$strap})) continue;
 
             // Initialize the Global Variable
             global ${$strap};
@@ -224,8 +286,28 @@ class Bootstrap {
             } else {
 
                 // Set default to null
-                ${$strap} = new Strap();
+                ${$strap} = new Module();
             }
         }
+
+        return $this;
+    }
+
+    /**
+     * Start the Bootstrap.
+     *
+     * @return self
+     */
+    private function start(): self
+    {
+        // Initialize the scope
+        global ${$this->scope};
+        if(!in_array(get_class(${$this->scope}),["Module","LaswitchTech\Core\Module"])){
+            if(method_exists(${$this->scope},'start')){
+                ${$this->scope}->start();
+            }
+        }
+
+        return $this;
     }
 }

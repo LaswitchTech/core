@@ -15,7 +15,8 @@ use Exception;
 
 class CSRF {
 
-    const FIELD = 'csrf';
+    // Constants
+    const FIELD = '%UUID%';
     const LENGTH = 32;
     const ROTATION = true;
 
@@ -23,6 +24,7 @@ class CSRF {
     protected $Request;
     protected $Output;
 	protected $Config;
+    protected $UUID;
 
     // Properties
     protected $Token = null;
@@ -31,20 +33,19 @@ class CSRF {
     protected $Rotate = self::ROTATION;
 
     /**
-     * Create a new CSRF instance.
-     *
-     * @param  string|null  $field
-     * @return void
+     * Constructor
      */
-    public function __construct(){
+    public function __construct()
+    {
 
         // Import Global Variables
-        global $REQUEST, $OUTPUT, $CONFIG;
+        global $REQUEST, $OUTPUT, $CONFIG, $UUID;
 
         // Initialize Properties
         $this->Request = $REQUEST;
         $this->Output = $OUTPUT;
         $this->Config = $CONFIG;
+        $this->UUID = $UUID;
 
         // Add the csrf config file
         $this->Config->add('csrf');
@@ -53,6 +54,9 @@ class CSRF {
         $this->Field = $this->Config->get('csrf', 'field') ?? $this->Field;
         $this->Length = $this->Config->get('csrf', 'length') ?? $this->Length;
         $this->Rotate = $this->Config->get('csrf', 'rotate') ?? $this->Rotate;
+
+        // Parse the field
+        $this->Field = $this->parse($this->Field);
 
         // Check if the method used should be validated
         if(!defined('STDIN') && in_array($this->Request->getMethod(), ['POST', 'PUT', 'PATCH', 'DELETE'])){
@@ -66,13 +70,24 @@ class CSRF {
     }
 
     /**
+     * Parse a string
+     */
+    protected function parse(string $string): string
+    {
+        $string = str_replace('%SESSION%', session_id(), $string);
+        $string = str_replace('%UUID%', $this->UUID->toString("csrf-" . session_id()), $string);
+        return $string;
+    }
+
+    /**
      * Generate token.
      * @return $this
      */
-    protected function generate(){
+    protected function generate()
+    {
 
         // Retrieve the existing Token
-        $token = $this->Request->getParams('SESSION', $this->Field) ?? bin2hex(random_bytes((int) ($this->Length / 2)));
+        $token = $this->Request->getParams('SESSION', $this->Field) ?? $this->UUID->toString();
 
         // Store the token
         $this->Token = $token;
@@ -86,7 +101,8 @@ class CSRF {
      * Clear token.
      * @return $this
      */
-    protected function clear(){
+    protected function clear()
+    {
 
         // Check if rotate is enabled
         if($this->Rotate){
@@ -104,8 +120,18 @@ class CSRF {
      * Get token.
      * @return string $this->Token
      */
-    public function token(){
+    public function token()
+    {
         return $this->generate()->Token;
+    }
+
+    /**
+     * Get key.
+     * @return string $this->Field
+     */
+    public function key()
+    {
+        return $this->Field;
     }
 
     /**
@@ -125,7 +151,8 @@ class CSRF {
     /**
      * Generate a hidden input field.
      */
-    public function field(){
+    public function field()
+    {
         return '<input type="hidden" name="' . $this->Field . '" value="' . $this->token() . '">';
     }
 }

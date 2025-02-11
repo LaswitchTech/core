@@ -15,9 +15,9 @@ composer.phar
 *.log
 
 # Exclude Files
-cli
-index.php
-api.php
+# cli
+# index.php
+# api.php
 
 # Exclude Locales Configurations and Translations
 !Locale/*/*.cfg
@@ -25,11 +25,11 @@ api.php
 # Unique Directories
 /tmp/
 /data/
-/lib/
+# /lib/
 
 # Apache
-.htaccess
-/webroot/
+# .htaccess
+# /webroot/
 
 # Backups
 /backup/
