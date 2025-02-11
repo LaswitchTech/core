@@ -106,7 +106,9 @@ class Auth {
      * @return bool
      */
     public function isAuthorized(string $permission, int $level): bool
-    {}
+    {
+        return $level <= 0;
+    }
 
     /**
      * Get the authentication method
