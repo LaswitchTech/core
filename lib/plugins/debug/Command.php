@@ -15,14 +15,16 @@ class DebugCommand extends Command {
     /**
      * Constructor
      */
-    public function __construct(){
+    public function __construct()
+    {
         parent::__construct();
     }
 
     /**
      * Execute the command
      */
-    public function executeAction(){
+    public function executeAction()
+    {
         $this->Output->print("Debugging...");
     }
 }
