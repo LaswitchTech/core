@@ -6,6 +6,3 @@ require_once __DIR__ . "/vendor/autoload.php";
 
 // Initiate Bootstrap
 $BOOTSTRAP = new LaswitchTech\Core\Bootstrap("CLI");
-
-// Import the debugger
-require_once 'webroot/debug.php';
