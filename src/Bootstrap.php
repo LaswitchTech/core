@@ -19,6 +19,7 @@ class Bootstrap {
 
     // Constant
     const Default = [
+        // Utilities
         "UUID" => [
             "class" => "\\LaswitchTech\\Core\\UUID",
             "scope" => [
@@ -27,6 +28,11 @@ class Bootstrap {
                 "CLI"
             ]
         ],
+        "ENCRYPTION" => [
+            "class" => "\\LaswitchTech\\Core\\Encryption",
+            "scope" => []
+        ],
+        // Input/Output
         "REQUEST" => [
             "class" => "\\LaswitchTech\\Core\\Request",
             "scope" => [
@@ -43,6 +49,7 @@ class Bootstrap {
                 "CLI"
             ]
         ],
+        // Logging
         "LOG" => [
             "class" => "\\LaswitchTech\\Core\\Log",
             "scope" => [
@@ -51,6 +58,16 @@ class Bootstrap {
                 "CLI"
             ]
         ],
+        // Locale
+        "LOCALE" => [
+            "class" => "\\LaswitchTech\\Core\\Locales",
+            "scope" => [
+                "ROUTER",
+                "API",
+                "CLI"
+            ]
+        ],
+        // Network and Security
         "CSRF" => [
             "class" => "\\LaswitchTech\\Core\\CSRF",
             "scope" => [
@@ -66,6 +83,7 @@ class Bootstrap {
                 "CLI"
             ]
         ],
+        // Helpers
         "HELPER" => [
             "class" => "\\LaswitchTech\\Core\\Helpers",
             "scope" => [
@@ -74,6 +92,7 @@ class Bootstrap {
                 "CLI"
             ]
         ],
+        // Database
         "DATABASE" => [
             "class" => "\\LaswitchTech\\Core\\Database",
             "scope" => [
@@ -90,26 +109,7 @@ class Bootstrap {
                 "CLI"
             ]
         ],
-        "LOCALE" => [
-            "class" => "\\LaswitchTech\\Core\\Locale",
-            "scope" => [
-                "ROUTER",
-                "API",
-                "CLI"
-            ]
-        ],
-        "ENCRYPTION" => [
-            "class" => "\\LaswitchTech\\Core\\Encryption",
-            "scope" => []
-        ],
-        "SLS" => [
-            "class" => "\\LaswitchTech\\Core\\SLS",
-            "scope" => [
-                "ROUTER",
-                "API",
-                "CLI"
-            ]
-        ],
+        // Communications
         "SMS" => [
             "class" => "\\LaswitchTech\\Core\\SMS",
             "scope" => [
@@ -134,6 +134,30 @@ class Bootstrap {
                 "CLI"
             ]
         ],
+        // Licensing
+        "SLS" => [
+            "class" => "\\LaswitchTech\\Core\\SLS",
+            "scope" => [
+                "ROUTER",
+                "API",
+                "CLI"
+            ]
+        ],
+        // Styles and Scripts
+        "STYLE" => [
+            "class" => "\\LaswitchTech\\Core\\Style",
+            "scope" => [
+                "ROUTER"
+            ]
+        ],
+        // Styles and Scripts
+        "BUILDER" => [
+            "class" => "\\LaswitchTech\\Core\\Builder",
+            "scope" => [
+                "ROUTER"
+            ]
+        ],
+        // Installation and Update
         "INSTALLER" => [
             "class" => "\\LaswitchTech\\Core\\Installer",
             "scope" => [
@@ -150,6 +174,7 @@ class Bootstrap {
                 "CLI"
             ]
         ],
+        // Authentication
         "AUTH" => [
             "class" => "\\LaswitchTech\\Core\\Auth",
             "scope" => [
@@ -157,6 +182,7 @@ class Bootstrap {
                 "API"
             ]
         ],
+        // Routing
         "ROUTER" => [
             "class" => "\\LaswitchTech\\Core\\Router",
             "scope" => [
