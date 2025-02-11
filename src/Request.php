@@ -96,7 +96,7 @@ class Request {
                 $namespace .= "/{$Segment}";
             }
         };
-        return $namespace;
+        return empty($namespace) ? '/' : $namespace;
     }
 
     /**
