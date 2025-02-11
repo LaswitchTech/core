@@ -89,7 +89,7 @@ class API {
                         $permission = "Endpoint>" . $namespace;
 
                         // Check if Auth is available and if the endpoint is public
-                        if(get_class($this->Auth) !== "Module" && !$public){
+                        if(!in_array(get_class($this->Auth),["Module","LaswitchTech\Core\Module"]) && !$public){
 
                             // Check if the user is loaded
                             if(!$this->Auth->isLoaded()){
