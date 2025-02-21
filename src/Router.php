@@ -172,7 +172,7 @@ class Router {
                     }
 
                     // Check if the user has the required permission
-                    if(!$this->Auth->isAuthorized('Route>' . $this->Routes[$route]->namespace(), $this->Routes[$route]->level())){
+                    if(!$this->Auth->isAuthorized('Route>' . $this->Routes[$route]->namespace(), intval($this->Routes[$route]->level()))){
 
                         // Send Forbidden
                         $this->Route = $this->Routes['403'];
