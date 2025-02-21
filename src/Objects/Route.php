@@ -414,12 +414,12 @@ class Route {
     {
         // Load the template
         if($this->Template){
-            require_once $this->Config->root() . DIRECTORY_SEPARATOR . $this->Template;
+            require_once $this->Config->root() . DIRECTORY_SEPARATOR . "Template" . DIRECTORY_SEPARATOR . "View" . DIRECTORY_SEPARATOR . $this->Template;
         }
 
         // Load the view
         if($this->View){
-            require_once $this->Config->root() . DIRECTORY_SEPARATOR . $this->View;
+            require_once $this->Config->root() . DIRECTORY_SEPARATOR . "View" . DIRECTORY_SEPARATOR . $this->View;
         }
 
         return $this;
