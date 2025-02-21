@@ -151,13 +151,13 @@ class Route {
             }
 
             // Create the file if it does not exist
-            if(!is_file($this->Config->root() . DIRECTORY_SEPARATOR . $template)){
+            if(!is_file($path)){
                 $content = "<!--" . PHP_EOL;
-                $content .= "  Core Framework - View File" . PHP_EOL . PHP_EOL;
+                $content .= "  Core Framework - Template File" . PHP_EOL . PHP_EOL;
                 $content .= "  @license    MIT (https://mit-license.org/)" . PHP_EOL;
                 $content .= "  @author     Full Name <user@domain.com>" . PHP_EOL;
                 $content .= "-->" . PHP_EOL;
-                file_put_contents($this->Config->root() . DIRECTORY_SEPARATOR . $template, $content);
+                file_put_contents($path, $content);
             }
             $this->Template = $template;
         }
