@@ -127,7 +127,7 @@ class API {
                             }
 
                             // Check if the user has the required permission
-                            if(!$this->Auth->isAuthorized($permission, $level)){
+                            if(!$this->Auth->isAuthorized($permission, intval($level))){
 
                                 // Send Forbidden
                                 $this->Output->print('Forbidden', array('HTTP/1.1 403 Forbidden'));
