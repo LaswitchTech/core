@@ -159,5 +159,75 @@ class CoreCommand extends Command {
             // Create symbolic link
             symlink($icon, $favicon);
         }
+
+        // Path to directory
+        $css = $webroot . DIRECTORY_SEPARATOR . "css";
+        $dist = $CONFIG->root() . DIRECTORY_SEPARATOR . "dist" . DIRECTORY_SEPARATOR . "css";
+
+        // Check if directory exists
+        if(!is_dir($css) && !is_file($css) && !is_link($css)) {
+
+            // Output
+            $this->Output->print("Creating {$css} directory...");
+
+            // Create symbolic link
+            symlink($dist, $css);
+        }
+
+        // Path to directory
+        $js = $webroot . DIRECTORY_SEPARATOR . "js";
+        $dist = $CONFIG->root() . DIRECTORY_SEPARATOR . "dist" . DIRECTORY_SEPARATOR . "js";
+
+        // Check if directory exists
+        if(!is_dir($js) && !is_file($js) && !is_link($js)) {
+
+            // Output
+            $this->Output->print("Creating {$js} directory...");
+
+            // Create symbolic link
+            symlink($dist, $js);
+        }
+
+        // Path to directory
+        $img = $webroot . DIRECTORY_SEPARATOR . "img";
+        $dist = $CONFIG->root() . DIRECTORY_SEPARATOR . "dist" . DIRECTORY_SEPARATOR . "img";
+
+        // Check if directory exists
+        if(!is_dir($img) && !is_file($img) && !is_link($img)) {
+
+            // Output
+            $this->Output->print("Creating {$img} directory...");
+
+            // Create symbolic link
+            symlink($dist, $img);
+        }
+
+        // Path to directory
+        $plugins = $webroot . DIRECTORY_SEPARATOR . "plugins";
+        $dist = $CONFIG->root() . DIRECTORY_SEPARATOR . "lib" . DIRECTORY_SEPARATOR . "plugins";
+
+        // Check if directory exists
+        if(!is_dir($plugins) && !is_file($plugins) && !is_link($plugins)) {
+
+            // Output
+            $this->Output->print("Creating {$plugins} directory...");
+
+            // Create symbolic link
+            symlink($dist, $plugins);
+        }
+
+        // Path to directory
+        $themes = $webroot . DIRECTORY_SEPARATOR . "themes";
+        $dist = $CONFIG->root() . DIRECTORY_SEPARATOR . "lib" . DIRECTORY_SEPARATOR . "themes";
+
+        // Check if directory exists
+        if(!is_dir($themes) && !is_file($themes) && !is_link($themes)) {
+
+            // Output
+            $this->Output->print("Creating {$themes} directory...");
+
+            // Create symbolic link
+            symlink($dist, $themes);
+        }
     }
 }
