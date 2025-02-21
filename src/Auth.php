@@ -56,26 +56,36 @@ class Auth {
         // Check Bearer Token
         if ($this->authenticateBearer()) {
             $this->method = 'bearer';
+            $this->status = true;
+            return $this->status;
         }
 
         // Check Basic Authentication
         if ($this->authenticateBasic()) {
             $this->method = 'basic';
+            $this->status = true;
+            return $this->status;
         }
 
         // Check Session Authentication
         if ($this->authenticateSession()) {
             $this->method = 'session';
+            $this->status = true;
+            return $this->status;
         }
 
         // Check Cookie Authentication
         if ($this->authenticateCookie()) {
             $this->method = 'cookie';
+            $this->status = true;
+            return $this->status;
         }
 
         // Check Request Authentication
         if ($this->authenticateRequest()) {
             $this->method = 'request';
+            $this->status = true;
+            return $this->status;
         }
 
         if($this->method){
