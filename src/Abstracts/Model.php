@@ -16,7 +16,7 @@ use Exception;
 abstract class Model {
 
     // Properties
-    protected $Database;
+    private $Database;
 
     /**
      * Constructor
