@@ -72,7 +72,7 @@ class Helpers {
                     // Check if the plugin includes a Helper
                     if(is_file($path)){
 
-                        // Include the Model
+                        // Include the Helper
                         require_once $path;
 
                         // Get the Helper Base Name and Class Name
