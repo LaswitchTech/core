@@ -61,7 +61,7 @@ class Models {
         if(is_dir($this->Path)){
 
             // Loop through all the files in the directory
-            foreach(scandir($this->Path) as $plugin){
+            foreach(array_diff(scandir($this->Path), array('..', '.')) as $plugin){
 
                 // Check if a Model already exist
                 if(!isset($this->Models[ucfirst($plugin)])){
