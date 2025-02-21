@@ -161,7 +161,7 @@ class Auth {
 
             // Check if the token is valid
             if (!empty($result)) {
-                return $this->authenticate($result[0]['user']);
+                return $this->authenticate(intval($result[0]['user']));
             }
         }
 
