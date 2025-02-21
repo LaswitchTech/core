@@ -146,6 +146,17 @@ class User {
     }
 
     /**
+     * Magic Method to catch all undefined properties
+     *
+     * @param string $key
+     * @return mixed
+     */
+    public function __get(string $key): mixed
+    {
+        return $this->user[$key] ?? null;
+    }
+
+    /**
      * Retrieve the User ID
      *
      * @return int
