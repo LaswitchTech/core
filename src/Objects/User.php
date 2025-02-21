@@ -167,6 +167,16 @@ class User {
     }
 
     /**
+     * Retrieve the User Username
+     *
+     * @return string
+     */
+    public function username(): string
+    {
+        return $this->user['username'];
+    }
+
+    /**
      * Check if the User is Verified
      *
      * @return bool
