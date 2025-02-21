@@ -114,7 +114,10 @@
                     $(this).parent().hide();
                 });
                 $.ajax({
-                    url: 'api.php/debug/execute',
+                    url: '/endpoint.php/debug/execute',
+                    headers: {
+                        'Authorization': 'Bearer DD90005D-830E-47A3-8B48-4781FCB40A9D'
+                    },
                     type: 'GET',
                     dataType: 'json',
                     success: function(response) {
