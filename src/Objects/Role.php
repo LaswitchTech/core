@@ -21,10 +21,10 @@ class Role {
     // Properties
     private $name;
     private $description;
-    private $organizations;
-    private $users;
-    private $groups;
-    private $permissions;
+    private $organizations = [];
+    private $users = [];
+    private $groups = [];
+    private $permissions = [];
     private $default; // Applies to all users
 
     /**
