@@ -77,7 +77,7 @@ class Router {
         // Load Error Routes
         foreach(self::HttpCodes as $Code){
             $Code = strval($Code);
-            $this->Routes[$Code] = $this->route($Code, ['label' => self::HttpLabels[$Code], 'view' => $Code]);
+            $this->Routes[$Code] = $this->route($Code, ['label' => self::HttpLabels[$Code], 'view' => $Code . '.php']);
         }
 
         // Load Routes
