@@ -63,37 +63,8 @@ class Router {
         // Configure Globals
         $this->Config->add('routes');
 
-        // Check if the server requirements are met
-        $this->checkRequirements();
-
         // Load Routes
         $this->load();
-    }
-
-    /**
-     * Check if the required apache modules are installed
-     *
-     * @return self
-     */
-    private function checkRequirements(): self
-    {
-        // Check Server Type
-        if(strpos(strtoupper($this->Request->getParams('SERVER','SERVER_SOFTWARE')), 'APACHE') === false){
-            $this->Output->print(
-                "This application requires an Apache server.",
-                array('HTTP/1.1 500 Internal Error'),
-            );
-        }
-
-        // Check Apache if Mod Rewrite is enabled
-        if(is_null($this->Request->getParams('SERVER','REDIRECT_MOD_REWRITE')) && is_null($this->Request->getParams('SERVER','MOD_REWRITE'))){
-            $this->Output->print(
-                "This application requires the Apache mod_rewrite module.",
-                array('HTTP/1.1 500 Internal Error'),
-            );
-        }
-
-        return $this;
     }
 
     /**
