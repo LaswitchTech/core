@@ -16,8 +16,8 @@ use Exception;
 class Models {
 
     // Properties
-    protected $Path = null;
-    protected array $Models = []; // store them here
+    private $Path = null;
+    private array $Models = []; // store them here
 
     public function __construct() {
 
