@@ -351,7 +351,7 @@ class Auth {
      * @param string|int|null $user
      * @return Objects\User
      */
-    public function user(string|int|null $user = null): Objects\User
+    public function user(string|int|null $user = null): ?Objects\User
     {
         return is_null($user) ? $this->user : new Objects\User($user);
     }
