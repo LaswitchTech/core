@@ -47,8 +47,6 @@ class CoreCommand extends Command {
             $content .= "</IfModule>" . PHP_EOL . PHP_EOL;
             $content .= "<IfModule mod_rewrite.c>" . PHP_EOL;
             $content .= "    RewriteEngine on" . PHP_EOL;
-            $content .= "    RewriteRule .* - [E=MOD_REWRITE:1]" . PHP_EOL;
-            $content .= "    RewriteRule ^ - [E=HAS_MOD_REWRITE:true]" . PHP_EOL;
             $content .= "    RewriteRule ^(\.well-known/.*)$ $1 [L]" . PHP_EOL;
             $content .= "    RewriteRule ^$ webroot/ [L]" . PHP_EOL;
             $content .= "    RewriteRule (.*) webroot/$1 [L]" . PHP_EOL;
@@ -81,20 +79,27 @@ class CoreCommand extends Command {
             $this->Output->print("Creating {$htaccess} file...");
 
             // Create content
+            $content = "Options +FollowSymLinks" . PHP_EOL . PHP_EOL;
             $content = "AddType application/javascript .mjs" . PHP_EOL . PHP_EOL;
             $content .= "<IfModule mod_headers.c>" . PHP_EOL;
             $content .= "    RequestHeader unset Proxy" . PHP_EOL;
             $content .= "</IfModule>" . PHP_EOL . PHP_EOL;
             $content .= "<IfModule mod_rewrite.c>" . PHP_EOL;
             $content .= "    RewriteEngine on" . PHP_EOL;
-            $content .= "    RewriteRule .* - [E=MOD_REWRITE:1]" . PHP_EOL;
-            $content .= "    RewriteBase /" . PHP_EOL;
-            $content .= "    RewriteCond %{REQUEST_FILENAME} !-d" . PHP_EOL;
-            $content .= "    RewriteCond %{REQUEST_FILENAME} !-f" . PHP_EOL;
-            $content .= "    RewriteRule ^ - [E=HAS_MOD_REWRITE:true]" . PHP_EOL;
-            $content .= "    RewriteRule ^(.+)$ index.php [QSA,L]" . PHP_EOL;
-            $content .= "    RewriteRule ^cli - [F,L]" . PHP_EOL;
-            $content .= "    RewriteRule ^.htaccess - [F,L]" . PHP_EOL;
+            $content .= "    RewriteBase /" . PHP_EOL . PHP_EOL;
+            $content .= "    # Forbid any direct .php file access in plugins or themes" . PHP_EOL;
+            $content .= "    RewriteRule ^(plugins|themes)/.*\.php$ - [F,L]" . PHP_EOL . PHP_EOL;
+            $content .= "    # Forbid direct access to certain files" . PHP_EOL;
+            $content .= "    RewriteRule ^(cli|\.htaccess)$ - [F,L]" . PHP_EOL . PHP_EOL;
+            $content .= "    # Serve existing files, directories, or symlinks directly" . PHP_EOL;
+            $content .= "    RewriteCond %{REQUEST_FILENAME} -f [OR]" . PHP_EOL;
+            $content .= "    RewriteCond %{REQUEST_FILENAME} -d [OR]" . PHP_EOL;
+            $content .= "    RewriteCond %{REQUEST_FILENAME} -l" . PHP_EOL;
+            $content .= "    RewriteRule ^.*$ - [L]" . PHP_EOL . PHP_EOL;
+            $content .= "    # Route endpoint.php/anything to endpoint.php" . PHP_EOL;
+            $content .= "    RewriteRule ^endpoint\.php(.*)$ endpoint.php [QSA,L]" . PHP_EOL . PHP_EOL;
+            $content .= "    # Everything else goes to index.php" . PHP_EOL;
+            $content .= "    RewriteRule ^.*$ index.php [QSA,L]" . PHP_EOL;
             $content .= "</IfModule>";
 
             // Create file
