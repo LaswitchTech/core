@@ -127,13 +127,13 @@ class CoreCommand extends Command {
         }
 
         // Path to file
-        $api = $webroot . DIRECTORY_SEPARATOR . "api.php";
+        $endpoint = $webroot . DIRECTORY_SEPARATOR . "endpoint.php";
 
         // Check if file exists
         if(!is_dir($endpoint) && !is_file($endpoint) && !is_link($endpoint)) {
 
             // Output
-            $this->Output->print("Creating {$api} file...");
+            $this->Output->print("Creating {$endpoint} file...");
 
             // Create content
             $content = '<?php' . PHP_EOL;
@@ -143,7 +143,7 @@ class CoreCommand extends Command {
             $content .= '$BOOTSTRAP = new LaswitchTech\Core\Bootstrap("API");' . PHP_EOL;
 
             // Create file
-            file_put_contents($api, $content);
+            file_put_contents($endpoint, $content);
         }
 
         // Path to file
