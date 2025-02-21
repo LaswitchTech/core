@@ -216,6 +216,70 @@ class User {
         return new Objects\Session($this);
     }
 
+    /**
+     * Retrieve the User's Groups
+     *
+     * @return array
+     */
+    public function groups(): array
+    {
+        return array_keys($this->groups);
+    }
+
+    /**
+     * Retrieve a Group
+     *
+     * @param string $name
+     * @return Objects\Group
+     */
+    public function group(string $name): ?Objects\Group
+    {
+        return $this->groups[$name] ?? null;
+    }
+
+    /**
+     * Retrieve the User's Roles
+     *
+     * @return array
+     */
+    public function roles(): array
+    {
+        return array_keys($this->roles);
+    }
+
+    /**
+     * Retrieve a Role
+     *
+     * @param string $name
+     * @return Objects\Role
+     */
+    public function role(string $name): ?Objects\Role
+    {
+        return $this->roles[$name] ?? null;
+    }
+
+    /**
+     * Retrieve the User's VCard
+     */
+    public function vcard(): array
+    {
+        return $this->user['vcard'];
+    }
+
+    /**
+     * Retrieve the User's Associates
+     */
+    public function associates(): array
+    {
+        $users = [];
+        foreach($this->roles as $key => $role){
+            foreach($role->members('users') as $member){
+                $users[$member['id']] = $member;
+            }
+        }
+        return $users;
+    }
+
     // /**
     //  * Create a new Organization object
     //  *
