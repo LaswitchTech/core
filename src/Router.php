@@ -17,13 +17,14 @@ use Exception;
 class Router {
 
     // Constants
-    const HttpCodes = [400,401,403,404,422,423,427,428,429,430,432,500,501];
+    const HttpCodes = [400,401,403,404,405,422,423,427,428,429,430,432,500,501];
     const HttpCustomCodes = [427,430,432];
     const HttpLabels = [
         "400" => "Bad Request", // 400 Error Document // Bad Request
         "401" => "Unauthorized", // 401 Error Document // Unauthorized
         "403" => "Forbidden", // 403 Error Document // Forbidden
         "404" => "Not Found", // 404 Error Document // Not Found
+        "405" => "Method Not Allowed", // 405 Error Document // Method Not Allowed
         "422" => "Unprocessable Content", // 422 Error Document // Unprocessable Content
         "423" => "Locked", // 423 Error Document // Locked
         "427" => "2FA Required", // 427 Error Document // 2FA Required
