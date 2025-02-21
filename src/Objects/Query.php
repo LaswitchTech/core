@@ -340,6 +340,36 @@ class Query {
     }
 
     /**
+     * Execute the query and return the result
+     *
+     * Alias for result()
+     *
+     * For a SELECT, returns an array of rows.
+     * For INSERT, UPDATE, DELETE, returns the number of affected rows.
+     *
+     * @return mixed
+     */
+    public function execute()
+    {
+        return $this->result();
+    }
+
+    /**
+     * Execute the query and return the result
+     *
+     * Alias for result()
+     *
+     * For a SELECT, returns an array of rows.
+     * For INSERT, UPDATE, DELETE, returns the number of affected rows.
+     *
+     * @return mixed
+     */
+    public function fetch()
+    {
+        return $this->result();
+    }
+
+    /**
      * Build the rows array
      *
      * @param array $results
