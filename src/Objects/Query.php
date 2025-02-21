@@ -219,7 +219,7 @@ class Query {
      * @param string $conjunction
      * @return self
      */
-    public function where(string $column, $value, string $operator = null, string $conjunction = 'AND'): self
+    public function where(string $column, $value, ?string $operator = null, string $conjunction = 'AND'): self
     {
         $operator = (in_array($operator,self::operators)) ? $operator : '=';
         $conjunction = (in_array($conjunction,self::conjunctions)) ? $conjunction : 'AND';
