@@ -3,4 +3,4 @@
 require_once dirname(__DIR__) . "/vendor/autoload.php";
 
 // Initiate Bootstrap
-$BOOTSTRAP = new LaswitchTech\Core\Bootstrap("Router");
+$BOOTSTRAP = new LaswitchTech\Core\Bootstrap("ROUTER");
