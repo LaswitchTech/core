@@ -557,7 +557,15 @@ class Query {
     {
         $clauses = [];
         foreach ($this->order as $order) {
-            $clauses[] = "`{$order['column']}` {$order['direction']}";
+            // Check if the column is a joined column
+            if(strpos($order['column'], '.') !== false){
+                $parts = explode('.', $order['column']);
+                $joint = $parts[0];
+                $column = $parts[1];
+                $clauses[] = "`j__{$joint}`.`{$column}` {$order['direction']}";
+            } else {
+                $clauses[] = "t.`{$order['column']}` {$order['direction']}";
+            }
         }
         return implode(', ', $clauses);
     }
