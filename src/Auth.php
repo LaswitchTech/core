@@ -155,7 +155,7 @@ class Auth {
             $result = $query->table('tokens')
                 ->select('user')
                 ->where('token', $token)
-                ->where('expires', '>', date('Y-m-d H:i:s'))
+                ->where('expires', date('Y-m-d H:i:s'), '>')
                 ->limit(1)
                 ->result();
 
