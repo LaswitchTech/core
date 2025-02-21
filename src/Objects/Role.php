@@ -41,28 +41,63 @@ class Role {
         // Initialize Properties
         $this->Database = $DATABASE;
 
-        // Retrieve Role
-        $query = $this->Database->query();
-        $role = $query->table('roles')
-            ->select('name, description, organizations, users, groups, permissions, isDefault')
-            ->where('name', $name)
-            ->limit(1)
-            ->result();
+        // Check if Data is provided
+        if(!empty($data)){
 
-        // Set Properties
-        $this->name = count($role) > 0 ? $role[0]['name'] : $name;
-        $this->description = count($role) > 0 ? $role[0]['description'] : null;
-        $this->organizations = count($role) > 0 ? $role[0]['organizations'] : null;
-        $this->users = count($role) > 0 ? $role[0]['users'] : null;
-        $this->groups = count($role) > 0 ? $role[0]['groups'] : null;
-        $this->permissions = count($role) > 0 ? $role[0]['permissions'] : null;
-        $this->default = count($role) > 0 ? $role[0]['isDefault'] : null;
+            // Set Properties
+            $this->name = $name;
+            $this->description = $data['description'] ?? null;
+            $this->organizations = $data['organizations'] ?? [];
+            $this->users = $data['users'] ?? [];
+            $this->groups = $data['groups'] ?? [];
+            $this->permissions = $data['permissions'] ?? [];
+            $this->default = $data['isDefault'] ?? null;
+        } else {
 
-        // Decode Members
-        $this->organizations = json_decode($this->organizations ?? '', true) ?? [];
-        $this->users = json_decode($this->users ?? '', true) ?? [];
-        $this->groups = json_decode($this->groups ?? '', true) ?? [];
-        $this->permissions = json_decode($this->permissions ?? '', true) ?? [];
+            // Retrieve Role
+            $query = $this->Database->query();
+            $role = $query->table('roles')
+                ->select('*')
+                ->where('name', $name)
+                ->limit(1)
+                ->result();
+
+            // Set Properties
+            $this->name = count($role) > 0 ? $role[0]['name'] : $name;
+            $this->description = count($role) > 0 ? $role[0]['description'] : null;
+            $this->organizations = count($role) > 0 ? ($role[0]['organizations'] ?? '[]') : '[]';
+            $this->users = count($role) > 0 ? ($role[0]['users'] ?? '[]') : '[]';
+            $this->groups = count($role) > 0 ? ($role[0]['groups'] ?? '[]') : '[]';
+            $this->permissions = count($role) > 0 ? ($role[0]['permissions'] ?? '[]') : '[]';
+            $this->default = count($role) > 0 ? $role[0]['isDefault'] : null;
+        }
+
+        // Decoding JSON
+        $this->organizations = (gettype($this->organizations) == "string") ? (json_decode($this->organizations ?? '', true) ?? []) : $this->organizations;
+        $this->users = (gettype($this->users) == "string") ? (json_decode($this->users ?? '', true) ?? []) : $this->users;
+        $this->groups = (gettype($this->groups) == "string") ? (json_decode($this->groups ?? '', true) ?? []) : $this->groups;
+        $this->permissions = (gettype($this->permissions) == "string") ? (json_decode($this->permissions ?? '', true) ?? []) : $this->permissions;
+
+        // Retrieve Members
+        foreach(['organizations', 'groups', 'users'] as $type){
+            foreach($this->{$type} as $key => $id){
+                $query = $this->Database->query();
+                $member = $query->table($type)
+                    ->select('*')
+                    ->where('id', $id)
+                    ->limit(1)
+                    ->index('id')
+                    ->fetch();
+                if(count($member) > 0){
+                    $this->{$type}[$id] = $member[array_key_first($member)];
+                    if($type != 'users'){
+                        $this->{$type}[$id]['users'] = json_decode($this->{$type}[$id]['users'] ?? '[]', true) ?? [];
+                        $this->users = array_unique(array_merge($this->users, $this->{$type}[$id]['users']));
+                    }
+                }
+                unset($this->{$type}[$key]);
+            }
+        }
     }
 
     /**
