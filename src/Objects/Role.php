@@ -29,8 +29,11 @@ class Role {
 
     /**
      * Constructor
+     *
+     * @param string $name
+     * @param array $data
      */
-    public function __construct(string $name)
+    public function __construct(string $name, array $data = [])
     {
         // Import Global Variables
         global $DATABASE;
