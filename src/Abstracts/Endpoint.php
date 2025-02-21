@@ -29,14 +29,15 @@ abstract class Endpoint {
     /**
      * Constructor
      */
-    public function __construct(){
+    public function __construct()
+    {
 
         // Import Global Variables
-        global $AUTH, $MODAL, $HELPER, $OUTPUT, $REQUEST;
+        global $AUTH, $MODEL, $HELPER, $OUTPUT, $REQUEST;
 
         // Initialize Properties
         $this->Auth = $AUTH;
-        $this->Model = $MODAL;
+        $this->Model = $MODEL;
         $this->Helper = $HELPER;
         $this->Output = $OUTPUT;
         $this->Request = $REQUEST;
@@ -48,7 +49,8 @@ abstract class Endpoint {
      * @param array $arguments
      * @return void
      */
-    public function __call($name, $arguments) {
+    public function __call($name, $arguments)
+    {
 
         // Send the output
         $this->Output->print('Endpoint Action not Implemented', array('HTTP/1.1 501 Not Implemented'));
@@ -57,14 +59,16 @@ abstract class Endpoint {
     /**
      * Get the public status
      */
-    public function getPublic() {
+    public function getPublic()
+    {
         return $this->Public;
     }
 
     /**
      * Get the level
      */
-    public function getLevel() {
+    public function getLevel()
+    {
         return $this->Level;
     }
 }
