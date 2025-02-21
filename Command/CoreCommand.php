@@ -35,7 +35,7 @@ class CoreCommand extends Command {
         $htaccess = $CONFIG->root() . DIRECTORY_SEPARATOR . ".htaccess";
 
         // Check if file exists
-        if(!is_file($htaccess)) {
+        if(!is_dir($htaccess) && !is_file($htaccess) && !is_link($htaccess)) {
 
             // Output
             $this->Output->print("Creating {$htaccess} file...");
@@ -62,7 +62,7 @@ class CoreCommand extends Command {
         $webroot = $CONFIG->root() . DIRECTORY_SEPARATOR . "webroot";
 
         // Check if directory exists
-        if(!is_dir($webroot)) {
+        if(!is_dir($webroot) && !is_file($webroot) && !is_link($webroot)) {
 
             // Output
             $this->Output->print("Creating {$webroot} directory...");
@@ -75,7 +75,7 @@ class CoreCommand extends Command {
         $htaccess = $webroot . DIRECTORY_SEPARATOR . ".htaccess";
 
         // Check if file exists
-        if(!is_file($htaccess)) {
+        if(!is_dir($htaccess) && !is_file($htaccess) && !is_link($htaccess)) {
 
             // Output
             $this->Output->print("Creating {$htaccess} file...");
@@ -105,7 +105,7 @@ class CoreCommand extends Command {
         $index = $webroot . DIRECTORY_SEPARATOR . "index.php";
 
         // Check if file exists
-        if(!is_file($index)) {
+        if(!is_dir($index) && !is_file($index) && !is_link($index)) {
 
             // Output
             $this->Output->print("Creating {$index} file...");
@@ -125,7 +125,7 @@ class CoreCommand extends Command {
         $api = $webroot . DIRECTORY_SEPARATOR . "api.php";
 
         // Check if file exists
-        if(!is_file($api)) {
+        if(!is_dir($endpoint) && !is_file($endpoint) && !is_link($endpoint)) {
 
             // Output
             $this->Output->print("Creating {$api} file...");
@@ -146,7 +146,7 @@ class CoreCommand extends Command {
         $icon = $CONFIG->root() . DIRECTORY_SEPARATOR . "src" . DIRECTORY_SEPARATOR . "icons". DIRECTORY_SEPARATOR . "icon.ico";
 
         // Check if file exists
-        if(!is_file($favicon)) {
+        if(!is_dir($favicon) && !is_file($favicon) && !is_link($favicon)) {
 
             // Output
             $this->Output->print("Creating {$favicon} file...");
