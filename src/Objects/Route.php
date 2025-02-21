@@ -345,6 +345,7 @@ class Route {
             'parent' => $this->Parent,
             'label' => $this->Label,
             'icon' => $this->Icon,
+            'color' => $this->Color,
         ]);
 
         return $this;
