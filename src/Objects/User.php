@@ -100,7 +100,13 @@ class User {
             ->where('isDefault', 1, '=', 'OR');
 
         // Retrieve Groups
-        $this->groups = $query->result();
+        $groups = $query->result();
+
+        // Initialize Groups
+        $this->groups = [];
+        foreach($groups as $group){
+            $this->groups[$group['name']] = new Objects\Group($group['name'],$group);
+        }
 
         // Retrieve User's Roles
         $query = $this->Database->query();
@@ -115,12 +121,18 @@ class User {
             ->where('isDefault', 1, '=', 'OR');
 
         // Filter by Groups
-        foreach($this->groups as $group){
+        foreach($groups as $group){
             $query->where('groups', $group['id'], 'CONTAINS', 'OR');
         }
 
-        // Retrieve Groups
-        $this->roles = $query->result();
+        // Retrieve Results
+        $roles = $query->result();
+
+        // Initialize Roles
+        $this->roles = [];
+        foreach($roles as $role){
+            $this->roles[$role['name']] = new Objects\Role($role['name'],$role);
+        }
     }
 
     /**
