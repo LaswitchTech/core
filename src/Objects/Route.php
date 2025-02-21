@@ -173,22 +173,25 @@ class Route {
      */
     public function view(?string $view = null): ?string
     {
-        // Set Template
+        // Set View
         if(!is_null($view)){
 
-            // Check if the view is a file
-            if(!is_file($this->Config->root() . DIRECTORY_SEPARATOR . $view)){
-                $view = 'View' . DIRECTORY_SEPARATOR . $view . '.php';
+            // Check if the template is a file
+            $path = $this->Config->root() . DIRECTORY_SEPARATOR . 'View' . DIRECTORY_SEPARATOR . $view;
+
+            // Check if the view directory exists recursively and create it if it does not
+            if(!is_dir(dirname($path))){
+                mkdir(dirname($path), 0755, true);
             }
 
             // Create the file if it does not exist
-            if(!is_file($this->Config->root() . DIRECTORY_SEPARATOR . $view)){
+            if(!is_file($path)){
                 $content = "<!--" . PHP_EOL;
                 $content .= "  Core Framework - View File" . PHP_EOL . PHP_EOL;
                 $content .= "  @license    MIT (https://mit-license.org/)" . PHP_EOL;
                 $content .= "  @author     Full Name <user@domain.com>" . PHP_EOL;
                 $content .= "-->" . PHP_EOL;
-                file_put_contents($this->Config->root() . DIRECTORY_SEPARATOR . $view, $content);
+                file_put_contents($path, $content);
             }
             $this->View = $view;
         }
