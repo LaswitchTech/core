@@ -72,6 +72,9 @@ class Models {
                     // Check if the plugin includes a Model
                     if(is_file($path)){
 
+                        // Include the Model
+                        require_once $path;
+
                         // Get the Model Base Name and Class Name
                         $baseName = ucfirst($plugin);
                         $className = $baseName . 'Model';
