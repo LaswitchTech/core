@@ -143,8 +143,11 @@ class Route {
         if(!is_null($template)){
 
             // Check if the template is a file
-            if(!is_file($this->Config->root() . DIRECTORY_SEPARATOR . $template)){
-                $template = 'Template' . DIRECTORY_SEPARATOR . $template . '.php';
+            $path = $this->Config->root() . DIRECTORY_SEPARATOR . 'Template' . DIRECTORY_SEPARATOR . 'View' . DIRECTORY_SEPARATOR . $template;
+
+            // Check if the template directory exists recursively and create it if it does not
+            if(!is_dir(dirname($path))){
+                mkdir(dirname($path), 0755, true);
             }
 
             // Create the file if it does not exist
