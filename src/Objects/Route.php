@@ -432,7 +432,7 @@ class Route {
                     // Check if the controller file exists
                     $path = $this->Config->root() . DIRECTORY_SEPARATOR . 'Controller' . DIRECTORY_SEPARATOR . $controllerName . '.php';
                     if(!is_file($path)){
-                        $path = $this->Config->root() . DIRECTORY_SEPARATOR . 'lib' . DIRECTORY_SEPARATOR . $controller . DIRECTORY_SEPARATOR . 'Controller.php';
+                        $path = $this->Config->root() . DIRECTORY_SEPARATOR . 'lib' . DIRECTORY_SEPARATOR . 'plugins' . DIRECTORY_SEPARATOR . $controller . DIRECTORY_SEPARATOR . 'Controller.php';
                     }
 
                     // Check if the controller file exists
