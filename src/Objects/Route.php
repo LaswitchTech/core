@@ -405,11 +405,14 @@ class Route {
 
     /**
      * Call an action
+     *
+     * @param string|null $key
+     * @return mixed
      */
-    private function call(): mixed
+    private function call(?string $key = null): mixed
     {
         // Check if the action was already called
-        if(!empty($this->Call)){
+        if(empty($this->Call) || is_null($this->Call)){
 
             // Check if the action is set
             if($this->Action){
@@ -456,6 +459,9 @@ class Route {
             }
         }
 
+        if(!is_null($key) && is_array($this->Call)){
+            return $this->Call[$key] ?? null;
+        }
         return $this->Call;
     }
 
