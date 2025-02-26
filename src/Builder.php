@@ -91,6 +91,55 @@ class Builder {
     }
 
     /**
+     * Create Crumbs
+     *
+     * @param string $location
+     * @param string $parent
+     * @return array
+     */
+    public function crumbs()
+    {
+        // Import Global Variables
+        global $REQUEST;
+
+        // Initialize the crumbs
+        $crumbs = [];
+
+        // Retrieve the routes
+        $routes = $this->Config->get('routes');
+
+        // Load Plugins Routes
+        $pluginsPath = $this->Config->root() . DIRECTORY_SEPARATOR . 'lib' . DIRECTORY_SEPARATOR . 'plugins';
+        foreach(array_diff(scandir($pluginsPath), array('..', '.')) as $plugin){
+            $pluginPath = $pluginsPath . DIRECTORY_SEPARATOR . $plugin;
+            if(is_file($pluginPath . DIRECTORY_SEPARATOR . 'routes.cfg')){
+                foreach(json_decode(file_get_contents($pluginPath . DIRECTORY_SEPARATOR . 'routes.cfg'),true) as $route => $param){
+                    if(!isset($routes[$route])){
+                        $routes[$route] = $param;
+                    }
+                }
+            }
+        }
+
+        // Retrieve the current url
+        $url = $REQUEST->getUri() . '?' . $REQUEST->getQueryString();
+
+        // Create Base URL
+        $base = '';
+        $parts = explode('/', $url);
+        foreach($parts as $part){
+            $base = rtrim($base,'/') . '/' . rtrim($part,'/');
+            $route = explode('?', $base)[0];
+            if(isset($routes[$route])){
+                $crumbs[$route] = $routes[$route];
+                $crumbs[$route]['link'] = $base;
+            }
+        }
+
+        return $crumbs;
+    }
+
+    /**
      * Generate the HTML tags for the CSS files
      */
     public function css()
