@@ -49,7 +49,22 @@ class Builder {
     {
         global $AUTH;
         $menu = [];
-        foreach($this->Config->get('routes') as $route => $param) {
+        $routes = $this->Config->get('routes');
+
+        // Load Plugins Routes
+        $pluginsPath = $this->Config->root() . DIRECTORY_SEPARATOR . 'lib' . DIRECTORY_SEPARATOR . 'plugins';
+        foreach(array_diff(scandir($pluginsPath), array('..', '.')) as $plugin){
+            $pluginPath = $pluginsPath . DIRECTORY_SEPARATOR . $plugin;
+            if(is_file($pluginPath . DIRECTORY_SEPARATOR . 'routes.cfg')){
+                foreach(json_decode(file_get_contents($pluginPath . DIRECTORY_SEPARATOR . 'routes.cfg'),true) as $route => $param){
+                    if(!isset($routes[$route])){
+                        $routes[$route] = $param;
+                    }
+                }
+            }
+        }
+
+        foreach($routes as $route => $param) {
             if($parent){
                 if(!isset($param['parent']) || $param['parent'] !== $parent) continue;
             }
