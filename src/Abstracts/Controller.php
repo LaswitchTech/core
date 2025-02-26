@@ -32,11 +32,11 @@ abstract class Controller {
     public function __construct(){
 
         // Import Global Variables
-        global $AUTH, $MODAL, $HELPER, $OUTPUT, $REQUEST;
+        global $AUTH, $MODEL, $HELPER, $OUTPUT, $REQUEST;
 
         // Initialize Properties
         $this->Auth = $AUTH;
-        $this->Model = $MODAL;
+        $this->Model = $MODEL;
         $this->Helper = $HELPER;
         $this->Output = $OUTPUT;
         $this->Request = $REQUEST;
