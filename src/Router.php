@@ -87,6 +87,19 @@ class Router {
             }
         }
 
+        // Load Plugins Routes
+        $pluginsPath = $this->Config->root() . DIRECTORY_SEPARATOR . 'lib' . DIRECTORY_SEPARATOR . 'plugins';
+        foreach(array_diff(scandir($pluginsPath), array('..', '.')) as $plugin){
+            $pluginPath = $pluginsPath . DIRECTORY_SEPARATOR . $plugin;
+            if(is_file($pluginPath . DIRECTORY_SEPARATOR . 'routes.cfg')){
+                foreach(json_decode(file_get_contents($pluginPath . DIRECTORY_SEPARATOR . 'routes.cfg'),true) as $route => $param){
+                    if(!isset($this->Routes[$route])){
+                        $this->Routes[$route] = $this->route($route, $param, 'lib' . DIRECTORY_SEPARATOR . 'plugins' . DIRECTORY_SEPARATOR . $plugin);
+                    }
+                }
+            }
+        }
+
         return $this;
     }
 
@@ -97,7 +110,7 @@ class Router {
      * @param array $data
      * @return self
      */
-    public function route(string $route, ?array $data = null): Objects\Route
+    public function route(string $route, ?array $data = null, ?string $directory = null): Objects\Route
     {
         if(isset($this->Routes[$route])){
             if(!is_null($data)){
@@ -105,7 +118,7 @@ class Router {
             }
             return $this->Routes[$route];
         }
-        return new Objects\Route($route, $data);
+        return new Objects\Route($route, $data, $directory);
     }
 
     /**

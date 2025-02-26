@@ -28,6 +28,7 @@ class Route {
 
     // Properties
     private $Route;
+    private $Directory;
     private $Template;
     private $View;
     private $Public = true;
@@ -45,8 +46,9 @@ class Route {
      *
      * @param string $route
      * @param array|null $data
+     * @param string|null $directory
      */
-    public function __construct(string $route, ?array $data = null)
+    public function __construct(string $route, ?array $data = null, ?string $directory = null)
     {
         // Global Variables
         global $CONFIG, $REQUEST, $OUTPUT, $LOCALE , $AUTH, $CSRF, $HELPER, $BUILDER, $STYLE;
@@ -61,6 +63,7 @@ class Route {
         $this->Helper = $HELPER;
         $this->Builder = $BUILDER;
         $this->Style = $STYLE;
+        $this->Directory = $directory;
 
         // Set Properties
         $this->Route = $route;
@@ -84,6 +87,7 @@ class Route {
      * Set Route Data
      *
      * @param array $data
+     * @param string $directory
      * @return self
      */
     public function set(array $data): self
@@ -139,11 +143,23 @@ class Route {
      */
     public function template(?string $template = null): ?string
     {
-        // Set Template
+
+        // Set View
         if(!is_null($template)){
 
-            // Check if the template is a file
-            $path = $this->Config->root() . DIRECTORY_SEPARATOR . 'Template' . DIRECTORY_SEPARATOR . 'View' . DIRECTORY_SEPARATOR . $template;
+            // Set View
+            $this->Template = $template;
+        }
+
+        // Generate the path
+        $path = $this->Config->root();
+        if($this->Directory){
+            $path .= DIRECTORY_SEPARATOR . $this->Directory;
+        }
+        $path .= DIRECTORY_SEPARATOR . 'Template' . DIRECTORY_SEPARATOR . 'View' . DIRECTORY_SEPARATOR . $this->Template;
+
+        // Set Template
+        if(!is_null($template)){
 
             // Check if the template directory exists recursively and create it if it does not
             if(!is_dir(dirname($path))){
@@ -159,10 +175,9 @@ class Route {
                 $content .= "-->" . PHP_EOL;
                 file_put_contents($path, $content);
             }
-            $this->Template = $template;
         }
 
-        return $this->Template;
+        return $path;
     }
 
     /**
@@ -173,11 +188,23 @@ class Route {
      */
     public function view(?string $view = null): ?string
     {
+
         // Set View
         if(!is_null($view)){
 
-            // Check if the template is a file
-            $path = $this->Config->root() . DIRECTORY_SEPARATOR . 'View' . DIRECTORY_SEPARATOR . $view;
+            // Set View
+            $this->View = $view;
+        }
+
+        // Generate the path
+        $path = $this->Config->root();
+        if($this->Directory){
+            $path .= DIRECTORY_SEPARATOR . $this->Directory;
+        }
+        $path .= DIRECTORY_SEPARATOR . 'View' . DIRECTORY_SEPARATOR . $this->View;
+
+        // Set View
+        if(!is_null($view)){
 
             // Check if the view directory exists recursively and create it if it does not
             if(!is_dir(dirname($path))){
@@ -193,10 +220,9 @@ class Route {
                 $content .= "-->" . PHP_EOL;
                 file_put_contents($path, $content);
             }
-            $this->View = $view;
         }
 
-        return $this->View;
+        return $path;
     }
 
     /**
@@ -335,18 +361,42 @@ class Route {
      */
     public function save(): self
     {
-        // Save Route to Config
-        $this->Config->set('routes', $this->Route, [
-            'template' => $this->Template,
-            'view' => $this->View,
-            'public' => $this->Public,
-            'location' => $this->Location,
-            'level' => $this->Level,
-            'parent' => $this->Parent,
-            'label' => $this->Label,
-            'icon' => $this->Icon,
-            'color' => $this->Color,
-        ]);
+        // Check if the route is from a plugin
+        if($this->Directory){
+
+            // Retrieve the routes file
+            $routes = json_decode(file_get_contents($this->Config->root() . DIRECTORY_SEPARATOR . $this->Directory . DIRECTORY_SEPARATOR . 'routes.cfg'), true);
+
+            // Update the route
+            $routes[$this->Route] = [
+                'template' => $this->Template,
+                'view' => $this->View,
+                'public' => $this->Public,
+                'location' => $this->Location,
+                'level' => $this->Level,
+                'parent' => $this->Parent,
+                'label' => $this->Label,
+                'icon' => $this->Icon,
+                'color' => $this->Color,
+            ];
+
+            // Save the routes file
+            file_put_contents($this->Config->root() . DIRECTORY_SEPARATOR . $this->Directory . DIRECTORY_SEPARATOR . 'routes.cfg', json_encode($routes, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
+        } else {
+
+            // Save Route to Config
+            $this->Config->set('routes', $this->Route, [
+                'template' => $this->Template,
+                'view' => $this->View,
+                'public' => $this->Public,
+                'location' => $this->Location,
+                'level' => $this->Level,
+                'parent' => $this->Parent,
+                'label' => $this->Label,
+                'icon' => $this->Icon,
+                'color' => $this->Color,
+            ]);
+        }
 
         return $this;
     }
@@ -414,12 +464,16 @@ class Route {
     {
         // Load the template
         if($this->Template){
-            require_once $this->Config->root() . DIRECTORY_SEPARATOR . "Template" . DIRECTORY_SEPARATOR . "View" . DIRECTORY_SEPARATOR . $this->Template;
+
+            // Load the Template
+            require_once $this->template();
         }
 
         // Load the view
         if($this->View){
-            require_once $this->Config->root() . DIRECTORY_SEPARATOR . "View" . DIRECTORY_SEPARATOR . $this->View;
+
+            // Load the View
+            require_once $this->view();
         }
 
         return $this;
