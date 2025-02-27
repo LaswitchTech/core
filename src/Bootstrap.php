@@ -214,10 +214,9 @@ class Bootstrap {
      */
     public function __construct(string $scope)
     {
+
         // Start the session
         if (!defined('STDIN') && session_status() === PHP_SESSION_NONE) {
-            ini_set('session.cookie_samesite', 'Strict');
-            ini_set('session.cookie_secure', 'On');
             session_start();
         }
 
