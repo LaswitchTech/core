@@ -81,6 +81,16 @@ class CoreCommand extends Command {
             // Create content
             $content = "Options +FollowSymLinks" . PHP_EOL . PHP_EOL;
             $content = "AddType application/javascript .mjs" . PHP_EOL . PHP_EOL;
+            $content .= "<IfModule mod_php8.c>" . PHP_EOL;
+            $content .= "    php_value session.cookie_samesite Strict" . PHP_EOL;
+            $content .= "    php_value session.cookie_secure On" . PHP_EOL;
+            $content .= "    php_value memory_limit 1024M" . PHP_EOL;
+            $content .= "    php_value upload_max_filesize 8192M" . PHP_EOL;
+            $content .= "    php_value post_max_size 8192M" . PHP_EOL;
+            $content .= "    php_value max_input_time -1" . PHP_EOL;
+            $content .= "    php_value max_execution_time 600" . PHP_EOL;
+            $content .= "    php_value max_file_uploads 100" . PHP_EOL;
+            $content .= "</IfModule>" . PHP_EOL . PHP_EOL;
             $content .= "<IfModule mod_headers.c>" . PHP_EOL;
             $content .= "    RequestHeader unset Proxy" . PHP_EOL;
             $content .= "</IfModule>" . PHP_EOL . PHP_EOL;
