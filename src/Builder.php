@@ -122,7 +122,10 @@ class Builder {
         }
 
         // Retrieve the current url
-        $url = $REQUEST->getUri() . '?' . $REQUEST->getQueryString();
+        $url = $REQUEST->getUri();
+        if($REQUEST->getQueryString()){
+            $url .= '?' . $REQUEST->getQueryString();
+        }
 
         // Create Base URL
         $base = '';
