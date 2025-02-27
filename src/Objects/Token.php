@@ -1,32 +1,29 @@
 <?php
 
 /**
- * Core Framework - Model
+ * Core Framework - Token
  *
  * @license    MIT (https://mit-license.org/)
  * @author     Louis Ouellet <louis@laswitchtech.com>
  */
 
 // Declaring namespace
-namespace LaswitchTech\Core\Abstracts;
+namespace LaswitchTech\Core\Objects;
 
 // Import additionnal class into the global namespace
 use Exception;
 
-abstract class Model {
-
-    // Properties
-    private $Database;
+class Token {
 
     /**
      * Constructor
      */
-    public function __construct(){
-
-        // Retrieve the global Database
+    public function __construct()
+    {
+        // Import Global Variables
         global $DATABASE;
 
-        // Initialize Database
+        // Initialize Properties
         $this->Database = $DATABASE;
     }
 }

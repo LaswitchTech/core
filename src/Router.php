@@ -17,13 +17,14 @@ use Exception;
 class Router {
 
     // Constants
-    const HttpCodes = [400,401,403,404,422,423,427,428,429,430,432,500,501];
+    const HttpCodes = [400,401,403,404,405,422,423,427,428,429,430,432,500,501];
     const HttpCustomCodes = [427,430,432];
     const HttpLabels = [
         "400" => "Bad Request", // 400 Error Document // Bad Request
         "401" => "Unauthorized", // 401 Error Document // Unauthorized
         "403" => "Forbidden", // 403 Error Document // Forbidden
         "404" => "Not Found", // 404 Error Document // Not Found
+        "405" => "Method Not Allowed", // 405 Error Document // Method Not Allowed
         "422" => "Unprocessable Content", // 422 Error Document // Unprocessable Content
         "423" => "Locked", // 423 Error Document // Locked
         "427" => "2FA Required", // 427 Error Document // 2FA Required
@@ -62,37 +63,8 @@ class Router {
         // Configure Globals
         $this->Config->add('routes');
 
-        // Check if the server requirements are met
-        $this->checkRequirements();
-
         // Load Routes
         $this->load();
-    }
-
-    /**
-     * Check if the required apache modules are installed
-     *
-     * @return self
-     */
-    private function checkRequirements(): self
-    {
-        // Check Server Type
-        if(strpos(strtoupper($this->Request->getParams('SERVER','SERVER_SOFTWARE')), 'APACHE') === false){
-            $this->Output->print(
-                "This application requires an Apache server.",
-                array('HTTP/1.1 500 Internal Error'),
-            );
-        }
-
-        // Check Apache if Mod Rewrite is enabled
-        if(is_null($this->Request->getParams('SERVER','REDIRECT_MOD_REWRITE')) && is_null($this->Request->getParams('SERVER','MOD_REWRITE'))){
-            $this->Output->print(
-                "This application requires the Apache mod_rewrite module.",
-                array('HTTP/1.1 500 Internal Error'),
-            );
-        }
-
-        return $this;
     }
 
     /**
@@ -105,13 +77,26 @@ class Router {
         // Load Error Routes
         foreach(self::HttpCodes as $Code){
             $Code = strval($Code);
-            $this->Routes[$Code] = $this->route($Code, ['label' => self::HttpLabels[$Code], 'view' => $Code]);
+            $this->Routes[$Code] = $this->route($Code, ['label' => self::HttpLabels[$Code], 'view' => $Code . '.php']);
         }
 
         // Load Routes
         if($this->Config->get('routes')){
             foreach($this->Config->get('routes') as $route => $param){
                 $this->Routes[$route] = $this->route($route, $param);
+            }
+        }
+
+        // Load Plugins Routes
+        $pluginsPath = $this->Config->root() . DIRECTORY_SEPARATOR . 'lib' . DIRECTORY_SEPARATOR . 'plugins';
+        foreach(array_diff(scandir($pluginsPath), array('..', '.')) as $plugin){
+            $pluginPath = $pluginsPath . DIRECTORY_SEPARATOR . $plugin;
+            if(is_file($pluginPath . DIRECTORY_SEPARATOR . 'routes.cfg')){
+                foreach(json_decode(file_get_contents($pluginPath . DIRECTORY_SEPARATOR . 'routes.cfg'),true) as $route => $param){
+                    if(!isset($this->Routes[$route])){
+                        $this->Routes[$route] = $this->route($route, $param, 'lib' . DIRECTORY_SEPARATOR . 'plugins' . DIRECTORY_SEPARATOR . $plugin);
+                    }
+                }
             }
         }
 
@@ -125,7 +110,7 @@ class Router {
      * @param array $data
      * @return self
      */
-    public function route(string $route, ?array $data = null): Objects\Route
+    public function route(string $route, ?array $data = null, ?string $directory = null): Objects\Route
     {
         if(isset($this->Routes[$route])){
             if(!is_null($data)){
@@ -133,7 +118,7 @@ class Router {
             }
             return $this->Routes[$route];
         }
-        return new Objects\Route($route, $data);
+        return new Objects\Route($route, $data, $directory);
     }
 
     /**
@@ -200,7 +185,7 @@ class Router {
                     }
 
                     // Check if the user has the required permission
-                    if(!$this->Auth->isAuthorized('Route>' . $this->Routes[$route]->namespace(), $this->Routes[$route]->level())){
+                    if(!$this->Auth->isAuthorized('Route>' . $this->Routes[$route]->namespace(), intval($this->Routes[$route]->level()))){
 
                         // Send Forbidden
                         $this->Route = $this->Routes['403'];

@@ -56,26 +56,36 @@ class Auth {
         // Check Bearer Token
         if ($this->authenticateBearer()) {
             $this->method = 'bearer';
+            $this->status = true;
+            return $this->status;
         }
 
         // Check Basic Authentication
         if ($this->authenticateBasic()) {
             $this->method = 'basic';
+            $this->status = true;
+            return $this->status;
         }
 
         // Check Session Authentication
         if ($this->authenticateSession()) {
             $this->method = 'session';
+            $this->status = true;
+            return $this->status;
         }
 
         // Check Cookie Authentication
         if ($this->authenticateCookie()) {
             $this->method = 'cookie';
+            $this->status = true;
+            return $this->status;
         }
 
         // Check Request Authentication
         if ($this->authenticateRequest()) {
             $this->method = 'request';
+            $this->status = true;
+            return $this->status;
         }
 
         if($this->method){
@@ -145,13 +155,13 @@ class Auth {
             $result = $query->table('tokens')
                 ->select('user')
                 ->where('token', $token)
-                ->where('expires', '>', date('Y-m-d H:i:s'))
+                ->where('expires', date('Y-m-d H:i:s'), '>')
                 ->limit(1)
                 ->result();
 
             // Check if the token is valid
             if (!empty($result)) {
-                return $this->authenticate($result[0]['user']);
+                return $this->authenticate(intval($result[0]['user']));
             }
         }
 
@@ -341,7 +351,7 @@ class Auth {
      * @param string|int|null $user
      * @return Objects\User
      */
-    public function user(string|int|null $user = null): Objects\User
+    public function user(string|int|null $user = null): ?Objects\User
     {
         return is_null($user) ? $this->user : new Objects\User($user);
     }

@@ -35,88 +35,153 @@ class Builder {
         $this->Config = $CONFIG;
 
         // Configure Globals
-        $this->Config->add('css')->add('js');
+        $this->Config->add('css')->add('js')->add('routes');
     }
 
-    // /**
-    //  * Get a menu
-    //  *
-    //  * @param string $location
-    //  * @param string $parent
-    //  * @return array
-    //  */
-    // protected function menu($location = 'sidebar', $parent = null) {
-    //     $menu = [];
-    //     foreach($this->getRoutes() as $route => $param) {
-    //         if($parent){
-    //             if(!isset($param['parent']) || $param['parent'] !== $parent) continue;
-    //         }
-    //         if(!isset($param['location'])) continue;
-    //         if(is_string($param['location']) && $param['location'] !== $location) continue;
-    //         if(is_array($param['location']) && !in_array($location,$param['location'])) continue;
-    //         if(!$param['public'] && !$this->isAuthenticated()) continue;
-    //         if(!$param['public'] && $param['permission'] && !$this->hasPermission("Route>" . $route, $param['level'])) continue;
+    /**
+     * Get a menu
+     *
+     * @param string $location
+     * @param string $parent
+     * @return array
+     */
+    public function menu($location = 'sidebar', $parent = null)
+    {
+        global $AUTH;
+        $menu = [];
+        $routes = $this->Config->get('routes');
 
-    //         $parts = array_filter(explode('/', $route));
-    //         if(empty($parts)) $parts = [""];
+        // Load Plugins Routes
+        $pluginsPath = $this->Config->root() . DIRECTORY_SEPARATOR . 'lib' . DIRECTORY_SEPARATOR . 'plugins';
+        foreach(array_diff(scandir($pluginsPath), array('..', '.')) as $plugin){
+            $pluginPath = $pluginsPath . DIRECTORY_SEPARATOR . $plugin;
+            if(is_file($pluginPath . DIRECTORY_SEPARATOR . 'routes.cfg')){
+                foreach(json_decode(file_get_contents($pluginPath . DIRECTORY_SEPARATOR . 'routes.cfg'),true) as $route => $param){
+                    if(!isset($routes[$route])){
+                        $routes[$route] = $param;
+                    }
+                }
+            }
+        }
 
-    //         $current = &$menu;
-    //         $accumulated_route = "";
-    //         foreach($parts as $part) {
-    //             $accumulated_route .= "/$part";
+        foreach($routes as $route => $param) {
+            if($parent){
+                if(!isset($param['parent']) || $param['parent'] !== $parent) continue;
+            }
+            if(!isset($param['location'])) continue;
+            if(is_string($param['location']) && $param['location'] !== $location) continue;
+            if(is_array($param['location']) && !in_array($location,$param['location'])) continue;
+            if(!$param['public'] && !$AUTH->isAuthenticated()) continue;
+            if(!$param['public'] && !$AUTH->isAuthorized("Route>" . $route, $param['level'])) continue;
 
-    //             // Create intermediate nodes with default parameters if they don't exist
-    //             if(!isset($current[$part])) {
-    //                 $current[$part] = ['label' => ucfirst($part), 'icon' => 'default-icon', 'link' => $accumulated_route, 'items' => []];
-    //             }
+            $parts = array_filter(explode('/', $route));
+            if(empty($parts)) $parts = [""];
 
-    //             // If we're at the last part of the route, override the parameters with the ones provided in $param
-    //             if ($part === end($parts)) {
-    //                 $current[$part]['label'] = $param['label'];
-    //                 $current[$part]['icon'] = $param['icon'];
-    //                 $current[$part]['color'] = $param['color'];
-    //                 $current[$part]['parent'] = $param['parent'];
-    //                 $current[$part]['view'] = $param['view'];
-    //                 $current[$part]['link'] = $route;
-    //             }
+            $param['items'] = [];
+            $param['link'] = $route;
 
-    //             $current = &$current[$part]['items'];
-    //         }
-    //     }
+            if($param['parent'] && isset($menu[$param['parent']])){
+                $menu[$param['parent']]['items'][$route] = $param;
+            } else {
+                $menu[$route] = $param;
+            }
+        }
 
-    //     return $menu;
-    // }
+        return $menu;
+    }
 
-    // /**
-    //  * Generate the HTML tags for the CSS files
-    //  */
-    // protected function css(){
-    //     $html = '';
-    //     $css = $this->Config->get('css');
-    //     foreach($css as $file){
-    //         if(is_file($this->Config->root().'/webroot/'.trim($file,'/'))){
-    //             $html .= '<link rel="stylesheet" type="text/css" href="/'.trim($file,'/').'">' . PHP_EOL;
-    //         }
-    //     }
-    //     return $html;
-    // }
+    /**
+     * Create Crumbs
+     *
+     * @param string $location
+     * @param string $parent
+     * @return array
+     */
+    public function crumbs()
+    {
+        // Import Global Variables
+        global $REQUEST;
 
-    // /**
-    //  * Generate the HTML tags for the JS files
-    //  */
-    // protected function js(){
-    //     $html = '';
-    //     $js = $this->Config->get('js');
-    //     foreach($js as $file){
-    //         if(is_file($this->Config->root().'/webroot/'.trim($file,'/'))){
-    //             // Check if the file is a module by looking for the file extension
-    //             if(str_ends_with($file, '.mjs')){
-    //                 $html .= '<script type="module" src="/'.trim($file,'/').'"></script>' . PHP_EOL;
-    //             } else {
-    //                 $html .= '<script src="/'.trim($file,'/').'"></script>' . PHP_EOL;
-    //             }
-    //         }
-    //     }
-    //     return $html;
-    // }
+        // Initialize the crumbs
+        $crumbs = [];
+
+        // Retrieve the routes
+        $routes = $this->Config->get('routes');
+
+        // Load Plugins Routes
+        $pluginsPath = $this->Config->root() . DIRECTORY_SEPARATOR . 'lib' . DIRECTORY_SEPARATOR . 'plugins';
+        foreach(array_diff(scandir($pluginsPath), array('..', '.')) as $plugin){
+            $pluginPath = $pluginsPath . DIRECTORY_SEPARATOR . $plugin;
+            if(is_file($pluginPath . DIRECTORY_SEPARATOR . 'routes.cfg')){
+                foreach(json_decode(file_get_contents($pluginPath . DIRECTORY_SEPARATOR . 'routes.cfg'),true) as $route => $param){
+                    if(!isset($routes[$route])){
+                        $routes[$route] = $param;
+                    }
+                }
+            }
+        }
+
+        // Retrieve the current url
+        $url = $REQUEST->getUri();
+        if($REQUEST->getQueryString()){
+            $url .= '?' . $REQUEST->getQueryString();
+        }
+
+        // Create Base URL
+        $base = '';
+        $parts = explode('/', $url);
+        foreach($parts as $part){
+            $base = rtrim($base,'/') . '/' . rtrim($part,'/');
+            $route = explode('?', $base)[0];
+            if(isset($routes[$route])){
+                $crumbs[$route] = $routes[$route];
+                $crumbs[$route]['link'] = $base;
+            }
+        }
+
+        return $crumbs;
+    }
+
+    /**
+     * Generate the HTML tags for the CSS files
+     */
+    public function css()
+    {
+        $html = '';
+        $css = $this->Config->get('css');
+        foreach($css as $file){
+            if(is_file($this->Config->root().'/webroot/'.trim($file,'/'))){
+                $html .= '<link rel="stylesheet" type="text/css" href="/'.trim($file,'/').'">' . PHP_EOL;
+            }
+        }
+        return $html;
+    }
+
+    /**
+     * Generate the HTML tags for the JS files
+     */
+    public function js()
+    {
+        $html = '';
+        $js = $this->Config->get('js');
+        foreach($js as $file){
+            if(is_file($this->Config->root().'/dist/'.trim($file,'/'))){
+                // Check if the file is a module by looking for the file extension
+                if(str_ends_with($file, '.mjs')){
+                    $html .= '<script type="module" src="/'.trim($file,'/').'"></script>' . PHP_EOL;
+                } else {
+                    $html .= '<script src="/'.trim($file,'/').'"></script>' . PHP_EOL;
+                }
+            }
+        }
+        $path = $this->Config->root() . '/lib/plugins';
+        $plugins = array_diff(scandir($path), array('..', '.'));
+        foreach($plugins as $file){
+            $filePath = $file . '/script.js';
+            if(is_file($path.'/'.$filePath)){
+                $html .= '<script src="/plugins/'.trim($filePath,'/').'"></script>' . PHP_EOL;
+            }
+        }
+        return $html;
+    }
 }

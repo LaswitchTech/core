@@ -67,14 +67,7 @@ class Bootstrap {
                 "CLI"
             ]
         ],
-        // Network and Security
-        "CSRF" => [
-            "class" => "\\LaswitchTech\\Core\\CSRF",
-            "scope" => [
-                "ROUTER",
-                "API"
-            ]
-        ],
+        // Network
         "NET" => [
             "class" => "\\LaswitchTech\\Core\\Net",
             "scope" => [
@@ -107,6 +100,22 @@ class Bootstrap {
                 "ROUTER",
                 "API",
                 "CLI"
+            ]
+        ],
+        // Authentication
+        "AUTH" => [
+            "class" => "\\LaswitchTech\\Core\\Auth",
+            "scope" => [
+                "ROUTER",
+                "API"
+            ]
+        ],
+        // Security
+        "CSRF" => [
+            "class" => "\\LaswitchTech\\Core\\CSRF",
+            "scope" => [
+                "ROUTER",
+                "API"
             ]
         ],
         // Communications
@@ -150,7 +159,6 @@ class Bootstrap {
                 "ROUTER"
             ]
         ],
-        // Styles and Scripts
         "BUILDER" => [
             "class" => "\\LaswitchTech\\Core\\Builder",
             "scope" => [
@@ -172,14 +180,6 @@ class Bootstrap {
                 "ROUTER",
                 "API",
                 "CLI"
-            ]
-        ],
-        // Authentication
-        "AUTH" => [
-            "class" => "\\LaswitchTech\\Core\\Auth",
-            "scope" => [
-                "ROUTER",
-                "API"
             ]
         ],
         // Routing

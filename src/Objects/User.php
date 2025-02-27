@@ -46,9 +46,10 @@ class User {
             ->select('*')
             ->join('backend', 'backends', 'id')
             ->join('session', 'sessions', 'id')
-            ->join('profile', 'profiles', 'id')
+            ->join('vcard', 'vcards', 'id')
             ->join('organization', 'organizations', 'id')
             ->join('pin', 'pins', 'id')
+            ->join('token', 'tokens', 'id')
             ->where('id', $user, '=', 'OR')
             ->where('username', $user, '=', 'OR')
             ->limit(1)
@@ -99,7 +100,13 @@ class User {
             ->where('isDefault', 1, '=', 'OR');
 
         // Retrieve Groups
-        $this->groups = $query->result();
+        $groups = $query->result();
+
+        // Initialize Groups
+        $this->groups = [];
+        foreach($groups as $group){
+            $this->groups[$group['name']] = new Objects\Group($group['name'],$group);
+        }
 
         // Retrieve User's Roles
         $query = $this->Database->query();
@@ -114,12 +121,18 @@ class User {
             ->where('isDefault', 1, '=', 'OR');
 
         // Filter by Groups
-        foreach($this->groups as $group){
+        foreach($groups as $group){
             $query->where('groups', $group['id'], 'CONTAINS', 'OR');
         }
 
-        // Retrieve Groups
-        $this->roles = $query->result();
+        // Retrieve Results
+        $roles = $query->result();
+
+        // Initialize Roles
+        $this->roles = [];
+        foreach($roles as $role){
+            $this->roles[$role['name']] = new Objects\Role($role['name'],$role);
+        }
     }
 
     /**
@@ -133,6 +146,17 @@ class User {
     }
 
     /**
+     * Magic Method to catch all undefined properties
+     *
+     * @param string $key
+     * @return mixed
+     */
+    public function __get(string $key): mixed
+    {
+        return $this->user[$key] ?? null;
+    }
+
+    /**
      * Retrieve the User ID
      *
      * @return int
@@ -140,6 +164,16 @@ class User {
     public function id(): int
     {
         return $this->user['id'];
+    }
+
+    /**
+     * Retrieve the User Username
+     *
+     * @return string
+     */
+    public function username(): string
+    {
+        return $this->user['username'];
     }
 
     /**
@@ -180,6 +214,70 @@ class User {
     public function session(): Objects\Session
     {
         return new Objects\Session($this);
+    }
+
+    /**
+     * Retrieve the User's Groups
+     *
+     * @return array
+     */
+    public function groups(): array
+    {
+        return array_keys($this->groups);
+    }
+
+    /**
+     * Retrieve a Group
+     *
+     * @param string $name
+     * @return Objects\Group
+     */
+    public function group(string $name): ?Objects\Group
+    {
+        return $this->groups[$name] ?? null;
+    }
+
+    /**
+     * Retrieve the User's Roles
+     *
+     * @return array
+     */
+    public function roles(): array
+    {
+        return array_keys($this->roles);
+    }
+
+    /**
+     * Retrieve a Role
+     *
+     * @param string $name
+     * @return Objects\Role
+     */
+    public function role(string $name): ?Objects\Role
+    {
+        return $this->roles[$name] ?? null;
+    }
+
+    /**
+     * Retrieve the User's VCard
+     */
+    public function vcard(): array
+    {
+        return $this->user['vcard'];
+    }
+
+    /**
+     * Retrieve the User's Associates
+     */
+    public function associates(): array
+    {
+        $users = [];
+        foreach($this->roles as $key => $role){
+            foreach($role->members('users') as $member){
+                $users[$member['id']] = $member;
+            }
+        }
+        return $users;
     }
 
     // /**

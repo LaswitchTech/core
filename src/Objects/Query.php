@@ -219,7 +219,7 @@ class Query {
      * @param string $conjunction
      * @return self
      */
-    public function where(string $column, $value, string $operator = null, string $conjunction = 'AND'): self
+    public function where(string $column, $value, ?string $operator = null, string $conjunction = 'AND'): self
     {
         $operator = (in_array($operator,self::operators)) ? $operator : '=';
         $conjunction = (in_array($conjunction,self::conjunctions)) ? $conjunction : 'AND';
@@ -337,6 +337,36 @@ class Query {
             return $this->buildRows($rows);
         }
         return $this->connector->affectedRows();
+    }
+
+    /**
+     * Execute the query and return the result
+     *
+     * Alias for result()
+     *
+     * For a SELECT, returns an array of rows.
+     * For INSERT, UPDATE, DELETE, returns the number of affected rows.
+     *
+     * @return mixed
+     */
+    public function execute()
+    {
+        return $this->result();
+    }
+
+    /**
+     * Execute the query and return the result
+     *
+     * Alias for result()
+     *
+     * For a SELECT, returns an array of rows.
+     * For INSERT, UPDATE, DELETE, returns the number of affected rows.
+     *
+     * @return mixed
+     */
+    public function fetch()
+    {
+        return $this->result();
     }
 
     /**
@@ -527,7 +557,15 @@ class Query {
     {
         $clauses = [];
         foreach ($this->order as $order) {
-            $clauses[] = "`{$order['column']}` {$order['direction']}";
+            // Check if the column is a joined column
+            if(strpos($order['column'], '.') !== false){
+                $parts = explode('.', $order['column']);
+                $joint = $parts[0];
+                $column = $parts[1];
+                $clauses[] = "`j__{$joint}`.`{$column}` {$order['direction']}";
+            } else {
+                $clauses[] = "t.`{$order['column']}` {$order['direction']}";
+            }
         }
         return implode(', ', $clauses);
     }

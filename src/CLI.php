@@ -66,13 +66,20 @@ class CLI {
                 unset($this->Arguments[1]);
 
                 // Set Path
-                $this->Path = $this->Config->root() . "/Command/" . $this->Command . ".php";
+                $this->Path = $this->Config->root() . DIRECTORY_SEPARATOR . "vendor" . DIRECTORY_SEPARATOR . "laswitchtech" . DIRECTORY_SEPARATOR . "core" . DIRECTORY_SEPARATOR . "Command" . DIRECTORY_SEPARATOR . $this->Command . ".php";
+
+                // Check if the file exists
+                if(!is_file($this->Path)){
+
+                    // Set Local Path
+                    $this->Path = $this->Config->root() . DIRECTORY_SEPARATOR . "Command" . DIRECTORY_SEPARATOR . $this->Command . ".php";
+                }
 
                 // Check if the file exists
                 if(!is_file($this->Path)){
 
                     // Set Plugin Path
-                    $this->Path = $this->Config->root() . "/lib/plugins/" . strtolower(str_replace('Command','',$this->Command)) . "/Command.php";
+                    $this->Path = $this->Config->root() . DIRECTORY_SEPARATOR . "lib" . DIRECTORY_SEPARATOR . "plugins" . DIRECTORY_SEPARATOR . strtolower(str_replace('Command','',$this->Command)) . DIRECTORY_SEPARATOR . "Command.php";
                 }
 
                 // Check if the required command is available

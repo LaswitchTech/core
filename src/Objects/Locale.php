@@ -192,6 +192,16 @@ class Locale {
     }
 
     /**
+     * Get the list of all translations.
+     *
+     * @return array
+     */
+    public function all(): array
+    {
+        return $this->Translation;
+    }
+
+    /**
      * Add Locale string.
      *
      * @param  string  $key

@@ -12,6 +12,9 @@ echo $_BOLD . "Host Address" . $_BOLDE . ": " . $this->Request->getHostAddress()
 // Print Unique request ID
 echo $_BOLD . "Unique request ID" . $_BOLDE . ": " . uniqid() . $_EOL;
 
+// Print Request Method
+echo $_BOLD . "Request Method" . $_BOLDE . ": " . $this->Request->method() . $_EOL;
+
 // Display the PHP Session Status
 echo $_BOLD . "Session" . $_BOLDE . ": " . (session_status() === PHP_SESSION_ACTIVE ? "Active" : "Inactive") . $_EOL;
 

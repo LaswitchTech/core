@@ -64,11 +64,11 @@
                 margin-right: 0px;
                 border-radius: 0px;
             }
-            div.group a.first {
+            div.group a:first-child {
                 border-top-left-radius: 4px;
                 border-bottom-left-radius: 4px;
             }
-            div.group a.last {
+            div.group a:last-child {
                 border-top-right-radius: 4px;
                 border-bottom-right-radius: 4px;
             }
@@ -114,7 +114,10 @@
                     $(this).parent().hide();
                 });
                 $.ajax({
-                    url: 'api.php/debug/execute',
+                    url: '/endpoint.php/debug/execute',
+                    headers: {
+                        'Authorization': 'Bearer DD90005D-830E-47A3-8B48-4781FCB40A9D'
+                    },
                     type: 'GET',
                     dataType: 'json',
                     success: function(response) {

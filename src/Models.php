@@ -16,8 +16,8 @@ use Exception;
 class Models {
 
     // Properties
-    protected $Path = null;
-    protected array $Models = []; // store them here
+    private $Path = null;
+    private array $Models = []; // store them here
 
     public function __construct() {
 
@@ -61,7 +61,7 @@ class Models {
         if(is_dir($this->Path)){
 
             // Loop through all the files in the directory
-            foreach(scandir($this->Path) as $plugin){
+            foreach(array_diff(scandir($this->Path), array('..', '.')) as $plugin){
 
                 // Check if a Model already exist
                 if(!isset($this->Models[ucfirst($plugin)])){
@@ -71,6 +71,9 @@ class Models {
 
                     // Check if the plugin includes a Model
                     if(is_file($path)){
+
+                        // Include the Model
+                        require_once $path;
 
                         // Get the Model Base Name and Class Name
                         $baseName = ucfirst($plugin);
