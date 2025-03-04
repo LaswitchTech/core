@@ -239,6 +239,12 @@ class Config {
         return $this;
     }
 
+    /**
+     * Check if a configuration file exist.
+     *
+     * @param  string  $File
+     * @return boolean
+     */
     public function check($File){
 
         // Check if configuration file without loading it
