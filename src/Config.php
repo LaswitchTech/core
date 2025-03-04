@@ -292,4 +292,34 @@ class Config {
 
         return $filePath;
     }
+
+    /**
+     * Get/Set a Version.
+     *
+     * @param  string|null  $version
+     * @return string $version
+     */
+    public function version(?string $version = null): string
+    {
+
+        // Check if VERSION file exist and create it if not
+        if(!is_file($this->root() . DIRECTORY_SEPARATOR . "VERSION")){
+
+            // Create the VERSION file
+            file_put_contents($this->root() . DIRECTORY_SEPARATOR . "VERSION", "v0.0.0");
+        }
+
+        if($version){
+
+            // Save Version
+            file_put_contents($this->root() . DIRECTORY_SEPARATOR . "VERSION", $version);
+        } else {
+
+            // Retrieve Current Version
+            $version = file_get_contents($this->root() . DIRECTORY_SEPARATOR . "VERSION");
+            $version = preg_replace('/\s+/', '', $version);
+        }
+
+        return $version;
+    }
 }
