@@ -249,6 +249,7 @@ class Role {
         $role = $query->table('roles')
             ->select('id')
             ->where('name', $this->name)
+            ->where('id', 9999, '<>')
             ->limit(1)
             ->result();
 
