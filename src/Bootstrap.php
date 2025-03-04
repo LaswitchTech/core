@@ -156,7 +156,8 @@ class Bootstrap {
         "STYLE" => [
             "class" => "\\LaswitchTech\\Core\\Style",
             "scope" => [
-                "ROUTER"
+                "ROUTER",
+                "API"
             ]
         ],
         "BUILDER" => [
