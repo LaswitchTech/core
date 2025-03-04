@@ -556,4 +556,20 @@ class Schema {
         $result = $this->connector->query($sql);
         return $result->num_rows > 0;
     }
+
+    /**
+     * Return list of tables
+     *
+     * @return array
+     */
+    public function tables(): array
+    {
+        $sql = "SHOW TABLES";
+        $result = $this->connector->query($sql);
+        $tables = [];
+        while ($row = $result->fetch_row()) {
+            $tables[] = $row[0];
+        }
+        return $tables;
+    }
 }
