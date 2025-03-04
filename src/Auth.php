@@ -326,6 +326,9 @@ class Auth {
                 // Check if the user is verified
                 $status = ($status && $this->user->verified());
 
+                // Check if the user's organization is active
+                $status = ($status && $this->user->organization['isActive'] > 0);
+
                 // Check the user status
                 if($status){
 
