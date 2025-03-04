@@ -76,6 +76,13 @@ class Database {
         return $this->connector->isConnected();
     }
 
+    public function connect(): void
+    {
+        if ($this->connector !== null) {
+            $this->connector->connect();
+        }
+    }
+
     /**
      * Close the connection
      */
