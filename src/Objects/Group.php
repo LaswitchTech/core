@@ -141,6 +141,7 @@ class Group {
         $group = $query->table('groups')
             ->select('id')
             ->where('name', $this->name)
+            ->where('id', 9999, '<>')
             ->limit(1)
             ->result();
 
