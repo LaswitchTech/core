@@ -278,7 +278,9 @@ class Auth {
         global $REQUEST;
 
         if ($REQUEST->getParams('REQUEST','username') && $REQUEST->getParams('REQUEST','password')) {
-            return $this->authenticate($REQUEST->getParams('REQUEST','username'), $REQUEST->getParams('REQUEST','password'));
+            if (!is_null($REQUEST->getParams('REQUEST','login')) || !is_null($REQUEST->getParams('REQUEST','signin'))) {
+                return $this->authenticate($REQUEST->getParams('REQUEST','username'), $REQUEST->getParams('REQUEST','password'));
+            }
         }
 
         return false;
