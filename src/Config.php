@@ -113,6 +113,26 @@ class Config {
     }
 
     /**
+     * Reload a configuration file.
+     *
+     * @param  string  $File
+     * @return object $this
+     */
+    public function reload($File): object
+    {
+
+        // If not already saved, add File in the list
+        if(isset($this->Files[$File])){
+
+            // Retrieve File and Load it
+            $this->Configurations[$File] = json_decode(file_get_contents($this->Files[$File]),true);
+        }
+
+        // Return
+        return $this;
+    }
+
+    /**
      * Get a Setting.
      *
      * @param  string  $File
