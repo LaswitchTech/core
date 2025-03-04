@@ -21,9 +21,8 @@ class Group {
     // Properties
     private $name;
     private $description;
-    private $organizations;
     private $users;
-    private $default; // Applies to all users
+    private $default;
 
     /**
      * Constructor
@@ -39,7 +38,7 @@ class Group {
         // Retrieve Group
         $query = $this->Database->query();
         $group = $query->table('groups')
-            ->select('name, description, organizations, users, isDefault')
+            ->select('*')
             ->where('name', $name)
             ->limit(1)
             ->result();
@@ -47,12 +46,10 @@ class Group {
         // Set Properties
         $this->name = count($group) > 0 ? $group[0]['name'] : $name;
         $this->description = count($group) > 0 ? $group[0]['description'] : null;
-        $this->organizations = count($group) > 0 ? $group[0]['organizations'] : null;
         $this->users = count($group) > 0 ? $group[0]['users'] : null;
         $this->default = count($group) > 0 ? $group[0]['isDefault'] : null;
 
         // Decode Members
-        $this->organizations = json_decode($this->organizations ?? '', true) ?? [];
         $this->users = json_decode($this->users ?? '', true) ?? [];
     }
 
@@ -71,18 +68,12 @@ class Group {
     /**
      * Add a Member from the Group
      *
-     * @param string $type
      * @param int $id
      * @return self
      */
-    public function add(string $type, int $id): self
+    public function add(int $id): self
     {
         switch($type){
-            case 'organizations':
-                $this->organizations[] = $id;
-                $this->organizations = array_unique($this->organizations);
-                sort($this->organizations);
-                break;
             case 'users':
                 $this->users[] = $id;
                 $this->users = array_unique($this->users);
@@ -95,17 +86,12 @@ class Group {
     /**
      * Remove a Member from the Group
      *
-     * @param string $type
      * @param int $id
      * @return self
      */
-    public function remove(string $type, int $id): self
+    public function remove(int $id): self
     {
         switch($type){
-            case 'organizations':
-                $this->organizations = array_diff($this->organizations, [$id]);
-                sort($this->organizations);
-                break;
             case 'users':
                 $this->users = array_diff($this->users, [$id]);
                 sort($this->users);
@@ -123,8 +109,6 @@ class Group {
     public function members(string $type): array
     {
         switch($type){
-            case 'organizations':
-                return $this->organizations;
             case 'users':
                 return $this->users;
         }
@@ -170,7 +154,6 @@ class Group {
             $query->table('groups')
                 ->update([
                     'description' => $this->description,
-                    'organizations' => json_encode($this->organizations, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT),
                     'users' => json_encode($this->users, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT),
                     'isDefault' => $this->default
                 ])
@@ -183,7 +166,6 @@ class Group {
                 ->insert([
                     'name' => $this->name,
                     'description' => $this->description,
-                    'organizations' => json_encode($this->organizations, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT),
                     'users' => json_encode($this->users, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT),
                     'isDefault' => $this->default
                 ])
