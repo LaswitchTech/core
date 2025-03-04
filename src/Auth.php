@@ -375,4 +375,186 @@ class Auth {
     {
         return is_null($user) ? $this->user : new Objects\User($user);
     }
+
+    /**
+     * Check if the module is installed
+     *
+     * @return bool
+     */
+    public function isInstalled(): bool
+    {
+        // Check if the database has been initialized
+        if (is_null($this->Database)) {
+            return false;
+        }
+
+        // Check if the database is currently installed
+        if (!$this->Database->isInstalled()) {
+            return false;
+        }
+
+        // Check if the database is currently connected
+        if (!$this->Database->isConnected()) {
+            return false;
+        }
+
+        // Check if the module is currently installed
+        return $this->Config->reload('auth')->get('auth', 'installed') === true;
+    }
+
+    /**
+     * Install the module
+     *
+     * @param array $config
+     * @return array
+     */
+    public function install(array $config): array
+    {
+        // Import Global Variables
+        global $UUID;
+
+        // Initialize the status
+        $status = [];
+
+        // Check if the config includes all the required fields
+        if(isset($config['organization'],$config['username'],$config['password'])){
+
+            // Check if the database has been initialized
+            if (!is_null($this->Database)) {
+
+                // Check if the database is currently installed
+                if ($this->Database->isInstalled()) {
+
+                    // Connect to the database
+                    $this->Database->connect();
+
+                    // Check if the database is currently connected
+                    if ($this->Database->isConnected()) {
+
+                        // Create the organization
+                        $Query = $this->Database->query()
+                            ->table('organizations')
+                            ->insert([
+                                'owner' => $config['username']
+                            ]);
+                        $affected = $Query->execute();
+                        $organizationId = $Query->lastId();
+
+                        // Create the organization vCard
+                        $Query = $this->Database->query()
+                            ->table('vcards')
+                            ->insert([
+                                'owner' => $config['username'],
+                                'category' => 'Organization',
+                                'name' => $config['organization'],
+                                'organization' => $organizationId
+                            ]);
+                        $affected += $Query->execute();
+                        $organizationVcardId = $Query->lastId();
+
+                        // Create the user vCard
+                        $Query = $this->Database->query()
+                            ->table('vcards')
+                            ->insert([
+                                'owner' => $config['username'],
+                                'category' => 'User',
+                                'email' => $config['username'],
+                                'organization' => $organizationId
+                            ]);
+                        $affected += $Query->execute();
+                        $userVcardId = $Query->lastId();
+
+                        // Create the user backend
+                        $Query = $this->Database->query()
+                            ->table('backends')
+                            ->insert([
+                                'owner' => $config['username'],
+                                'type' => 'local',
+                                'password' => password_hash($config['password'], PASSWORD_DEFAULT),
+                                'organization' => $organizationId
+                            ]);
+                        $affected += $Query->execute();
+                        $userBackendId = $Query->lastId();
+
+                        // Create the user api token
+                        $Query = $this->Database->query()
+                            ->table('tokens')
+                            ->insert([
+                                'owner' => $config['username'],
+                                'token' => $UUID->toString($config['username'])
+                            ]);
+                        $affected += $Query->execute();
+                        $userTokenId = $Query->lastId();
+
+                        // Create the user
+                        $Query = $this->Database->query()
+                            ->table('users')
+                            ->insert([
+                                'owner' => $config['username'],
+                                'username' => $config['username'],
+                                'backend' => $userBackendId,
+                                'vcard' => $userVcardId,
+                                'organization' => $organizationId,
+                                'token' => $userTokenId,
+                                'isVerified' => 1
+                            ]);
+                        $affected += $Query->execute();
+                        $userId = $Query->lastId();
+
+                        // Update the organization
+                        $Query = $this->Database->query()
+                            ->table('organizations')
+                            ->update([
+                                'users' => json_encode([$userId], JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT),
+                                'vcard' => $organizationVcardId,
+                                'isActive' => 1
+                            ])
+                            ->where('id', $organizationId);
+                        $affected += $Query->execute();
+
+                        // Update the user token
+                        $Query = $this->Database->query()
+                            ->table('tokens')
+                            ->update([
+                                'user' => $userId
+                            ])
+                            ->where('id', $userTokenId);
+                        $affected += $Query->execute();
+
+                        // Update the group membership
+                        $Query = $this->Database->query()
+                            ->table('groups')
+                            ->update([
+                                'users' => json_encode([$userId], JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT)
+                            ])
+                            ->where('name', 'Administrator');
+                        $affected += $Query->execute();
+
+                        // Check if the database records were created
+                        if($affected >= 9){
+
+                            // Set the auth module as installed
+                            $this->Config->set('auth', 'installed', true);
+
+                            // Add a true status
+                            $status[] = true;
+                        } else {
+                            $status[] = "Failed to install";
+                        }
+                    } else {
+                        $status[] = "Database not connected";
+                    }
+                } else {
+                    $status[] = "Database not installed";
+                }
+            } else {
+                $status[] = "Database not initialized";
+            }
+        } else {
+            $status[] = "Missing required fields";
+        }
+
+        // Return the statuses
+        return $status;
+    }
 }
