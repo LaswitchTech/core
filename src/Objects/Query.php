@@ -585,4 +585,15 @@ class Query {
 
         return '?';
     }
+
+    /**
+     * Set the auto increment value
+     *
+     * @param int $int
+     */
+    public function autoIncrement(int $int): void
+    {
+        $sql = "ALTER TABLE `{$this->table}` AUTO_INCREMENT = {$int}";
+        $this->connector->query($sql);
+    }
 }
