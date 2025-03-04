@@ -48,6 +48,21 @@ class Auth {
      */
     public function isAuthenticated(): bool
     {
+        // Check if the database has been initialized
+        if (is_null($this->Database)) {
+            return false;
+        }
+
+        // Check if the database is currently installed
+        if (!$this->Database->isInstalled()) {
+            return false;
+        }
+
+        // Check if the database is currently connected
+        if (!$this->Database->isConnected()) {
+            return false;
+        }
+
         // Check if the user is already authenticated
         if ($this->status) {
             return $this->status;
