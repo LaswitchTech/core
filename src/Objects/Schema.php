@@ -62,7 +62,7 @@ class Schema {
      *
      * @var string
      */
-    private $collation = 'unicode_ci';
+    private $collation = 'general_ci';
 
     /**
      * Constructor
@@ -481,7 +481,7 @@ class Schema {
         // For demonstration, assume InnoDB engine
         // In real usage, you might store the engine in definition or config
         $columnsSQL = implode(",\n  ", $columnLines);
-        $sql = "CREATE TABLE `{$this->table}` (\n  {$columnsSQL}\n) ENGINE={$this->engine} DEFAULT CHARSET={$this->charset} COLLATE={$this->collation}";
+        $sql = "CREATE TABLE `{$this->table}` (\n  {$columnsSQL}\n) ENGINE={$this->engine} DEFAULT CHARSET={$this->charset} COLLATE={$this->charset}_{$this->collation}";
         return $sql;
     }
 
