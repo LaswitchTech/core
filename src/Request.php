@@ -121,7 +121,7 @@ class Request {
      * @param string $key
      * @return mixed
      */
-    public function getParams(string $type,?string $key = null): mixed
+    public function getParams(string $type,?string $key = null)
     {
         switch(strtoupper($type)){
             case 'GET':
@@ -164,7 +164,7 @@ class Request {
      * @param string $value
      * @return mixed
      */
-    public function setParams(string $type, string $key,?string $value): mixed
+    public function setParams(string $type, string $key,?string $value)
     {
         switch(strtoupper($type)){
             case 'COOKIE':
