@@ -93,9 +93,7 @@ class Router {
             $pluginPath = $pluginsPath . DIRECTORY_SEPARATOR . $plugin;
             if(is_file($pluginPath . DIRECTORY_SEPARATOR . 'routes.cfg')){
                 foreach(json_decode(file_get_contents($pluginPath . DIRECTORY_SEPARATOR . 'routes.cfg'),true) as $route => $param){
-                    if(!isset($this->Routes[$route])){
-                        $this->Routes[$route] = $this->route($route, $param, 'lib' . DIRECTORY_SEPARATOR . 'plugins' . DIRECTORY_SEPARATOR . $plugin);
-                    }
+                    $this->Routes[$route] = $this->route($route, $param, 'lib' . DIRECTORY_SEPARATOR . 'plugins' . DIRECTORY_SEPARATOR . $plugin);
                 }
             }
         }
@@ -112,12 +110,6 @@ class Router {
      */
     public function route(string $route, ?array $data = null, ?string $directory = null): Objects\Route
     {
-        if(isset($this->Routes[$route])){
-            if(!is_null($data)){
-                $this->Routes[$route]->set($data);
-            }
-            return $this->Routes[$route];
-        }
         return new Objects\Route($route, $data, $directory);
     }
 
