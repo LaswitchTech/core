@@ -42,17 +42,8 @@ class Database {
         // Load the Database Configuration
         $this->Config->add('database');
 
-        // Instantiate the appropriate connector
-        switch($this->Config->get('database', 'connector')) {
-            case 'mysql':
-                $this->connector = new Connectors\MySQL();
-                break;
-            default:
-                throw new Exception('Invalid database connector');
-        }
-
-        // Connect to the database
-        $this->connector->connect();
+        // Initiate the Connector
+        $this->init();
     }
 
     /**
@@ -61,6 +52,23 @@ class Database {
     public function __destruct()
     {
         $this->close();
+    }
+
+    /**
+     * Initialize the database connector
+     */
+    private function init(): void
+    {
+        // Instantiate the appropriate connector
+        switch($this->Config->get('database', 'connector')) {
+            case 'mysql':
+                // Connect to the database
+                $this->connector = new Connectors\MySQL();
+                $this->connector->connect();
+                break;
+            default:
+                // throw new Exception('Invalid database connector');
+        }
     }
 
     /**
@@ -76,8 +84,14 @@ class Database {
         return $this->connector->isConnected();
     }
 
+    /**
+     * Connect to the database
+     */
     public function connect(): void
     {
+        if ($this->connector === null) {
+            $this->init();
+        }
         if ($this->connector !== null) {
             $this->connector->connect();
         }
