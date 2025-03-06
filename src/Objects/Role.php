@@ -201,10 +201,14 @@ class Role {
     /**
      * Retrieve Permissions from the Role
      *
+     * @param string $key
      * @return self
      */
-    public function permissions(): array
+    public function permissions(?string $key = null): mixed
     {
+        if($key){
+            return $this->permissions[$key] ?? 0;
+        }
         return $this->permissions;
     }
 
