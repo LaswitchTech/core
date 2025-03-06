@@ -96,7 +96,6 @@ class User {
             ->where('id', 9999, '<>')
             ->filter()
             ->where('users', $this->user['id'], 'CONTAINS', 'OR')
-            ->where('organizations', $this->user['organization']['id'], 'CONTAINS', 'OR')
             ->where('isDefault', 1, '=', 'OR');
 
         // Retrieve Groups
@@ -117,7 +116,6 @@ class User {
             ->where('id', 9999, '<>')
             ->filter()
             ->where('users', $this->user['id'], 'CONTAINS', 'OR')
-            ->where('organizations', $this->user['organization']['id'], 'CONTAINS', 'OR')
             ->where('isDefault', 1, '=', 'OR');
 
         // Filter by Groups
