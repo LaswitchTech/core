@@ -217,10 +217,14 @@ class User {
     /**
      * Retrieve the User's Groups
      *
+     * @param bool $asObjects
      * @return array
      */
-    public function groups(): array
+    public function groups(bool $asObjects = false): array
     {
+        if($asObjects){
+            return $this->groups;
+        }
         return array_keys($this->groups);
     }
 
@@ -238,10 +242,14 @@ class User {
     /**
      * Retrieve the User's Roles
      *
+     * @param bool $asObjects
      * @return array
      */
-    public function roles(): array
+    public function roles(bool $asObjects = false): array
     {
+        if($asObjects){
+            return $this->roles;
+        }
         return array_keys($this->roles);
     }
 
