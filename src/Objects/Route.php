@@ -22,6 +22,7 @@ class Route {
     private $Request;
     private $Output;
     private $CSRF;
+    private $Model;
     private $Helper;
     private $Builder;
     private $Style;
@@ -51,7 +52,7 @@ class Route {
     public function __construct(string $route, ?array $data = null, ?string $directory = null)
     {
         // Global Variables
-        global $CONFIG, $REQUEST, $OUTPUT, $LOCALE , $AUTH, $CSRF, $HELPER, $BUILDER, $STYLE;
+        global $CONFIG, $REQUEST, $OUTPUT, $LOCALE , $AUTH, $CSRF, $MODEL, $HELPER, $BUILDER, $STYLE;
 
         // Set Global Properties
         $this->Config = $CONFIG;
@@ -60,6 +61,7 @@ class Route {
         $this->Request = $REQUEST;
         $this->Output = $OUTPUT;
         $this->CSRF = $CSRF;
+        $this->Model = $MODEL;
         $this->Helper = $HELPER;
         $this->Builder = $BUILDER;
         $this->Style = $STYLE;
