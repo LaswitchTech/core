@@ -43,6 +43,11 @@ class API {
      */
     public function start(): self
     {
+        // Import Global Variables
+        global $HELPER;
+
+        // Initialize the Core Framework
+        $HELPER->Core->init();
 
         // Retrieve the namespace
         $namespace = $this->Request->getNamespace();
