@@ -134,7 +134,7 @@ class Database {
      */
     public function isInstalled(): bool
     {
-        return $this->Config->reload('database')->get('database', 'installed');
+        return filter_var($this->Config->reload('database')->get('database', 'installed'), FILTER_VALIDATE_BOOLEAN);
     }
 
     /**
