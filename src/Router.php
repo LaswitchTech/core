@@ -205,8 +205,19 @@ class Router {
      */
     public function start(): self
     {
+        // Import Global Variables
+        global $HELPER;
+
+        // Initialize the Core Framework
+        $HELPER->Core->init();
+
+        // Set the route
         $this->set($this->Request->getNamespace());
+
+        // Render the route
         $this->Route->render();
+
+        // Return the instance
         return $this;
     }
 }
