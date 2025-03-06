@@ -200,6 +200,7 @@ class Query {
      */
     public function filter(string $conjunction = 'AND'): self
     {
+        $conjunction = strtoupper($conjunction);
         $conjunction = (in_array($conjunction,self::conjunctions)) ? $conjunction : 'AND';
 
         $this->where[] = [
