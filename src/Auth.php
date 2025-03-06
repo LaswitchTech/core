@@ -132,7 +132,15 @@ class Auth {
      */
     public function isAuthorized(string $permission, int $level): bool
     {
-        return $level <= 0;
+        if($this->isAuthenticated()){
+            $roles = $this->user->roles(true);
+            foreach($roles as $role){
+                if($role->permissions($permission) >= $level){
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     /**
