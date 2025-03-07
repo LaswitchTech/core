@@ -444,8 +444,8 @@ class SMTP {
                         ->subject('Test Email from %HOST%')
                         ->body('This is a test email')
                         ->var('logo', 'data:image/png;base64,' . base64_encode(file_get_contents($this->Config->root() . '/src/icons/icon.png')))
-                        ->var('brand', '%HOST%')
-                        ->var('greetings', "Sincerely,<br>%HOST%");
+                        ->var('brand', 'Core Framework')
+                        ->var('greetings', "Sincerely");
 
                     // Send the message
                     $message->send();
