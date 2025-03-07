@@ -82,7 +82,7 @@ class Schema {
      *
      * @return mixed
      */
-    public function describe()
+    public function describe(): array
     {
         $definitions = [];
         foreach ($this->definitions as $column => $definition) {
