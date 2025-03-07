@@ -53,7 +53,7 @@ abstract class Endpoint {
     {
 
         // Send the output
-        $this->Output->print('Endpoint Action not Implemented', array('HTTP/1.1 501 Not Implemented'));
+        $this->Output->print('Endpoint Action['.$name.'] not Implemented', array('HTTP/1.1 501 Not Implemented'));
     }
 
     /**
