@@ -158,10 +158,10 @@ class Database {
             $this->Config->set('database', 'username', $config['username']);
             $this->Config->set('database', 'password', $config['password']);
 
-            // Connect to the database
+            // Connect to the database server
             $this->connect();
 
-            // Check if the database is connected
+            // Check if the database server is connected
             if($this->isConnected()){
 
                 // Retrieve the current version
@@ -316,7 +316,7 @@ class Database {
                 }
             } else {
                 $this->Config->delete('database');
-                $status[] = "Could not connect to the database";
+                $status[] = "Could not connect to the database server";
             }
         } else {
             $status[] = "Missing required fields";
