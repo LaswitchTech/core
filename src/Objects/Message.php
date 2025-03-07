@@ -19,7 +19,7 @@ class Message {
 	// Constants
 	const SMTP_OK = '250';
 	const SMTP_DATA_OK = '354';
-	const SMTP_DATA_DIRECTORY = 'data';
+	const SMTP_DATA_DIRECTORY = 'data/messages';
 
     // Global Properties
     private $Request;
