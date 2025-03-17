@@ -110,7 +110,7 @@ class Router {
      */
     public function route(string $route, ?array $data = null, ?string $directory = null): Objects\Route
     {
-        return new Objects\Route($route, $data, $directory);
+        return new Objects\Route($this, $route, $data, $directory);
     }
 
     /**
