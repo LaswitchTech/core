@@ -198,6 +198,21 @@ class Router {
         return $this;
     }
 
+    /** */
+    public function render($route = null): self
+    {
+        // Set the route
+        if($route){
+            $this->set($route);
+        }
+
+        // Render the route
+        $this->Route->render();
+
+        // Return the instance
+        return $this;
+    }
+
     /**
      * Start the router
      *
@@ -211,11 +226,8 @@ class Router {
         // Initialize the Core Framework
         $HELPER->Core->init();
 
-        // Set the route
-        $this->set($this->Request->getNamespace());
-
         // Render the route
-        $this->Route->render();
+        $this->render($this->Request->getNamespace());
 
         // Return the instance
         return $this;
