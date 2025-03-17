@@ -274,10 +274,16 @@ class User {
     }
 
     /**
-     * Retrieve the User's VCard
+     * Retrieve the User's vCard
+     *
+     * @param string $key
+     * @return mixed
      */
-    public function vcard(): array
+    public function vcard(string $key = null): mixed
     {
+        if($key){
+            return $this->user['vcard'][$key] ?? null;
+        }
         return $this->user['vcard'];
     }
 
