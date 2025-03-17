@@ -46,7 +46,7 @@ class Request {
         $this->Arguments = $argv ?? [];
 
         // Unset the global variables
-        unset($_SERVER, $_GET, $_ENV, $_POST, $_FILES, $_REQUEST, $argv, $argc);
+        unset($_GET, $_POST, $_FILES, $_REQUEST, $argv, $argc);
     }
 
     /**
