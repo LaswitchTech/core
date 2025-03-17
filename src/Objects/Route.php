@@ -27,6 +27,9 @@ class Route {
     private $Builder;
     private $Style;
 
+    // Parent Object
+    public $Router;
+
     // Properties
     private $Route;
     private $Directory;
@@ -45,11 +48,12 @@ class Route {
     /**
      * Constructor
      *
+     * @param object $router
      * @param string $route
      * @param array|null $data
      * @param string|null $directory
      */
-    public function __construct(string $route, ?array $data = null, ?string $directory = null)
+    public function __construct(object $router, string $route, ?array $data = null, ?string $directory = null)
     {
         // Global Variables
         global $CONFIG, $REQUEST, $OUTPUT, $LOCALE , $AUTH, $CSRF, $MODEL, $HELPER, $BUILDER, $STYLE;
@@ -66,6 +70,9 @@ class Route {
         $this->Builder = $BUILDER;
         $this->Style = $STYLE;
         $this->Directory = $directory;
+
+        // Set Router
+        $this->Router = $router;
 
         // Set Properties
         $this->Route = $route;
