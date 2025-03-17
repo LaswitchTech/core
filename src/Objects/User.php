@@ -288,6 +288,20 @@ class User {
     }
 
     /**
+     * Retrieve the User's Organization
+     *
+     * @param string $key
+     * @return mixed
+     */
+    public function organization(string $key = null): mixed
+    {
+        if($key){
+            return $this->user['organization'][$key] ?? ($this->user['organization']['vcard'][$key] ?? null);
+        }
+        return $this->user['organization'];
+    }
+
+    /**
      * Retrieve the User's Associates
      */
     public function associates(): array
