@@ -63,6 +63,15 @@ class User {
         // Set Properties
         $this->user = $user[0];
 
+        // Retrieve the organization's vCard
+        $query = $this->Database->query()
+            ->table('vcards')
+            ->select('*')
+            ->where('id', 9999, '<>')
+            ->where('id', $this->user['organization']['vcard'])
+            ->limit(1);
+        $this->user['organization']['vcard'] = $query->fetch()[0];
+
         // Initialize Backend
         switch($this->user['backend']['type']) {
             case 'local':
