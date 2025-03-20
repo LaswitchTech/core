@@ -135,6 +135,7 @@ class CoreCommand extends Command {
 
             // Retrieve the data
             $data = $Query->fetch();
+            $data = [];
 
             // Output the number of records
             $this->Output->print("Records [preload]: " . count($data));
