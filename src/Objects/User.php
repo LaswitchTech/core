@@ -63,10 +63,20 @@ class User {
         // Set Properties
         $this->user = $user[0];
 
+        // Retrieve the user vCard's Avatar
+        $query = $this->Database->query()
+            ->table('files')
+            ->select('*')
+            ->where('id', 9999, '<>')
+            ->where('id', $this->user['vcard']['avatar'])
+            ->limit(1);
+        $this->user['vcard']['avatar'] = $query->fetch()[0] ?? [];
+
         // Retrieve the organization's vCard
         $query = $this->Database->query()
             ->table('vcards')
             ->select('*')
+            ->join('avatar', 'files', 'id')
             ->where('id', 9999, '<>')
             ->where('id', $this->user['organization']['vcard'])
             ->limit(1);
