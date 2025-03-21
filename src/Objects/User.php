@@ -22,6 +22,7 @@ class User {
 
     // Properties
     protected $user;
+    protected $organization;
     protected $backend;
     protected $roles;
     protected $groups;
@@ -72,15 +73,8 @@ class User {
             ->limit(1);
         $this->user['vcard']['avatar'] = $query->fetch()[0] ?? [];
 
-        // Retrieve the organization's vCard
-        $query = $this->Database->query()
-            ->table('vcards')
-            ->select('*')
-            ->join('avatar', 'files', 'id')
-            ->where('id', 9999, '<>')
-            ->where('id', $this->user['organization']['vcard'])
-            ->limit(1);
-        $this->user['organization']['vcard'] = $query->fetch()[0];
+        // Retrieve the Organization
+        $this->organization = new Objects\Organization($this->user['organization']['id']);
 
         // Initialize Backend
         switch($this->user['backend']['type']) {
@@ -173,25 +167,25 @@ class User {
         return $this->user[$key] ?? null;
     }
 
-    /**
-     * Retrieve the User ID
-     *
-     * @return int
-     */
-    public function id(): int
-    {
-        return $this->user['id'];
-    }
+    // /**
+    //  * Retrieve the User ID
+    //  *
+    //  * @return int
+    //  */
+    // public function id(): int
+    // {
+    //     return $this->user['id'];
+    // }
 
-    /**
-     * Retrieve the User Username
-     *
-     * @return string
-     */
-    public function username(): string
-    {
-        return $this->user['username'];
-    }
+    // /**
+    //  * Retrieve the User Username
+    //  *
+    //  * @return string
+    //  */
+    // public function username(): string
+    // {
+    //     return $this->user['username'];
+    // }
 
     /**
      * Check if the User is Verified
@@ -300,15 +294,11 @@ class User {
     /**
      * Retrieve the User's Organization
      *
-     * @param string $key
-     * @return mixed
+     * @return Objects\Organization
      */
-    public function organization(string $key = null): mixed
+    public function organization(): Objects\Organization
     {
-        if($key){
-            return $this->user['organization'][$key] ?? ($this->user['organization']['vcard'][$key] ?? null);
-        }
-        return $this->user['organization'];
+        return $this->organization;
     }
 
     /**
@@ -323,6 +313,14 @@ class User {
             }
         }
         return $users;
+    }
+
+    /**
+     * Retrieve the User's Colleagues
+     */
+    public function colleagues(): array
+    {
+        return $this->organization->members();
     }
 
     // /**
