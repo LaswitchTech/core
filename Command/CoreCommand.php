@@ -104,6 +104,21 @@ class CoreCommand extends Command {
             // Retrieve the data
             $data = $Query->fetch();
 
+            // Add some sanitizing of some tables
+            if(in_array($table, ['groups', 'roles', 'organizations'])){
+
+                // Loop through the data
+                foreach($data as $key => $value){
+
+                    // Check if the key users exists
+                    if(array_key_exists('users', $value)){
+
+                        // Set the value of users to null
+                        $data[$key]['users'] = null;
+                    }
+                }
+            }
+
             // Output the number of records
             $this->Output->print("Records [required]: " . count($data));
             // var_dump($Query->__toString());
