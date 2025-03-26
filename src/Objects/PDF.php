@@ -402,8 +402,8 @@ class PDF {
      */
     public function getVars(): array
     {
-        // Regular expression to match the variables in the format %VAR%
-        $pattern = '/%([^%]+)%/';
+        // Regular expression to match the variables in the format {{VAR}}
+        $pattern = '/{{([^}]+)}}/';
 
         // Find all matches
         preg_match_all($pattern, $this->html, $matches);
@@ -426,7 +426,7 @@ class PDF {
     {
         // Replace the placeholders with the corresponding data
         foreach ($values as $key => $value) {
-            $string = str_replace('%' . $key . '%', $value ?? '', $string);
+            $string = str_replace('{{' . $key . '}}', $value ?? '', $string);
         }
 
         // Return the string
