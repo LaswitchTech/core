@@ -63,14 +63,21 @@ class API {
             $class = ucfirst($endpoint) . "Endpoint";
             $method = $parts[1] . 'Action';
 
-            // Set the endpoint path
-            $path = $this->Config->root() . "/Endpoint/" . ucfirst($endpoint) . "Endpoint.php";
+            // Set Path
+            $path = $this->Config->root() . DIRECTORY_SEPARATOR . "vendor" . DIRECTORY_SEPARATOR . "laswitchtech" . DIRECTORY_SEPARATOR . "core" . DIRECTORY_SEPARATOR . "Endpoint" . DIRECTORY_SEPARATOR . $class . ".php";
 
-            // Check if the endpoint exists
+            // Check if the file exists
             if(!is_file($path)){
 
-                // Set the path to the plugin path
-                $path = $this->Config->root() . "/lib/plugins/" . $endpoint . "/Endpoint.php";
+                // Set Local Path
+                $path = $this->Config->root() . DIRECTORY_SEPARATOR . "Endpoint" . DIRECTORY_SEPARATOR . $class . ".php";
+            }
+
+            // Check if the file exists
+            if(!is_file($path)){
+
+                // Set Plugin Path
+                $path = $this->Config->root() . DIRECTORY_SEPARATOR . "lib" . DIRECTORY_SEPARATOR . "plugins" . DIRECTORY_SEPARATOR . strtolower(str_replace('Endpoint','',$class)) . DIRECTORY_SEPARATOR . "Endpoint.php";
             }
 
             // Check if the endpoint exists
