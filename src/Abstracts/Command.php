@@ -20,6 +20,8 @@ abstract class Command {
     protected $Helper;
     protected $Output;
     protected $Request;
+    protected $Config;
+    protected $Log;
 
     /**
      * Constructor
@@ -27,13 +29,15 @@ abstract class Command {
     public function __construct(){
 
         // Import Global Variables
-        global $MODEL, $HELPER, $OUTPUT, $REQUEST;
+        global $MODEL, $HELPER, $OUTPUT, $REQUEST, $CONFIG, $LOG;
 
         // Initialize Properties
         $this->Model = $MODEL;
         $this->Helper = $HELPER;
         $this->Output = $OUTPUT;
         $this->Request = $REQUEST;
+        $this->Config = $CONFIG;
+        $this->Log = $LOG;
     }
 
     /**
