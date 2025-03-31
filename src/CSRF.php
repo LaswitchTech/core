@@ -62,7 +62,7 @@ class CSRF {
 
         // Check if the method used should be validated
         if(!defined('STDIN') && in_array($this->Request->getMethod(), ['POST', 'PUT', 'PATCH', 'DELETE'])){
-            if(in_array(get_class($this->Auth),["Module","LaswitchTech\Core\Module"]) || !$this->Auth->isInstalled() || !$this->Auth->isLoaded() || !$this->Auth->isAuthenticated() || !in_array($this->Auth->method(),["bearer","basic"])){
+            if(in_array(get_class($this->Auth),["Module","LaswitchTech\Core\Module"]) || !$this->Auth->isLoaded() || !$this->Auth->isAuthenticated() || !in_array($this->Auth->method(),["bearer","basic"])){
                 if(!$this->validate($this->Request->getParams('POST', $this->Field) ?? null)){
                     $this->Output->print(
                         'Invalid CSRF Token',
