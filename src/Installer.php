@@ -35,7 +35,7 @@ class Installer {
         $this->Config = $CONFIG;
 
         // Configure Globals
-        $this->Config->add('installer')->add('application');
+        $this->Config->add('installer');
     }
 
     /**
