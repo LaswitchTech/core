@@ -228,6 +228,7 @@ class Bootstrap {
         // Initialize Config
         $CONFIG = new Config('bootstrap');
         $this->Config = $CONFIG;
+        $this->Config->add('application');
 
         // Set the scope
         $this->scope = strtoupper($scope);
