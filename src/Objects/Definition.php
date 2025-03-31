@@ -156,7 +156,7 @@ class Definition {
      * @param string $value
      * @return self
      */
-    public function default(string $value = null): self
+    public function default(?string $value = null): self
     {
         $this->definition['Default'] = $value;
         return $this;

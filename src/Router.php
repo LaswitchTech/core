@@ -93,9 +93,7 @@ class Router {
             $pluginPath = $pluginsPath . DIRECTORY_SEPARATOR . $plugin;
             if(is_file($pluginPath . DIRECTORY_SEPARATOR . 'routes.cfg')){
                 foreach(json_decode(file_get_contents($pluginPath . DIRECTORY_SEPARATOR . 'routes.cfg'),true) as $route => $param){
-                    if(!isset($this->Routes[$route])){
-                        $this->Routes[$route] = $this->route($route, $param, 'lib' . DIRECTORY_SEPARATOR . 'plugins' . DIRECTORY_SEPARATOR . $plugin);
-                    }
+                    $this->Routes[$route] = $this->route($route, $param, 'lib' . DIRECTORY_SEPARATOR . 'plugins' . DIRECTORY_SEPARATOR . $plugin);
                 }
             }
         }
@@ -112,13 +110,7 @@ class Router {
      */
     public function route(string $route, ?array $data = null, ?string $directory = null): Objects\Route
     {
-        if(isset($this->Routes[$route])){
-            if(!is_null($data)){
-                $this->Routes[$route]->set($data);
-            }
-            return $this->Routes[$route];
-        }
-        return new Objects\Route($route, $data, $directory);
+        return new Objects\Route($this, $route, $data, $directory);
     }
 
     /**
@@ -207,14 +199,42 @@ class Router {
     }
 
     /**
+     * Render the route
+     *
+     * @param string $route
+     * @return self
+     */
+    public function render($route = null): self
+    {
+        // Set the route
+        if($route){
+            $this->set($route);
+        }
+
+        // Render the route
+        $this->Route->render();
+
+        // Return the instance
+        return $this;
+    }
+
+    /**
      * Start the router
      *
      * @return self
      */
     public function start(): self
     {
-        $this->set($this->Request->getNamespace());
-        $this->Route->render();
+        // Import Global Variables
+        global $HELPER;
+
+        // Initialize the Core Framework
+        $HELPER->Core->init();
+
+        // Render the route
+        $this->render($this->Request->getNamespace());
+
+        // Return the instance
         return $this;
     }
 }

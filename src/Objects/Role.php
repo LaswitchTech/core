@@ -21,7 +21,6 @@ class Role {
     // Properties
     private $name;
     private $description;
-    private $organizations = [];
     private $users = [];
     private $groups = [];
     private $permissions = [];
@@ -47,7 +46,6 @@ class Role {
             // Set Properties
             $this->name = $name;
             $this->description = $data['description'] ?? null;
-            $this->organizations = $data['organizations'] ?? [];
             $this->users = $data['users'] ?? [];
             $this->groups = $data['groups'] ?? [];
             $this->permissions = $data['permissions'] ?? [];
@@ -65,7 +63,6 @@ class Role {
             // Set Properties
             $this->name = count($role) > 0 ? $role[0]['name'] : $name;
             $this->description = count($role) > 0 ? $role[0]['description'] : null;
-            $this->organizations = count($role) > 0 ? ($role[0]['organizations'] ?? '[]') : '[]';
             $this->users = count($role) > 0 ? ($role[0]['users'] ?? '[]') : '[]';
             $this->groups = count($role) > 0 ? ($role[0]['groups'] ?? '[]') : '[]';
             $this->permissions = count($role) > 0 ? ($role[0]['permissions'] ?? '[]') : '[]';
@@ -73,13 +70,12 @@ class Role {
         }
 
         // Decoding JSON
-        $this->organizations = (gettype($this->organizations) == "string") ? (json_decode($this->organizations ?? '', true) ?? []) : $this->organizations;
         $this->users = (gettype($this->users) == "string") ? (json_decode($this->users ?? '', true) ?? []) : $this->users;
         $this->groups = (gettype($this->groups) == "string") ? (json_decode($this->groups ?? '', true) ?? []) : $this->groups;
         $this->permissions = (gettype($this->permissions) == "string") ? (json_decode($this->permissions ?? '', true) ?? []) : $this->permissions;
 
         // Retrieve Members
-        foreach(['organizations', 'groups', 'users'] as $type){
+        foreach(['groups', 'users'] as $type){
             foreach($this->{$type} as $key => $id){
                 $query = $this->Database->query();
                 $member = $query->table($type)
@@ -122,11 +118,6 @@ class Role {
     public function add(string $type, int $id): self
     {
         switch($type){
-            case 'organizations':
-                $this->organizations[] = $id;
-                $this->organizations = array_unique($this->organizations);
-                sort($this->organizations);
-                break;
             case 'users':
                 $this->users[] = $id;
                 $this->users = array_unique($this->users);
@@ -151,10 +142,6 @@ class Role {
     public function remove(string $type, int $id): self
     {
         switch($type){
-            case 'organizations':
-                $this->organizations = array_diff($this->organizations, [$id]);
-                sort($this->organizations);
-                break;
             case 'users':
                 $this->users = array_diff($this->users, [$id]);
                 sort($this->users);
@@ -198,13 +185,11 @@ class Role {
      * Retrieve Members from the Role
      *
      * @param string $type
-     * @return self
+     * @return array
      */
     public function members(string $type): array
     {
         switch($type){
-            case 'organizations':
-                return $this->organizations;
             case 'users':
                 return $this->users;
             case 'groups':
@@ -216,10 +201,14 @@ class Role {
     /**
      * Retrieve Permissions from the Role
      *
+     * @param string $key
      * @return self
      */
-    public function permissions(): array
+    public function permissions(?string $key = null): mixed
     {
+        if($key){
+            return $this->permissions[$key] ?? 0;
+        }
         return $this->permissions;
     }
 
@@ -249,6 +238,7 @@ class Role {
         $role = $query->table('roles')
             ->select('id')
             ->where('name', $this->name)
+            ->where('id', 9999, '<>')
             ->limit(1)
             ->result();
 
@@ -262,7 +252,6 @@ class Role {
             $query->table('roles')
                 ->update([
                     'description' => $this->description,
-                    'organizations' => json_encode($this->organizations, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT),
                     'users' => json_encode($this->users, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT),
                     'groups' => json_encode($this->groups, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT),
                     'permissions' => json_encode($this->permissions, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT),
@@ -277,7 +266,6 @@ class Role {
                 ->insert([
                     'name' => $this->name,
                     'description' => $this->description,
-                    'organizations' => json_encode($this->organizations, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT),
                     'users' => json_encode($this->users, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT),
                     'groups' => json_encode($this->groups, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT),
                     'permissions' => json_encode($this->permissions, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT),

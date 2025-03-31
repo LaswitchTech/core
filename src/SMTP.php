@@ -383,4 +383,99 @@ class SMTP {
         $message->from($this->username);
         return $message;
     }
+
+    /**
+     * Check if the module is installed
+     *
+     * @return bool
+     */
+    public function isInstalled(): bool
+    {
+        // Check if the module is currently installed
+        return $this->isConnected() && $this->Config->reload('auth')->get('smtp', 'installed') === true;
+    }
+
+    /**
+     * Install the module
+     *
+     * @param array $config
+     * @return array
+     */
+    public function install(array $config): array
+    {
+        // Import Global Variables
+        global $UUID;
+
+        // Initialize the status
+        $status = [];
+
+        // Check if the config includes all the required fields
+        if(isset($config['encryption'],$config['host'],$config['port'],$config['username'],$config['password'])){
+
+            // Save the settings
+            $this->Config->set('smtp', 'encryption', $config['encryption']);
+            $this->Config->set('smtp', 'username', $config['username']);
+            $this->Config->set('smtp', 'password', $config['password']);
+            $this->Config->set('smtp', 'host', $config['host']);
+            $this->Config->set('smtp', 'port', $config['port']);
+
+            // Retrieve SMTP Settings
+            $this->encryption = $this->Config->get('smtp', 'encryption') ?: $this->encryption;
+            $this->username = $this->Config->get('smtp', 'username') ?: $this->username;
+            $this->password = $this->Config->get('smtp', 'password') ?: $this->password;
+            $this->host = $this->Config->get('smtp', 'host') ?: $this->host;
+            $this->port = $this->Config->get('smtp', 'port') ?: $this->port;
+
+            // Connect to the smtp server
+            $this->connect();
+
+            // Check if the smtp server is connected
+            if($this->isConnected()){
+
+                // Authenticate to the SMTP Server
+                $this->authenticate();
+
+                // Check if the SMTP Server is authenticated
+                if($this->isAuthenticated()){
+
+                    // Create a new message
+                    $message = $this->message()
+                        ->to($this->username)
+                        ->subject('Test Email from %HOST%')
+                        ->body('This is a test email')
+                        ->var('logo', 'data:image/png;base64,' . base64_encode(file_get_contents($this->Config->root() . '/src/icons/icon.png')))
+                        ->var('brand', 'Core Framework')
+                        ->var('greetings', "Sincerely");
+
+                    // Send the message
+                    $message->send();
+
+                    // Check if the message was sent
+                    if($message->status()){
+
+                        // Save the message
+                        $message->save();
+
+                        // Set the smtp module as installed
+                        $this->Config->set('smtp', 'installed', true);
+
+                        // Add a true status
+                        $status[] = true;
+                    } else {
+                        $status[] = "Could not send the test email";
+                    }
+                } else {
+                    $status[] = "Could not authenticate to the smtp server";
+                }
+            } else {
+                $this->Config->delete('smtp');
+                $status[] = "Could not connect to the smtp server";
+            }
+        } else {
+            $status[] = "Missing required fields";
+        }
+
+        // Return the statuses
+        return $status;
+    }
 }

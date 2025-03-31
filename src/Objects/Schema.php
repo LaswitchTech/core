@@ -62,7 +62,7 @@ class Schema {
      *
      * @var string
      */
-    private $collation = 'unicode_ci';
+    private $collation = 'general_ci';
 
     /**
      * Constructor
@@ -82,7 +82,7 @@ class Schema {
      *
      * @return mixed
      */
-    public function describe()
+    public function describe(): array
     {
         $definitions = [];
         foreach ($this->definitions as $column => $definition) {
@@ -481,7 +481,7 @@ class Schema {
         // For demonstration, assume InnoDB engine
         // In real usage, you might store the engine in definition or config
         $columnsSQL = implode(",\n  ", $columnLines);
-        $sql = "CREATE TABLE `{$this->table}` (\n  {$columnsSQL}\n) ENGINE={$this->engine} DEFAULT CHARSET={$this->charset} COLLATE={$this->collation}";
+        $sql = "CREATE TABLE `{$this->table}` (\n  {$columnsSQL}\n) ENGINE={$this->engine} DEFAULT CHARSET={$this->charset} COLLATE={$this->charset}_{$this->collation}";
         return $sql;
     }
 
@@ -555,5 +555,21 @@ class Schema {
         $sql = "SHOW TABLES LIKE '{$this->table}'";
         $result = $this->connector->query($sql);
         return $result->num_rows > 0;
+    }
+
+    /**
+     * Return list of tables
+     *
+     * @return array
+     */
+    public function tables(): array
+    {
+        $sql = "SHOW TABLES";
+        $result = $this->connector->query($sql);
+        $tables = [];
+        while ($row = $result->fetch_row()) {
+            $tables[] = $row[0];
+        }
+        return $tables;
     }
 }

@@ -200,6 +200,7 @@ class Query {
      */
     public function filter(string $conjunction = 'AND'): self
     {
+        $conjunction = strtoupper($conjunction);
         $conjunction = (in_array($conjunction,self::conjunctions)) ? $conjunction : 'AND';
 
         $this->where[] = [
@@ -584,5 +585,16 @@ class Query {
         $this->params[] = $value;
 
         return '?';
+    }
+
+    /**
+     * Set the auto increment value
+     *
+     * @param int $int
+     */
+    public function autoIncrement(int $int): void
+    {
+        $sql = "ALTER TABLE `{$this->table}` AUTO_INCREMENT = {$int}";
+        $this->connector->query($sql);
     }
 }

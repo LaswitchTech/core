@@ -25,6 +25,40 @@ class Helpers {
         global $CONFIG;
 
         // Set Path
+        $this->Path = $CONFIG->root() . DIRECTORY_SEPARATOR . "vendor" . DIRECTORY_SEPARATOR . "laswitchtech" . DIRECTORY_SEPARATOR . "core" . DIRECTORY_SEPARATOR . "Helper";
+
+        // Check if the Helper directory exists
+        if(is_dir($this->Path)){
+
+            // Loop through all the files in the directory
+            foreach(scandir($this->Path) as $helper){
+
+                // Check if the file is a Helper
+                if (!preg_match('/(.+)Helper\.php$/i', $helper, $matches)) {
+                    continue;
+                }
+
+                // Get the Helper Base Name and Class Name
+                $baseName = $matches[1];
+                $className = $baseName . 'Helper';
+
+                // Check if a Helper already exist
+                if(!isset($this->Helpers[$baseName])){
+
+                    // Include the Helper
+                    require_once $this->Path . "/" . $helper;
+
+                    // Check if the class exists
+                    if (class_exists($className)) {
+
+                        // Create the Helper
+                        $this->Helpers[$baseName] = new $className();
+                    }
+                }
+            }
+        }
+
+        // Set Path
         $this->Path = $CONFIG->root() . "/Helper";
 
         // Check if the Helper directory exists
@@ -38,18 +72,22 @@ class Helpers {
                     continue;
                 }
 
-                // Include the Helper
-                require_once $this->Path . "/" . $helper;
-
                 // Get the Helper Base Name and Class Name
                 $baseName = $matches[1];
                 $className = $baseName . 'Helper';
 
-                // Check if the class exists
-                if (class_exists($className)) {
+                // Check if a Helper already exist
+                if(!isset($this->Helpers[$baseName])){
 
-                    // Create the Helper
-                    $this->Helpers[$baseName] = new $className();
+                    // Include the Helper
+                    require_once $this->Path . "/" . $helper;
+
+                    // Check if the class exists
+                    if (class_exists($className)) {
+
+                        // Create the Helper
+                        $this->Helpers[$baseName] = new $className();
+                    }
                 }
             }
         }

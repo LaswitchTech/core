@@ -113,6 +113,26 @@ class Config {
     }
 
     /**
+     * Reload a configuration file.
+     *
+     * @param  string  $File
+     * @return object $this
+     */
+    public function reload($File): object
+    {
+
+        // If not already saved, add File in the list
+        if(isset($this->Files[$File])){
+
+            // Retrieve File and Load it
+            $this->Configurations[$File] = json_decode(file_get_contents($this->Files[$File]),true);
+        }
+
+        // Return
+        return $this;
+    }
+
+    /**
      * Get a Setting.
      *
      * @param  string  $File
@@ -219,6 +239,12 @@ class Config {
         return $this;
     }
 
+    /**
+     * Check if a configuration file exist.
+     *
+     * @param  string  $File
+     * @return boolean
+     */
     public function check($File){
 
         // Check if configuration file without loading it
@@ -265,5 +291,35 @@ class Config {
         $filePath = $reflector->getFileName();
 
         return $filePath;
+    }
+
+    /**
+     * Get/Set a Version.
+     *
+     * @param  string|null  $version
+     * @return string $version
+     */
+    public function version(?string $version = null): string
+    {
+
+        // Check if VERSION file exist and create it if not
+        if(!is_file($this->root() . DIRECTORY_SEPARATOR . "VERSION")){
+
+            // Create the VERSION file
+            file_put_contents($this->root() . DIRECTORY_SEPARATOR . "VERSION", "v0.0.0");
+        }
+
+        if($version){
+
+            // Save Version
+            file_put_contents($this->root() . DIRECTORY_SEPARATOR . "VERSION", $version);
+        } else {
+
+            // Retrieve Current Version
+            $version = file_get_contents($this->root() . DIRECTORY_SEPARATOR . "VERSION");
+            $version = preg_replace('/\s+/', '', $version);
+        }
+
+        return $version;
     }
 }

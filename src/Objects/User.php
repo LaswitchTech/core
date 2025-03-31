@@ -22,6 +22,7 @@ class User {
 
     // Properties
     protected $user;
+    protected $organization;
     protected $backend;
     protected $roles;
     protected $groups;
@@ -63,6 +64,18 @@ class User {
         // Set Properties
         $this->user = $user[0];
 
+        // Retrieve the user vCard's Avatar
+        $query = $this->Database->query()
+            ->table('files')
+            ->select('*')
+            ->where('id', 9999, '<>')
+            ->where('id', $this->user['vcard']['avatar'])
+            ->limit(1);
+        $this->user['vcard']['avatar'] = $query->fetch()[0] ?? [];
+
+        // Retrieve the Organization
+        $this->organization = new Objects\Organization($this->user['organization']['id']);
+
         // Initialize Backend
         switch($this->user['backend']['type']) {
             case 'local':
@@ -96,7 +109,6 @@ class User {
             ->where('id', 9999, '<>')
             ->filter()
             ->where('users', $this->user['id'], 'CONTAINS', 'OR')
-            ->where('organizations', $this->user['organization']['id'], 'CONTAINS', 'OR')
             ->where('isDefault', 1, '=', 'OR');
 
         // Retrieve Groups
@@ -117,7 +129,6 @@ class User {
             ->where('id', 9999, '<>')
             ->filter()
             ->where('users', $this->user['id'], 'CONTAINS', 'OR')
-            ->where('organizations', $this->user['organization']['id'], 'CONTAINS', 'OR')
             ->where('isDefault', 1, '=', 'OR');
 
         // Filter by Groups
@@ -156,25 +167,25 @@ class User {
         return $this->user[$key] ?? null;
     }
 
-    /**
-     * Retrieve the User ID
-     *
-     * @return int
-     */
-    public function id(): int
-    {
-        return $this->user['id'];
-    }
+    // /**
+    //  * Retrieve the User ID
+    //  *
+    //  * @return int
+    //  */
+    // public function id(): int
+    // {
+    //     return $this->user['id'];
+    // }
 
-    /**
-     * Retrieve the User Username
-     *
-     * @return string
-     */
-    public function username(): string
-    {
-        return $this->user['username'];
-    }
+    // /**
+    //  * Retrieve the User Username
+    //  *
+    //  * @return string
+    //  */
+    // public function username(): string
+    // {
+    //     return $this->user['username'];
+    // }
 
     /**
      * Check if the User is Verified
@@ -219,10 +230,14 @@ class User {
     /**
      * Retrieve the User's Groups
      *
+     * @param bool $asObjects
      * @return array
      */
-    public function groups(): array
+    public function groups(bool $asObjects = false): array
     {
+        if($asObjects){
+            return $this->groups;
+        }
         return array_keys($this->groups);
     }
 
@@ -240,10 +255,14 @@ class User {
     /**
      * Retrieve the User's Roles
      *
+     * @param bool $asObjects
      * @return array
      */
-    public function roles(): array
+    public function roles(bool $asObjects = false): array
     {
+        if($asObjects){
+            return $this->roles;
+        }
         return array_keys($this->roles);
     }
 
@@ -259,11 +278,27 @@ class User {
     }
 
     /**
-     * Retrieve the User's VCard
+     * Retrieve the User's vCard
+     *
+     * @param string $key
+     * @return mixed
      */
-    public function vcard(): array
+    public function vcard(string $key = null): mixed
     {
+        if($key){
+            return $this->user['vcard'][$key] ?? null;
+        }
         return $this->user['vcard'];
+    }
+
+    /**
+     * Retrieve the User's Organization
+     *
+     * @return Objects\Organization
+     */
+    public function organization(): Objects\Organization
+    {
+        return $this->organization;
     }
 
     /**
@@ -278,6 +313,14 @@ class User {
             }
         }
         return $users;
+    }
+
+    /**
+     * Retrieve the User's Colleagues
+     */
+    public function colleagues(): array
+    {
+        return $this->organization->members();
     }
 
     // /**

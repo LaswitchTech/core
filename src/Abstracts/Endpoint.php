@@ -21,6 +21,7 @@ abstract class Endpoint {
     protected $Helper;
     protected $Output;
     protected $Request;
+    protected $Config;
 
     // Auth Properties
     protected $Level;
@@ -33,7 +34,7 @@ abstract class Endpoint {
     {
 
         // Import Global Variables
-        global $AUTH, $MODEL, $HELPER, $OUTPUT, $REQUEST;
+        global $AUTH, $MODEL, $HELPER, $OUTPUT, $REQUEST, $CONFIG;
 
         // Initialize Properties
         $this->Auth = $AUTH;
@@ -41,6 +42,7 @@ abstract class Endpoint {
         $this->Helper = $HELPER;
         $this->Output = $OUTPUT;
         $this->Request = $REQUEST;
+        $this->Config = $CONFIG;
     }
 
     /**
@@ -53,7 +55,7 @@ abstract class Endpoint {
     {
 
         // Send the output
-        $this->Output->print('Endpoint Action not Implemented', array('HTTP/1.1 501 Not Implemented'));
+        $this->Output->print('Endpoint Action['.$name.'] not Implemented', array('HTTP/1.1 501 Not Implemented'));
     }
 
     /**

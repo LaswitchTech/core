@@ -76,6 +76,20 @@ class Bootstrap {
                 "CLI"
             ]
         ],
+        // Styles and Scripts
+        "STYLE" => [
+            "class" => "\\LaswitchTech\\Core\\Style",
+            "scope" => [
+                "ROUTER",
+                "API"
+            ]
+        ],
+        "BUILDER" => [
+            "class" => "\\LaswitchTech\\Core\\Builder",
+            "scope" => [
+                "ROUTER"
+            ]
+        ],
         // Helpers
         "HELPER" => [
             "class" => "\\LaswitchTech\\Core\\Helpers",
@@ -94,20 +108,21 @@ class Bootstrap {
                 "CLI"
             ]
         ],
-        "MODEL" => [
-            "class" => "\\LaswitchTech\\Core\\Models",
-            "scope" => [
-                "ROUTER",
-                "API",
-                "CLI"
-            ]
-        ],
         // Authentication
         "AUTH" => [
             "class" => "\\LaswitchTech\\Core\\Auth",
             "scope" => [
                 "ROUTER",
                 "API"
+            ]
+        ],
+        // Models
+        "MODEL" => [
+            "class" => "\\LaswitchTech\\Core\\Models",
+            "scope" => [
+                "ROUTER",
+                "API",
+                "CLI"
             ]
         ],
         // Security
@@ -150,19 +165,6 @@ class Bootstrap {
                 "ROUTER",
                 "API",
                 "CLI"
-            ]
-        ],
-        // Styles and Scripts
-        "STYLE" => [
-            "class" => "\\LaswitchTech\\Core\\Style",
-            "scope" => [
-                "ROUTER"
-            ]
-        ],
-        "BUILDER" => [
-            "class" => "\\LaswitchTech\\Core\\Builder",
-            "scope" => [
-                "ROUTER"
             ]
         ],
         // Installation and Update
@@ -214,10 +216,9 @@ class Bootstrap {
      */
     public function __construct(string $scope)
     {
+
         // Start the session
         if (!defined('STDIN') && session_status() === PHP_SESSION_NONE) {
-            ini_set('session.cookie_samesite', 'Strict');
-            ini_set('session.cookie_secure', 'On');
             session_start();
         }
 
@@ -227,6 +228,7 @@ class Bootstrap {
         // Initialize Config
         $CONFIG = new Config('bootstrap');
         $this->Config = $CONFIG;
+        $this->Config->add('application');
 
         // Set the scope
         $this->scope = strtoupper($scope);

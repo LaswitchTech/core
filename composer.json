@@ -1,6 +1,6 @@
 {
     "name": "laswitchtech/core",
-    "description": "Bootstrap Libraries for the Laswitch Core Framework",
+    "description": "Laswitch Core Framework",
     "type": "library",
     "license": "MIT",
     "autoload": {
