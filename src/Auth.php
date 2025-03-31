@@ -53,11 +53,6 @@ class Auth {
             return false;
         }
 
-        // Check if the database is currently installed
-        if (!$this->Database->isInstalled()) {
-            return false;
-        }
-
         // Check if the database is currently connected
         if (!$this->Database->isConnected()) {
             return false;
