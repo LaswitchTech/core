@@ -25,6 +25,36 @@ class Models {
         global $CONFIG;
 
         // Set Path
+        $this->Path = $CONFIG->root() . "/vendor/laswitchtech/core/Model";
+
+        // Check if the Model directory exists
+        if(is_dir($this->Path)){
+
+            // Loop through all the files in the directory
+            foreach(scandir($this->Path) as $model){
+
+                // Check if the file is a Model
+                if (!preg_match('/(.+)Model\.php$/i', $model, $matches)) {
+                    continue;
+                }
+
+                // Include the Model
+                require_once $this->Path . "/" . $model;
+
+                // Get the Model Base Name and Class Name
+                $baseName = $matches[1];
+                $className      = $baseName . 'Model';
+
+                // Check if the class exists
+                if (class_exists($className)) {
+
+                    // Create the Model
+                    $this->Models[$baseName] = new $className();
+                }
+            }
+        }
+
+        // Set Path
         $this->Path = $CONFIG->root() . "/Model";
 
         // Check if the Model directory exists
