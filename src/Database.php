@@ -128,16 +128,6 @@ class Database {
     }
 
     /**
-     * Check if the module is installed
-     *
-     * @return bool
-     */
-    public function isInstalled(): bool
-    {
-        return filter_var($this->Config->reload('database')->get('database', 'installed'), FILTER_VALIDATE_BOOLEAN);
-    }
-
-    /**
      * Install the module
      *
      * @param array $config
