@@ -385,17 +385,6 @@ class SMTP {
     }
 
     /**
-     * Check if the module is installed
-     *
-     * @return bool
-     */
-    public function isInstalled(): bool
-    {
-        // Check if the module is currently installed
-        return $this->isConnected() && $this->Config->reload('auth')->get('smtp', 'installed') === true;
-    }
-
-    /**
      * Install the module
      *
      * @param array $config
@@ -455,9 +444,6 @@ class SMTP {
 
                         // Save the message
                         $message->save();
-
-                        // Set the smtp module as installed
-                        $this->Config->set('smtp', 'installed', true);
 
                         // Add a true status
                         $status[] = true;

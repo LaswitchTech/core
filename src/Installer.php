@@ -45,7 +45,7 @@ class Installer {
      */
     public function isInstalled(): bool
     {
-        return $this->Config->reload('application')->get('application', 'installed') === true;
+        return filter_var($this->Config->reload('application')->get('application', 'installed'), FILTER_VALIDATE_BOOLEAN);
     }
 
     /**
