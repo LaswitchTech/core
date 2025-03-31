@@ -154,6 +154,26 @@ class Builder {
                 $html .= '<link rel="stylesheet" type="text/css" href="/'.trim($file,'/').'">' . PHP_EOL;
             }
         }
+        $path = $this->Config->root() . '/lib/themes';
+        $themes = array_diff(scandir($path), array('..', '.'));
+        foreach($themes as $file){
+            $filePath = $file . '/styles.css';
+            if(is_file($path.'/'.$filePath)){
+                if($this->Config->get('application','theme') == $file){
+                    $html .= '<link rel="stylesheet" type="text/css" href="/themes/'.trim($filePath,'/').'" data-theme="'.$file.'">' . PHP_EOL;
+                } else {
+                    $html .= '<link rel="stylesheet" type="text/css" href="/themes/'.trim($filePath,'/').'" data-theme="'.$file.'" disabled="">' . PHP_EOL;
+                }
+            }
+        }
+        $path = $this->Config->root() . '/lib/plugins';
+        $plugins = array_diff(scandir($path), array('..', '.'));
+        foreach($plugins as $file){
+            $filePath = $file . '/style.css';
+            if(is_file($path.'/'.$filePath)){
+                $html .= '<link rel="stylesheet" type="text/css" href="/plugins/'.trim($filePath,'/').'" data-plugin="'.$file.'">' . PHP_EOL;
+            }
+        }
         return $html;
     }
 
