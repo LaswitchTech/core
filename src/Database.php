@@ -302,9 +302,6 @@ class Database {
                             // Set auto increment on the table
                             $this->query()->table($definition)->autoIncrement($autoIncrement);
 
-                            // Set the database module as installed
-                            $this->Config->set('database', 'installed', true);
-
                             // Add a true status
                             $status[] = true;
                         } else {

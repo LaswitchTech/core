@@ -541,9 +541,6 @@ class Auth {
                         // Check if the database records were created
                         if($affected >= 9){
 
-                            // Set the auth module as installed
-                            $this->Config->set('auth', 'installed', true);
-
                             // Add a true status
                             $status[] = true;
                         } else {
