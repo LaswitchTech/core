@@ -35,25 +35,7 @@ class CoreCommand extends Command {
     public function compileAction()
     {
         // Import Global Variables
-        global $BOOTSTRAP, $DATABASE, $CONFIG;
-
-        // Load/Create the installer configuration
-        $CONFIG->add('installer');
-
-        // Modules
-        $modules = $CONFIG->get('installer', 'modules');
-
-        // Check if modules are defined
-        if(is_null($modules)){
-
-            // Set default modules list to empty
-            $modules = [];
-
-            // Save the modules list
-            $CONFIG->set('installer', 'modules', $modules);
-        }
-
-        // var_dump($modules);
+        global $BOOTSTRAP, $DATABASE, $CONFIG, $REQUEST;
 
         // Get the current version
         $version = $CONFIG->version();
@@ -74,89 +56,126 @@ class CoreCommand extends Command {
             mkdir($path . DIRECTORY_SEPARATOR . "Data", 0755, true);
         }
 
-        // List Tables
-        $tables = $DATABASE->schema()->tables();
+        // Check if Database is connected
+        if($DATABASE->isConnected()){
 
-        // Loop through the tables
-        foreach($tables as $table){
+            // Loop through the tables
+            foreach($DATABASE->schema()->tables() as $table){
 
-            // Output the name of the table
-            $this->Output->print("Compiling {$table}...");
+                // Output the name of the table
+                $this->Output->print("Compiling {$table}...");
 
-            // Create a Schema
-            $Schema = $DATABASE->schema()
-                ->define($table)
-                ->save();
+                // Check if we compile the schema
+                if(is_null($REQUEST->getArguments(3)) || in_array("--schema",$REQUEST->getArguments())){
 
-            // Move the Schema to the Update directory
-            rename($CONFIG->root() . DIRECTORY_SEPARATOR . "Definition" . DIRECTORY_SEPARATOR . $table . ".map", $path . DIRECTORY_SEPARATOR . "Definition" . DIRECTORY_SEPARATOR . $table . ".map");
+                    // Create a Schema
+                    $Schema = $DATABASE->schema()
+                        ->define($table)
+                        ->save();
 
-            // Output the Definition path
-            $this->Output->print("Definition: " . $path . DIRECTORY_SEPARATOR . "Definition" . DIRECTORY_SEPARATOR . $table . ".map");
+                    // Move the Schema to the Update directory
+                    rename($CONFIG->root() . DIRECTORY_SEPARATOR . "Definition" . DIRECTORY_SEPARATOR . $table . ".map", $path . DIRECTORY_SEPARATOR . "Definition" . DIRECTORY_SEPARATOR . $table . ".map");
 
-            // Create a Query
-            $Query = $DATABASE->query()
-                ->table($table)
-                ->select('*')
-                ->where('id', 5000, '<', 'OR')
-                ->where('id', 9999, '=', 'OR');
+                    // Output the Definition path
+                    $this->Output->print("Definition: " . $path . DIRECTORY_SEPARATOR . "Definition" . DIRECTORY_SEPARATOR . $table . ".map");
 
-            // Retrieve the data
-            $data = $Query->fetch();
+                }
 
-            // Add some sanitizing of some tables
-            if(in_array($table, ['groups', 'roles', 'organizations'])){
+                // Check if we compile the required data
+                if(is_null($REQUEST->getArguments(3)) || in_array("--required",$REQUEST->getArguments())){
 
-                // Loop through the data
-                foreach($data as $key => $value){
+                    // Create a Query
+                    $Query = $DATABASE->query()
+                        ->table($table)
+                        ->select('*')
+                        ->where('id', 5000, '<', 'OR')
+                        ->where('id', 9999, '=', 'OR');
 
-                    // Check if the key users exists
-                    if(array_key_exists('users', $value)){
+                    // Retrieve the data
+                    $data = $Query->fetch();
 
-                        // Set the value of users to null
-                        $data[$key]['users'] = null;
+                    // Add some sanitizing of some tables
+                    if(in_array($table, ['groups', 'roles', 'organizations'])){
+
+                        // Loop through the data
+                        foreach($data as $key => $value){
+
+                            // Check if the key users exists
+                            if(array_key_exists('users', $value)){
+
+                                // Set the value of users to null
+                                $data[$key]['users'] = null;
+                            }
+                        }
                     }
+
+                    // Output the number of records
+                    $this->Output->print("Records [required]: " . count($data));
+
+                    // Save the data as JSON
+                    file_put_contents($path . DIRECTORY_SEPARATOR . "Data" . DIRECTORY_SEPARATOR . $table . ".required", json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
+                }
+
+                // Check if we compile the sample data
+                if(is_null($REQUEST->getArguments(3)) || in_array("--sample",$REQUEST->getArguments())){
+
+                    // Create a Query
+                    $Query = $DATABASE->query()
+                        ->table($table)
+                        ->select('*')
+                        ->where('id', 5000, '>=', 'AND')
+                        ->where('id', 9999, '<', 'AND');
+
+                    // Retrieve the data
+                    $data = $Query->fetch();
+
+                    // Output the number of records
+                    $this->Output->print("Records [sample]: " . count($data));
+
+                    // Save the data as JSON
+                    file_put_contents($path . DIRECTORY_SEPARATOR . "Data" . DIRECTORY_SEPARATOR . $table . ".sample", json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
+                }
+
+                // Check if we compile the preload data
+                if(is_null($REQUEST->getArguments(3)) || in_array("--preload",$REQUEST->getArguments())){
+
+                    // Create a Query
+                    $Query = $DATABASE->query()
+                        ->table($table)
+                        ->select('*')
+                        ->where('id', 9999, '>');
+
+                    // Retrieve the data
+                    $data = $Query->fetch();
+                    $data = [];
+
+                    // Output the number of records
+                    $this->Output->print("Records [preload]: " . count($data));
+
+                    // Save the data as JSON
+                    file_put_contents($path . DIRECTORY_SEPARATOR . "Data" . DIRECTORY_SEPARATOR . $table . ".preload", json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
                 }
             }
+        }
 
-            // Output the number of records
-            $this->Output->print("Records [required]: " . count($data));
-            // var_dump($Query->__toString());
+        // Check if we compile the installer
+        if(is_null($REQUEST->getArguments(3)) || in_array("--installer",$REQUEST->getArguments())){
 
-            // Save the data as JSON
-            file_put_contents($path . DIRECTORY_SEPARATOR . "Data" . DIRECTORY_SEPARATOR . $table . ".required", json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
+            // Load/Create the installer configuration
+            $CONFIG->add('installer');
 
-            // Create a Query
-            $Query = $DATABASE->query()
-                ->table($table)
-                ->select('*')
-                ->where('id', 5000, '>=', 'AND')
-                ->where('id', 9999, '<', 'AND');
+            // Modules
+            $modules = $CONFIG->get('installer', 'modules');
 
-            // Retrieve the data
-            $data = $Query->fetch();
+            // Check if modules are defined
+            if(is_null($modules)){
 
-            // Output the number of records
-            $this->Output->print("Records [sample]: " . count($data));
+                // Set default modules list to empty
+                $modules = [];
 
-            // Save the data as JSON
-            file_put_contents($path . DIRECTORY_SEPARATOR . "Data" . DIRECTORY_SEPARATOR . $table . ".sample", json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
-
-            // Create a Query
-            $Query = $DATABASE->query()
-                ->table($table)
-                ->select('*')
-                ->where('id', 9999, '>');
-
-            // Retrieve the data
-            $data = $Query->fetch();
-            $data = [];
-
-            // Output the number of records
-            $this->Output->print("Records [preload]: " . count($data));
-
-            // Save the data as JSON
-            file_put_contents($path . DIRECTORY_SEPARATOR . "Data" . DIRECTORY_SEPARATOR . $table . ".preload", json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
+                // Save the modules list
+                $CONFIG->set('installer', 'modules', $modules);
+            }
         }
     }
 }
