@@ -148,7 +148,7 @@ class CoreHelper extends Helper {
         $dist = $CONFIG->root() . DIRECTORY_SEPARATOR . "dist" . DIRECTORY_SEPARATOR . "css";
 
         // Check if directory exists
-        if(!is_dir($css) && !is_file($css) && !is_link($css)) {
+        if(is_dir($dist) && !is_dir($css) && !is_file($css) && !is_link($css)) {
 
             // Create symbolic link
             symlink($dist, $css);
@@ -159,7 +159,7 @@ class CoreHelper extends Helper {
         $dist = $CONFIG->root() . DIRECTORY_SEPARATOR . "dist" . DIRECTORY_SEPARATOR . "js";
 
         // Check if directory exists
-        if(!is_dir($js) && !is_file($js) && !is_link($js)) {
+        if(is_dir($dist) && !is_dir($js) && !is_file($js) && !is_link($js)) {
 
             // Create symbolic link
             symlink($dist, $js);
@@ -170,7 +170,7 @@ class CoreHelper extends Helper {
         $dist = $CONFIG->root() . DIRECTORY_SEPARATOR . "dist" . DIRECTORY_SEPARATOR . "img";
 
         // Check if directory exists
-        if(!is_dir($img) && !is_file($img) && !is_link($img)) {
+        if(is_dir($dist) && !is_dir($img) && !is_file($img) && !is_link($img)) {
 
             // Create symbolic link
             symlink($dist, $img);
@@ -181,7 +181,7 @@ class CoreHelper extends Helper {
         $dist = $CONFIG->root() . DIRECTORY_SEPARATOR . "lib" . DIRECTORY_SEPARATOR . "plugins";
 
         // Check if directory exists
-        if(!is_dir($plugins) && !is_file($plugins) && !is_link($plugins)) {
+        if(is_dir($dist) && !is_dir($plugins) && !is_file($plugins) && !is_link($plugins)) {
 
             // Create symbolic link
             symlink($dist, $plugins);
@@ -192,7 +192,7 @@ class CoreHelper extends Helper {
         $dist = $CONFIG->root() . DIRECTORY_SEPARATOR . "lib" . DIRECTORY_SEPARATOR . "themes";
 
         // Check if directory exists
-        if(!is_dir($themes) && !is_file($themes) && !is_link($themes)) {
+        if(is_dir($dist) && !is_dir($themes) && !is_file($themes) && !is_link($themes)) {
 
             // Create symbolic link
             symlink($dist, $themes);
