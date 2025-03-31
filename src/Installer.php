@@ -66,6 +66,7 @@ class Installer {
             $this->Config->set('application', 'owner', $config['owner']);
             $this->Config->set('application', 'name', $config['name']);
             $this->Config->set('application', 'copyright', intval($config['copyright']));
+            $this->Config->set('application', 'theme', $this->Config->get('installer', 'theme'));
 
             // Set the database as installed
             $this->Config->set('application', 'installed', true);
