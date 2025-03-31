@@ -198,7 +198,12 @@ class Router {
         return $this;
     }
 
-    /** */
+    /**
+     * Render the route
+     *
+     * @param string $route
+     * @return self
+     */
     public function render($route = null): self
     {
         // Set the route
