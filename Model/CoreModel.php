@@ -13,20 +13,7 @@ use \LaswitchTech\Core\Abstracts\Model;
 class coreModel extends Model {
 
     // Properties
-    private $Database;
     private $Table;
-
-    /**
-     * Constructor
-     */
-    public function __construct()
-    {
-        // Import Global Variables
-        global $DATABASE;
-
-        // Set Properties
-        $this->Database = $DATABASE;
-    }
 
     /**
      * Get the table name
