@@ -432,7 +432,7 @@ class SMTP {
                         ->to($this->username)
                         ->subject('Test Email from %HOST%')
                         ->body('This is a test email')
-                        ->var('logo', 'data:image/png;base64,' . base64_encode(file_get_contents($this->Config->root() . '/src/icons/icon.png')))
+                        ->var('logo', 'data:'.mime_content_type($this->Config->root() . '/src/icons/icon.png').';base64,' . base64_encode(file_get_contents($this->Config->root() . '/src/icons/icon.png')))
                         ->var('brand', 'Core Framework')
                         ->var('greetings', "Sincerely");
 
