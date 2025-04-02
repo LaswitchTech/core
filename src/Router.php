@@ -17,7 +17,7 @@ use Exception;
 class Router {
 
     // Constants
-    const HttpCodes = [400,401,403,404,405,422,423,427,428,429,430,432,500,501];
+    const HttpCodes = [400,401,403,404,405,422,423,427,428,429,430,432,500,501,503];
     const HttpCustomCodes = [427,430,432];
     const HttpLabels = [
         "400" => "Bad Request", // 400 Error Document // Bad Request
@@ -34,6 +34,7 @@ class Router {
         "432" => "Unverified", // 432 Error Document // Unverified
         "500" => "Internal Server Error", // 500 Error Document // Internal Server Error
         "501" => "Not Implemented", // 501 Error Document // Not Implemented
+        "503" => "Service Unavailable", // 503 Error Document // Service Unavailable
     ];
 
     // Global Properties
@@ -209,6 +210,13 @@ class Router {
         // Set the route
         if($route){
             $this->set($route);
+        }
+
+        // Check if maintenance mode is enabled
+        if($this->Config->get('application','maintenance') && !$this->Auth->isAuthorized('Administrator', 1)){
+
+            // Set the route to maintenance
+            $this->set(503);
         }
 
         // Render the route
