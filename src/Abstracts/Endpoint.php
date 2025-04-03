@@ -22,6 +22,7 @@ abstract class Endpoint {
     protected $Output;
     protected $Request;
     protected $Config;
+    protected $Locale;
 
     // Auth Properties
     protected $Level;
@@ -34,7 +35,7 @@ abstract class Endpoint {
     {
 
         // Import Global Variables
-        global $AUTH, $MODEL, $HELPER, $OUTPUT, $REQUEST, $CONFIG;
+        global $AUTH, $MODEL, $HELPER, $OUTPUT, $REQUEST, $CONFIG, $LOCALE;
 
         // Initialize Properties
         $this->Auth = $AUTH;
@@ -43,6 +44,7 @@ abstract class Endpoint {
         $this->Output = $OUTPUT;
         $this->Request = $REQUEST;
         $this->Config = $CONFIG;
+        $this->Locale = $LOCALE;
     }
 
     /**
