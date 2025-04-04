@@ -30,6 +30,76 @@ class CoreCommand extends Command {
     }
 
     /**
+     * Add changes to the migration config file
+     */
+    public function changeAction()
+    {
+        // Load the current version
+        $current = $this->Config->get('migration', $this->Config->version()) ?? [];
+
+        // Retrieve the type of change
+        $type = $this->Request->getArguments(3);
+
+        // Check if the type is valid
+        if(!in_array($type, ['add', 'delete', 'update', 'rename', 'convert', 'filter'])){
+
+            // Output the error message
+            $this->Output->print("Invalid type of change. Valid types are: add, delete, update, rename, convert, filter");
+            $this->Output->print("Usage: ./cli change <type> <table> <column> <object> [<value>]");
+            $this->Output->print("Example: ./cli change rename users name table auth_users");
+            return;
+        }
+
+        // Retrieve the table
+        $table = $this->Request->getArguments(4);
+
+        // Check if the table is valid
+        if(empty($table)){
+
+            // Output the error message
+            $this->Output->print("Invalid table name. Please provide a valid table name.");
+            return;
+        }
+
+        // Retrieve the column
+        $column = $this->Request->getArguments(5);
+
+        // Check if the column is valid
+        if(empty($column)){
+
+            // Output the error message
+            $this->Output->print("Invalid column name. Please provide a valid column name.");
+            return;
+        }
+
+        // Retrieve object
+        $object = $this->Request->getArguments(6);
+
+        // Check if the object is valid
+        if(!in_array($object, ['table', 'column', 'data'])){
+
+            // Output the error message
+            $this->Output->print("Invalid object name. Valid objects are: table, column, data");
+            return;
+        }
+
+        // Retrieve the value
+        $value = $this->Request->getArguments(7);
+
+        // Append the change to the migration config file
+        $current[] = [
+            'type' => $type,
+            'table' => $table,
+            'column' => $column,
+            'object' => $object,
+            'value' => $value
+        ];
+
+        // Save the changes
+        $this->Config->set('migration', $this->Config->version(), $current);
+    }
+
+    /**
      * Compile the application
      */
     public function compileAction()
