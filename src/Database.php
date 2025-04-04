@@ -40,7 +40,7 @@ class Database {
         $this->Config = $CONFIG;
 
         // Load the Database Configuration
-        $this->Config->add('database');
+        $this->Config->add('database')->add('migration');
 
         // Initiate the Connector
         $this->init();
