@@ -28,7 +28,7 @@ abstract class Backend {
      * @param array $data
      * @throws Exception
      */
-    public function __construct(string $backend = null, ?array $data = null)
+    public function __construct(?string $backend = null, ?array $data = null)
     {
         // Import Global Variables
         global $DATABASE;
