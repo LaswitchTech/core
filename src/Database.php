@@ -40,7 +40,7 @@ class Database {
         $this->Config = $CONFIG;
 
         // Load the Database Configuration
-        $this->Config->add('database');
+        $this->Config->add('database')->add('migration');
 
         // Initiate the Connector
         $this->init();
@@ -154,11 +154,8 @@ class Database {
             // Check if the database server is connected
             if($this->isConnected()){
 
-                // Retrieve the current version
-                $version = $this->Config->version();
-
                 // Retrieve the path of the version's directory
-                $path = $this->Config->root() . DIRECTORY_SEPARATOR . "Update" . DIRECTORY_SEPARATOR . $version;
+                $path = $this->Config->root() . DIRECTORY_SEPARATOR . "Install";
 
                 // Check if the directory exists
                 if(is_dir($path)) {

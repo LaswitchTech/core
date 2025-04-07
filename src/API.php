@@ -144,6 +144,13 @@ class API {
                                 // Send Forbidden
                                 $this->Output->print('Forbidden', array('HTTP/1.1 403 Forbidden'));
                             }
+
+                            // Check if the user has the required permission
+                            if($this->Config->get('application','maintenance') && !$this->Auth->isAuthorized('Administrator', 1)){
+
+                                // Send Unavailable
+                                $this->Output->print('Unavailable', array('HTTP/1.1 503 Service Unavailable'));
+                            }
                         }
 
                         // Call the method

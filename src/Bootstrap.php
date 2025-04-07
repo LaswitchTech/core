@@ -113,7 +113,8 @@ class Bootstrap {
             "class" => "\\LaswitchTech\\Core\\Auth",
             "scope" => [
                 "ROUTER",
-                "API"
+                "API",
+                "CLI"
             ]
         ],
         // Models

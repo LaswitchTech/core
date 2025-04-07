@@ -44,6 +44,7 @@ class Route {
     private $Color;
     private $Action;
     private $Call;
+    private $Interrupt = false;
 
     /**
      * Constructor
@@ -475,19 +476,31 @@ class Route {
     }
 
     /**
+     * Interrupt the execution
+     *
+     * @return self
+     */
+    public function interrupt(): self
+    {
+        // Interrupt the execution
+        $this->Interrupt = true;
+        return $this;
+    }
+
+    /**
      * Render the route
      */
     public function render(): self
     {
         // Load the template
-        if($this->Template){
+        if($this->Template && !$this->Interrupt){
 
             // Load the Template
             require_once $this->template();
         }
 
         // Load the view
-        if($this->View){
+        if($this->View && !$this->Interrupt){
 
             // Load the View
             require_once $this->view();

@@ -283,7 +283,7 @@ class User {
      * @param string $key
      * @return mixed
      */
-    public function vcard(string $key = null): mixed
+    public function vcard(?string $key = null): mixed
     {
         if($key){
             return $this->user['vcard'][$key] ?? null;

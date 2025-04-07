@@ -104,6 +104,13 @@ class CLI {
                             // Check if the required action is available
                             if(method_exists($this->Class, $this->Action)){
 
+                                // Check if maintenance mode is enabled
+                                if($this->Config->get('application','maintenance')){
+
+                                    // Send Warning
+                                    $this->Output->warning("Maintenance mode is enabled. Some features may not be available.");
+                                }
+
                                 // Execute Action
                                 $this->Class->{$this->Action}();
                             } else {

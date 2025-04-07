@@ -200,17 +200,17 @@ class Message {
 
         // Replace Template Variables
         foreach($this->vars as $key => $value){
-            $string = str_replace('%' . strtoupper($key) . '%',$value,$string);
+            $string = str_replace('%' . strtoupper($key) . '%',$value ?? '',$string);
         }
 
         // Replace Server Variables
         foreach($this->Request->getParams('SERVER') as $key => $value){
-            $string = str_replace('%' . strtoupper($key) . '%',$value,$string);
+            $string = str_replace('%' . strtoupper($key) . '%',$value ?? '',$string);
         }
 
         // Replace Env Variables
         foreach($this->Request->getParams('ENV') as $key => $value){
-            $string = str_replace('%' . strtoupper($key) . '%',$value,$string);
+            $string = str_replace('%' . strtoupper($key) . '%',$value ?? '',$string);
         }
 
         return $string;

@@ -73,7 +73,7 @@ class Organization {
      * @param string $key
      * @return mixed
      */
-    public function __get(string $key = null): mixed
+    public function __get(?string $key = null): mixed
     {
         if($key){
             return $this->organization[$key] ?? ($this->vcard[$key] ?? ($this->organization['vcard'][$key] ?? null));
