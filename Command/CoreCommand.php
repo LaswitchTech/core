@@ -107,20 +107,25 @@ class CoreCommand extends Command {
         // Import Global Variables
         global $BOOTSTRAP, $DATABASE, $CONFIG, $REQUEST;
 
-        // Get the current version
-        $version = $CONFIG->version();
-
         // Create an Update directory
-        $path = $CONFIG->root() . DIRECTORY_SEPARATOR . "Update" . DIRECTORY_SEPARATOR . $version;
+        $path = $CONFIG->root() . DIRECTORY_SEPARATOR . "Install";
 
         // Check if the Update directory exists
         if(!is_dir($path)){
 
             // Create the Update directory recursively
             mkdir($path, 0755, true);
+        }
+
+        // Check if the Update directory exists
+        if(!is_dir($path . DIRECTORY_SEPARATOR . "Definition")){
 
             // Create the Update directory recursively
             mkdir($path . DIRECTORY_SEPARATOR . "Definition", 0755, true);
+        }
+
+        // Check if the Update directory exists
+        if(!is_dir($path . DIRECTORY_SEPARATOR . "Data")){
 
             // Create the Update directory recursively
             mkdir($path . DIRECTORY_SEPARATOR . "Data", 0755, true);
