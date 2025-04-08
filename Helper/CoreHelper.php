@@ -15,15 +15,23 @@ class CoreHelper extends Helper {
     /**
      * Init function
      *
+     * @param bool $force Force the creation of the files
      * @return void
      */
-    public function init(): void
+    public function init(bool $force = false): void
     {
         // Global Variables
         global $CONFIG;
 
         // Path to file
         $htaccess = $CONFIG->root() . DIRECTORY_SEPARATOR . ".htaccess";
+
+        // Check if the file exist
+        if($force && is_file($htaccess)) {
+
+            // Delete file
+            unlink($htaccess);
+        }
 
         // Check if file exists
         if(!is_dir($htaccess) && !is_file($htaccess) && !is_link($htaccess)) {
@@ -56,6 +64,13 @@ class CoreHelper extends Helper {
 
         // Path to file
         $htaccess = $webroot . DIRECTORY_SEPARATOR . ".htaccess";
+
+        // Check if the file exist
+        if($force && is_file($htaccess)) {
+
+            // Delete file
+            unlink($htaccess);
+        }
 
         // Check if file exists
         if(!is_dir($htaccess) && !is_file($htaccess) && !is_link($htaccess)) {
@@ -101,6 +116,13 @@ class CoreHelper extends Helper {
         // Path to file
         $index = $webroot . DIRECTORY_SEPARATOR . "index.php";
 
+        // Check if the file exist
+        if($force && is_file($index)) {
+
+            // Delete file
+            unlink($index);
+        }
+
         // Check if file exists
         if(!is_dir($index) && !is_file($index) && !is_link($index)) {
 
@@ -117,6 +139,13 @@ class CoreHelper extends Helper {
 
         // Path to file
         $endpoint = $webroot . DIRECTORY_SEPARATOR . "endpoint.php";
+
+        // Check if the file exist
+        if($force && is_file($endpoint)) {
+
+            // Delete file
+            unlink($endpoint);
+        }
 
         // Check if file exists
         if(!is_dir($endpoint) && !is_file($endpoint) && !is_link($endpoint)) {
@@ -135,6 +164,13 @@ class CoreHelper extends Helper {
         // Path to file
         $favicon = $webroot . DIRECTORY_SEPARATOR . "favicon.ico";
         $icon = $CONFIG->root() . DIRECTORY_SEPARATOR . "src" . DIRECTORY_SEPARATOR . "icons". DIRECTORY_SEPARATOR . "icon.ico";
+
+        // Check if the file exist
+        if($force && is_file($favicon)) {
+
+            // Delete file
+            unlink($favicon);
+        }
 
         // Check if file exists
         if(!is_dir($favicon) && !is_file($favicon) && !is_link($favicon)) {
