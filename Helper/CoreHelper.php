@@ -16,12 +16,15 @@ class CoreHelper extends Helper {
      * Init function
      *
      * @param bool $force Force the creation of the files
-     * @return void
+     * @return bool
      */
-    public function init(bool $force = false): void
+    public function init(bool $force = false): bool
     {
         // Global Variables
         global $CONFIG;
+
+        // Init status
+        $status = true;
 
         // Path to file
         $htaccess = $CONFIG->root() . DIRECTORY_SEPARATOR . ".htaccess";
@@ -52,6 +55,9 @@ class CoreHelper extends Helper {
             file_put_contents($htaccess, $content);
         }
 
+        // Update the status
+        $status = $status && is_file($htaccess);
+
         // Path to file
         $webroot = $CONFIG->root() . DIRECTORY_SEPARATOR . "webroot";
 
@@ -61,6 +67,9 @@ class CoreHelper extends Helper {
             // Create directory
             mkdir($webroot, 0755, true);
         }
+
+        // Update the status
+        $status = $status && is_dir($webroot);
 
         // Path to file
         $htaccess = $webroot . DIRECTORY_SEPARATOR . ".htaccess";
@@ -113,6 +122,9 @@ class CoreHelper extends Helper {
             file_put_contents($htaccess, $content);
         }
 
+        // Update the status
+        $status = $status && is_file($htaccess);
+
         // Path to file
         $index = $webroot . DIRECTORY_SEPARATOR . "index.php";
 
@@ -136,6 +148,9 @@ class CoreHelper extends Helper {
             // Create file
             file_put_contents($index, $content);
         }
+
+        // Update the status
+        $status = $status && is_file($index);
 
         // Path to file
         $endpoint = $webroot . DIRECTORY_SEPARATOR . "endpoint.php";
@@ -161,6 +176,9 @@ class CoreHelper extends Helper {
             file_put_contents($endpoint, $content);
         }
 
+        // Update the status
+        $status = $status && is_file($endpoint);
+
         // Path to file
         $favicon = $webroot . DIRECTORY_SEPARATOR . "favicon.ico";
         $icon = $CONFIG->root() . DIRECTORY_SEPARATOR . "src" . DIRECTORY_SEPARATOR . "icons". DIRECTORY_SEPARATOR . "icon.ico";
@@ -179,6 +197,9 @@ class CoreHelper extends Helper {
             symlink($icon, $favicon);
         }
 
+        // Update the status
+        $status = $status && is_link($favicon);
+
         // Path to directory
         $css = $webroot . DIRECTORY_SEPARATOR . "css";
         $dist = $CONFIG->root() . DIRECTORY_SEPARATOR . "dist" . DIRECTORY_SEPARATOR . "css";
@@ -189,6 +210,9 @@ class CoreHelper extends Helper {
             // Create symbolic link
             symlink($dist, $css);
         }
+
+        // Update the status
+        $status = $status && is_link($css);
 
         // Path to directory
         $js = $webroot . DIRECTORY_SEPARATOR . "js";
@@ -201,6 +225,9 @@ class CoreHelper extends Helper {
             symlink($dist, $js);
         }
 
+        // Update the status
+        $status = $status && is_link($js);
+
         // Path to directory
         $img = $webroot . DIRECTORY_SEPARATOR . "img";
         $dist = $CONFIG->root() . DIRECTORY_SEPARATOR . "dist" . DIRECTORY_SEPARATOR . "img";
@@ -211,6 +238,9 @@ class CoreHelper extends Helper {
             // Create symbolic link
             symlink($dist, $img);
         }
+
+        // Update the status
+        $status = $status && is_link($img);
 
         // Path to directory
         $plugins = $webroot . DIRECTORY_SEPARATOR . "plugins";
@@ -223,6 +253,9 @@ class CoreHelper extends Helper {
             symlink($dist, $plugins);
         }
 
+        // Update the status
+        $status = $status && is_link($plugins);
+
         // Path to directory
         $themes = $webroot . DIRECTORY_SEPARATOR . "themes";
         $dist = $CONFIG->root() . DIRECTORY_SEPARATOR . "lib" . DIRECTORY_SEPARATOR . "themes";
@@ -233,5 +266,11 @@ class CoreHelper extends Helper {
             // Create symbolic link
             symlink($dist, $themes);
         }
+
+        // Update the status
+        $status = $status && is_link($themes);
+
+        // Return
+        return $status;
     }
 }
