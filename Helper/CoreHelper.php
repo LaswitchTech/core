@@ -15,15 +15,26 @@ class CoreHelper extends Helper {
     /**
      * Init function
      *
-     * @return void
+     * @param bool $force Force the creation of the files
+     * @return bool
      */
-    public function init(): void
+    public function init(bool $force = false): bool
     {
         // Global Variables
         global $CONFIG;
 
+        // Init status
+        $status = true;
+
         // Path to file
         $htaccess = $CONFIG->root() . DIRECTORY_SEPARATOR . ".htaccess";
+
+        // Check if the file exist
+        if($force && is_file($htaccess)) {
+
+            // Delete file
+            unlink($htaccess);
+        }
 
         // Check if file exists
         if(!is_dir($htaccess) && !is_file($htaccess) && !is_link($htaccess)) {
@@ -44,6 +55,9 @@ class CoreHelper extends Helper {
             file_put_contents($htaccess, $content);
         }
 
+        // Update the status
+        $status = $status && is_file($htaccess);
+
         // Path to file
         $webroot = $CONFIG->root() . DIRECTORY_SEPARATOR . "webroot";
 
@@ -54,8 +68,18 @@ class CoreHelper extends Helper {
             mkdir($webroot, 0755, true);
         }
 
+        // Update the status
+        $status = $status && is_dir($webroot);
+
         // Path to file
         $htaccess = $webroot . DIRECTORY_SEPARATOR . ".htaccess";
+
+        // Check if the file exist
+        if($force && is_file($htaccess)) {
+
+            // Delete file
+            unlink($htaccess);
+        }
 
         // Check if file exists
         if(!is_dir($htaccess) && !is_file($htaccess) && !is_link($htaccess)) {
@@ -98,8 +122,18 @@ class CoreHelper extends Helper {
             file_put_contents($htaccess, $content);
         }
 
+        // Update the status
+        $status = $status && is_file($htaccess);
+
         // Path to file
         $index = $webroot . DIRECTORY_SEPARATOR . "index.php";
+
+        // Check if the file exist
+        if($force && is_file($index)) {
+
+            // Delete file
+            unlink($index);
+        }
 
         // Check if file exists
         if(!is_dir($index) && !is_file($index) && !is_link($index)) {
@@ -115,8 +149,18 @@ class CoreHelper extends Helper {
             file_put_contents($index, $content);
         }
 
+        // Update the status
+        $status = $status && is_file($index);
+
         // Path to file
         $endpoint = $webroot . DIRECTORY_SEPARATOR . "endpoint.php";
+
+        // Check if the file exist
+        if($force && is_file($endpoint)) {
+
+            // Delete file
+            unlink($endpoint);
+        }
 
         // Check if file exists
         if(!is_dir($endpoint) && !is_file($endpoint) && !is_link($endpoint)) {
@@ -132,9 +176,19 @@ class CoreHelper extends Helper {
             file_put_contents($endpoint, $content);
         }
 
+        // Update the status
+        $status = $status && is_file($endpoint);
+
         // Path to file
         $favicon = $webroot . DIRECTORY_SEPARATOR . "favicon.ico";
         $icon = $CONFIG->root() . DIRECTORY_SEPARATOR . "src" . DIRECTORY_SEPARATOR . "icons". DIRECTORY_SEPARATOR . "icon.ico";
+
+        // Check if the file exist
+        if($force && is_file($favicon)) {
+
+            // Delete file
+            unlink($favicon);
+        }
 
         // Check if file exists
         if(!is_dir($favicon) && !is_file($favicon) && !is_link($favicon)) {
@@ -142,6 +196,9 @@ class CoreHelper extends Helper {
             // Create symbolic link
             symlink($icon, $favicon);
         }
+
+        // Update the status
+        $status = $status && is_link($favicon);
 
         // Path to directory
         $css = $webroot . DIRECTORY_SEPARATOR . "css";
@@ -154,6 +211,9 @@ class CoreHelper extends Helper {
             symlink($dist, $css);
         }
 
+        // Update the status
+        $status = $status && is_link($css);
+
         // Path to directory
         $js = $webroot . DIRECTORY_SEPARATOR . "js";
         $dist = $CONFIG->root() . DIRECTORY_SEPARATOR . "dist" . DIRECTORY_SEPARATOR . "js";
@@ -164,6 +224,9 @@ class CoreHelper extends Helper {
             // Create symbolic link
             symlink($dist, $js);
         }
+
+        // Update the status
+        $status = $status && is_link($js);
 
         // Path to directory
         $img = $webroot . DIRECTORY_SEPARATOR . "img";
@@ -176,6 +239,9 @@ class CoreHelper extends Helper {
             symlink($dist, $img);
         }
 
+        // Update the status
+        $status = $status && is_link($img);
+
         // Path to directory
         $plugins = $webroot . DIRECTORY_SEPARATOR . "plugins";
         $dist = $CONFIG->root() . DIRECTORY_SEPARATOR . "lib" . DIRECTORY_SEPARATOR . "plugins";
@@ -187,6 +253,9 @@ class CoreHelper extends Helper {
             symlink($dist, $plugins);
         }
 
+        // Update the status
+        $status = $status && is_link($plugins);
+
         // Path to directory
         $themes = $webroot . DIRECTORY_SEPARATOR . "themes";
         $dist = $CONFIG->root() . DIRECTORY_SEPARATOR . "lib" . DIRECTORY_SEPARATOR . "themes";
@@ -197,5 +266,11 @@ class CoreHelper extends Helper {
             // Create symbolic link
             symlink($dist, $themes);
         }
+
+        // Update the status
+        $status = $status && is_link($themes);
+
+        // Return
+        return $status;
     }
 }
