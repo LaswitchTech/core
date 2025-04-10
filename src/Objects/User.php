@@ -362,4 +362,16 @@ class User {
     // {
     //     return new Objects\Token();
     // }
+
+    /**
+     * Set the User's Last Login
+     */
+    public function lastLogin(): int
+    {
+        $query = $this->Database->query();
+        $query->table('users')
+            ->update(['lastLogin' => date('Y-m-d H:i:s')])
+            ->where('id', $this->user['id']);
+        return $query->execute();
+    }
 }
