@@ -210,26 +210,6 @@ class CoreCommand extends Command {
                     // Save the data as JSON
                     file_put_contents($path . DIRECTORY_SEPARATOR . "Data" . DIRECTORY_SEPARATOR . $table . ".sample", json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
                 }
-
-                // Check if we compile the preload data
-                if(is_null($REQUEST->getArguments(3)) || in_array("--preload",$REQUEST->getArguments())){
-
-                    // Create a Query
-                    $Query = $DATABASE->query()
-                        ->table($table)
-                        ->select('*')
-                        ->where('id', 9999, '>');
-
-                    // Retrieve the data
-                    $data = $Query->fetch();
-                    $data = [];
-
-                    // Output the number of records
-                    $this->Output->print("Records [preload]: " . count($data));
-
-                    // Save the data as JSON
-                    file_put_contents($path . DIRECTORY_SEPARATOR . "Data" . DIRECTORY_SEPARATOR . $table . ".preload", json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
-                }
             }
         }
 

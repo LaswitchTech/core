@@ -335,6 +335,9 @@ class Auth {
                 // Check the user status
                 if($status){
 
+                    // Set User Last Login
+                    $this->user->lastLogin();
+
                     // Set Session
                     $this->user->session()->create();
 

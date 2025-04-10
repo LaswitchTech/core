@@ -167,26 +167,6 @@ class User {
         return $this->user[$key] ?? null;
     }
 
-    // /**
-    //  * Retrieve the User ID
-    //  *
-    //  * @return int
-    //  */
-    // public function id(): int
-    // {
-    //     return $this->user['id'];
-    // }
-
-    // /**
-    //  * Retrieve the User Username
-    //  *
-    //  * @return string
-    //  */
-    // public function username(): string
-    // {
-    //     return $this->user['username'];
-    // }
-
     /**
      * Check if the User is Verified
      *
@@ -323,43 +303,15 @@ class User {
         return $this->organization->members();
     }
 
-    // /**
-    //  * Create a new Organization object
-    //  *
-    //  * @return Objects\Organization
-    //  */
-    // public function organization(): Objects\Organization
-    // {
-    //     return new Objects\Organization();
-    // }
-
-    // /**
-    //  * Create a new Pin object
-    //  *
-    //  * @return Objects\Pin
-    //  */
-    // public function pin(): Objects\Pin
-    // {
-    //     return new Objects\Pin();
-    // }
-
-    // /**
-    //  * Create a new Profile object
-    //  *
-    //  * @return Objects\Profile
-    //  */
-    // public function profile(): Objects\Profile
-    // {
-    //     return new Objects\Profile();
-    // }
-
-    // /**
-    //  * Create a new Token object
-    //  *
-    //  * @return Objects\Token
-    //  */
-    // public function token(): Objects\Token
-    // {
-    //     return new Objects\Token();
-    // }
+    /**
+     * Set the User's Last Login
+     */
+    public function lastLogin(): int
+    {
+        $query = $this->Database->query();
+        $query->table('users')
+            ->update(['lastLogin' => date('Y-m-d H:i:s')])
+            ->where('id', $this->user['id']);
+        return $query->execute();
+    }
 }
