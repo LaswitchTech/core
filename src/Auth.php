@@ -292,11 +292,11 @@ class Auth {
     /**
      * Authenticate the user
      *
-     * @param int|string $user
+     * @param mixed $user
      * @param string|null $password
      * @return bool
      */
-    protected function authenticate(int|string $user, ?string $password = null): bool
+    protected function authenticate(mixed $user, ?string $password = null): bool
     {
         // Import Global Variables
         global $REQUEST;
@@ -374,10 +374,10 @@ class Auth {
     /**
      * Create a new User object
      *
-     * @param string|int|null $user
+     * @param mixed $user
      * @return Objects\User
      */
-    public function user(string|int|null $user = null): ?Objects\User
+    public function user(mixed $user = null): ?Objects\User
     {
         return is_null($user) ? $this->user : new Objects\User($user);
     }
