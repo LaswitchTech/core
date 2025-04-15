@@ -166,20 +166,45 @@ class Auth {
 
         // Check if the Authorization Header is set
         if (preg_match('/Bearer\s(\S+)/', $headers['Authorization'], $matches)) {
-            $token = $matches[1];
+            $tokens = $matches[1];
 
-            // Validate Token
+            // Check if the string is long enough
+            if (strlen($tokens) < 73) {
+                return false;
+            }
+
+            // Check if the splitter character is valid '-'
+            if (substr($tokens, 36, 1) !== '-') {
+                return false;
+            }
+
+            // Retrieve the user
             $query = $this->Database->query();
-            $result = $query->table('tokens')
-                ->select('user')
-                ->where('token', $token)
-                ->where('expires', date('Y-m-d H:i:s'), '>')
+            $user = $query->table('users')
+                ->select('*')
+                ->join('token', 'tokens', 'id')
+                ->where('uuid', substr($tokens, 0, 36))
+                ->where('id', 9999, '<>')
                 ->limit(1)
                 ->result();
 
             // Check if the token is valid
-            if (!empty($result)) {
-                return $this->authenticate(intval($result[0]['user']));
+            if (!empty($user)) {
+
+                // Select the user
+                $user = $user[0];
+
+                // Validate Token
+                if(password_verify(substr($tokens, -36), $user['token']['hash'])){
+
+                    // Check if the token is expired
+                    if (strtotime($user['token']['expires']) < time()) {
+                        return false;
+                    }
+
+                    // Return the user id
+                    return $this->authenticate(intval($user['id']));
+                }
             }
         }
 
@@ -458,7 +483,7 @@ class Auth {
                         ->table('tokens')
                         ->insert([
                             'owner' => $config['username'],
-                            'token' => $UUID->toString($config['username'])
+                            'hash' => password_hash($UUID->toString($config['username']), PASSWORD_DEFAULT)
                         ]);
                     $affected += $Query->execute();
                     $userTokenId = $Query->lastId();
@@ -507,8 +532,17 @@ class Auth {
                         ->where('name', 'Administrator');
                     $affected += $Query->execute();
 
+                    // Update the user
+                    $Query = $this->Database->query()
+                        ->table('users')
+                        ->update([
+                            'uuid' => $UUID->toString($userId),
+                        ])
+                        ->where('id', $userId);
+                    $affected += $Query->execute();
+
                     // Check if the database records were created
-                    if($affected >= 9){
+                    if($affected >= 10){
 
                         // Add a true status
                         $status[] = true;

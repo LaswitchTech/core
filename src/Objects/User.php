@@ -19,6 +19,7 @@ class User {
 
     // Global Properties
     protected $Database;
+    protected $UUID;
 
     // Properties
     protected $user;
@@ -26,6 +27,7 @@ class User {
     protected $backend;
     protected $roles;
     protected $groups;
+    protected $token;
 
     /**
      * Constructor
@@ -36,10 +38,11 @@ class User {
     public function __construct(int|string $user)
     {
         // Import Global Variables
-        global $DATABASE;
+        global $DATABASE, $UUID;
 
         // Initialize Properties
         $this->Database = $DATABASE;
+        $this->UUID = $UUID;
 
         // Retrieve User
         $query = $this->Database->query();
@@ -144,6 +147,9 @@ class User {
         foreach($roles as $role){
             $this->roles[$role['name']] = new Objects\Role($role['name'],$role);
         }
+
+        // Set the user Token
+        $this->token = $this->UUID->toString($this->user['id']) . '-' . $this->UUID->toString($this->user['username']);
     }
 
     /**
@@ -305,6 +311,8 @@ class User {
 
     /**
      * Set the User's Last Login
+     *
+     * @return int
      */
     public function lastLogin(): int
     {
@@ -313,5 +321,15 @@ class User {
             ->update(['lastLogin' => date('Y-m-d H:i:s')])
             ->where('id', $this->user['id']);
         return $query->execute();
+    }
+
+    /**
+     * Retrieve the User's Token
+     *
+     * @return string
+     */
+    public function token(): string
+    {
+        return $this->token;
     }
 }
