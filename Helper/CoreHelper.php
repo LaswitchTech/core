@@ -12,6 +12,9 @@ use \LaswitchTech\Core\Abstracts\Helper;
 
 class CoreHelper extends Helper {
 
+    // Constants
+    const HttpCodes = [400,401,403,404,405,422,423,427,428,429,430,432,500,501,503];
+
     /**
      * Init function
      *
@@ -39,8 +42,33 @@ class CoreHelper extends Helper {
         // Check if file exists
         if(!is_dir($htaccess) && !is_file($htaccess) && !is_link($htaccess)) {
 
+            // Initialize content
+            $content = "";
+
+            // Loop through the HTTP codes
+            foreach (self::HttpCodes as $code) {
+
+                // Set the error document path
+                $path = $CONFIG->root() . DIRECTORY_SEPARATOR . "View" . DIRECTORY_SEPARATOR . $code . ".php";
+
+                // Check if the file exists
+                if(is_file($path)) {
+
+                    // Add the ErrorDocument line
+                    $content .= "ErrorDocument $code $path" . PHP_EOL;
+                }
+            }
+
+            // Check if the content is empty
+            if(!empty($content)) {
+
+                // Add a new line
+                $content .= PHP_EOL;
+            }
+
             // Create content
-            $content = "AddType application/javascript .mjs" . PHP_EOL . PHP_EOL;
+            $content .= "Options +FollowSymLinks" . PHP_EOL . PHP_EOL;
+            $content .= "AddType application/javascript .mjs" . PHP_EOL . PHP_EOL;
             $content .= "<IfModule mod_headers.c>" . PHP_EOL;
             $content .= "    RequestHeader unset Proxy" . PHP_EOL;
             $content .= "</IfModule>" . PHP_EOL . PHP_EOL;
@@ -84,9 +112,33 @@ class CoreHelper extends Helper {
         // Check if file exists
         if(!is_dir($htaccess) && !is_file($htaccess) && !is_link($htaccess)) {
 
+            // Initialize content
+            $content = "";
+
+            // Loop through the HTTP codes
+            foreach (self::HttpCodes as $code) {
+
+                // Set the error document path
+                $path = $CONFIG->root() . DIRECTORY_SEPARATOR . "View" . DIRECTORY_SEPARATOR . $code . ".php";
+
+                // Check if the file exists
+                if(is_file($path)) {
+
+                    // Add the ErrorDocument line
+                    $content .= "ErrorDocument $code $path" . PHP_EOL;
+                }
+            }
+
+            // Check if the content is empty
+            if(!empty($content)) {
+
+                // Add a new line
+                $content .= PHP_EOL;
+            }
+
             // Create content
-            $content = "Options +FollowSymLinks" . PHP_EOL . PHP_EOL;
-            $content = "AddType application/javascript .mjs" . PHP_EOL . PHP_EOL;
+            $content .= "Options +FollowSymLinks" . PHP_EOL . PHP_EOL;
+            $content .= "AddType application/javascript .mjs" . PHP_EOL . PHP_EOL;
             $content .= "<IfModule mod_php8.c>" . PHP_EOL;
             $content .= "    php_value session.cookie_samesite Strict" . PHP_EOL;
             $content .= "    php_value session.cookie_secure On" . PHP_EOL;
