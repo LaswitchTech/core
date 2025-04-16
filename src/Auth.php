@@ -329,44 +329,48 @@ class Auth {
         // Retrieve User
         $user = $this->user($user);
 
-        // Check if the user is logging out
-        if(!is_null($REQUEST->getParams('GET','logout') ?? $REQUEST->getParams('GET','signout'))){
+        // Check if the user is found
+        if($user->found()){
 
-            // Destroy Session
-            $user->session()->clear();
-        } else {
+            // Check if the user is logging out
+            if(!is_null($REQUEST->getParams('GET','logout') ?? $REQUEST->getParams('GET','signout'))){
 
-            // Validate Password
-            $load = ($password) ? (bool) $user->backend()->validate($password) : true;
+                // Destroy Session
+                $user->session()->clear();
+            } else {
 
-            // Check if the user can be loaded
-            if($load){
+                // Validate Password
+                $load = ($password) ? (bool) $user->backend()->validate($password) : true;
 
-                // Load User
-                $this->user = $user;
+                // Check if the user can be loaded
+                if($load){
 
-                // Check if the user is deleted
-                $status = !$this->user->deleted();
+                    // Load User
+                    $this->user = $user;
 
-                // Check if the user is banned
-                $status = ($status && !$this->user->banned());
+                    // Check if the user is deleted
+                    $status = !$this->user->deleted();
 
-                // Check if the user is verified
-                $status = ($status && $this->user->verified());
+                    // Check if the user is banned
+                    $status = ($status && !$this->user->banned());
 
-                // Check if the user's organization is active
-                $status = ($status && $this->user->organization['isActive'] > 0);
+                    // Check if the user is verified
+                    $status = ($status && $this->user->verified());
 
-                // Check the user status
-                if($status){
+                    // Check if the user's organization is active
+                    $status = ($status && $this->user->organization['isActive'] > 0);
 
-                    // Set User Last Login
-                    $this->user->lastLogin();
+                    // Check the user status
+                    if($status){
 
-                    // Set Session
-                    $this->user->session()->create();
+                        // Set User Last Login
+                        $this->user->lastLogin();
 
-                    return true;
+                        // Set Session
+                        $this->user->session()->create();
+
+                        return true;
+                    }
                 }
             }
         }

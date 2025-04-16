@@ -61,7 +61,7 @@ class User {
 
         // Check if user exists
         if (count($user) == 0) {
-            throw new Exception('User not found');
+            return null;
         }
 
         // Set Properties
@@ -171,6 +171,14 @@ class User {
     public function __get(string $key): mixed
     {
         return $this->user[$key] ?? null;
+    }
+
+    /**
+     * Check if the user is found
+     */
+    public function found(): bool
+    {
+        return !is_null($this->user);
     }
 
     /**
