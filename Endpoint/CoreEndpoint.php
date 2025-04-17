@@ -61,6 +61,21 @@ class CoreEndpoint extends Endpoint {
                     "to" => date("Y")
                 ];
 
+                // Retrieve the changelog
+                $releases = $this->Helper->Core->releases();
+
+                // Retrieve the current release
+                $current = null;
+                foreach($releases as $release){
+                    if($release['tag_name'] == $message['data']['version']){
+                        $current = $release;
+                        break;
+                    }
+                }
+
+                // Retrieve the changelog
+                $message['data']['changelog'] = $current['body'] ?? '';
+
                 // Retrieve the icon
                 $path = $this->Config->root() . DIRECTORY_SEPARATOR . 'dist' . DIRECTORY_SEPARATOR . 'img' . DIRECTORY_SEPARATOR . 'logo.png';
                 if(!file_exists($path)){
