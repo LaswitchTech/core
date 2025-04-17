@@ -476,6 +476,23 @@ class Route {
     }
 
     /**
+     * Get the route metadata
+     *
+     * @return array
+     */
+    public function metadata(): array
+    {
+        return [
+            'route' => $this->Route,
+            'public' => $this->Public,
+            'level' => $this->Level,
+            'label' => $this->Label,
+            'icon' => $this->Icon,
+            'color' => $this->Color,
+        ];
+    }
+
+    /**
      * Interrupt the execution
      *
      * @return self

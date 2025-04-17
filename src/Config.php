@@ -82,7 +82,7 @@ class Config {
     public function add($File, $Path = null){
 
         // If not already saved, add File in the list
-        if(!isset($this->Files[$File])){
+        if(!array_key_exists($File, $this->Files)){
 
             // Set Path
             if(!is_string($Path)){
@@ -137,22 +137,27 @@ class Config {
      *
      * @param  string  $File
      * @param  string  $Setting
-     * @return object $this
+     * @return mixed
      */
-    public function get($File, $Setting = null){
-
-        // Check if file and setting exist and return it.
-        if(isset($this->Configurations[$File])){
-            if($Setting){
-                if(isset($this->Configurations[$File][$Setting])){
-                    // Return
-                    return $this->Configurations[$File][$Setting];
-                }
-            } else {
-                // Return
-                return $this->Configurations[$File];
-            }
+    public function get($File, $Setting = null): mixed
+    {
+        // Check if file exist and load it.
+        if(!array_key_exists($File, $this->Files)){
+            $this->add($File);
         }
+
+        // Check if setting exist and return it.
+        if($Setting){
+            if(isset($this->Configurations[$File][$Setting])){
+                // Return
+                return $this->Configurations[$File][$Setting];
+            }
+        } else {
+            // Return
+            return $this->Configurations[$File];
+        }
+
+        return null;
     }
 
     /**

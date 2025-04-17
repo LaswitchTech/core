@@ -12,6 +12,9 @@ use \LaswitchTech\Core\Abstracts\Helper;
 
 class CoreHelper extends Helper {
 
+    // Constants
+    const HttpCodes = [400,401,403,404,405,422,423,427,428,429,430,432,500,501,503];
+
     /**
      * Init function
      *
@@ -39,8 +42,33 @@ class CoreHelper extends Helper {
         // Check if file exists
         if(!is_dir($htaccess) && !is_file($htaccess) && !is_link($htaccess)) {
 
+            // Initialize content
+            $content = "";
+
+            // Loop through the HTTP codes
+            foreach (self::HttpCodes as $code) {
+
+                // Set the error document path
+                $path = $CONFIG->root() . DIRECTORY_SEPARATOR . "View" . DIRECTORY_SEPARATOR . $code . ".php";
+
+                // Check if the file exists
+                if(is_file($path)) {
+
+                    // Add the ErrorDocument line
+                    $content .= "ErrorDocument $code $path" . PHP_EOL;
+                }
+            }
+
+            // Check if the content is empty
+            if(!empty($content)) {
+
+                // Add a new line
+                $content .= PHP_EOL;
+            }
+
             // Create content
-            $content = "AddType application/javascript .mjs" . PHP_EOL . PHP_EOL;
+            $content .= "Options +FollowSymLinks" . PHP_EOL . PHP_EOL;
+            $content .= "AddType application/javascript .mjs" . PHP_EOL . PHP_EOL;
             $content .= "<IfModule mod_headers.c>" . PHP_EOL;
             $content .= "    RequestHeader unset Proxy" . PHP_EOL;
             $content .= "</IfModule>" . PHP_EOL . PHP_EOL;
@@ -84,9 +112,33 @@ class CoreHelper extends Helper {
         // Check if file exists
         if(!is_dir($htaccess) && !is_file($htaccess) && !is_link($htaccess)) {
 
+            // Initialize content
+            $content = "";
+
+            // Loop through the HTTP codes
+            foreach (self::HttpCodes as $code) {
+
+                // Set the error document path
+                $path = $CONFIG->root() . DIRECTORY_SEPARATOR . "View" . DIRECTORY_SEPARATOR . $code . ".php";
+
+                // Check if the file exists
+                if(is_file($path)) {
+
+                    // Add the ErrorDocument line
+                    $content .= "ErrorDocument $code $path" . PHP_EOL;
+                }
+            }
+
+            // Check if the content is empty
+            if(!empty($content)) {
+
+                // Add a new line
+                $content .= PHP_EOL;
+            }
+
             // Create content
-            $content = "Options +FollowSymLinks" . PHP_EOL . PHP_EOL;
-            $content = "AddType application/javascript .mjs" . PHP_EOL . PHP_EOL;
+            $content .= "Options +FollowSymLinks" . PHP_EOL . PHP_EOL;
+            $content .= "AddType application/javascript .mjs" . PHP_EOL . PHP_EOL;
             $content .= "<IfModule mod_php8.c>" . PHP_EOL;
             $content .= "    php_value session.cookie_samesite Strict" . PHP_EOL;
             $content .= "    php_value session.cookie_secure On" . PHP_EOL;
@@ -272,5 +324,72 @@ class CoreHelper extends Helper {
 
         // Return
         return $status;
+    }
+
+    /**
+     * Retrieve the list of releases from the repository
+     *
+     * @return array
+     */
+    public function releases(): array
+    {
+        // Retrieve the git configuration
+        $git = $this->Config->get('installer','git');
+
+        // Check if git is set
+        if (is_null($git) || empty($git)) {
+            return [];
+        }
+
+        // Retrieve the repository
+        $repository = $git['repository'] ?? null;
+
+        // Retrieve the token
+        $token = $git['token'] ?? null;
+
+        // Retrieve the name
+        $name = $this->Config->get('installer','name');
+
+        // Check if repository is set
+        if (is_null($repository) || empty($repository)) {
+            return [];
+        }
+
+        // Initialize the url
+        $url = "https://api.github.com/repos/{$repository}/releases";
+
+        // Initialize curl
+        $cURL = curl_init($url);
+
+        // Set Headers
+        $headers = [
+            'User-Agent: ' . $name,
+            'Accept: application/vnd.github.v3+json'
+        ];
+
+        // Check if a token is set
+        if (!is_null($token) && !empty($token)) {
+            $headers[] = 'Authorization: token ' . $token;
+        }
+
+        // Set cURL options
+        curl_setopt($cURL, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($cURL, CURLOPT_HTTPHEADER, $headers);
+
+        // Execute the request
+        $response = curl_exec($cURL);
+        $status = curl_getinfo($cURL, CURLINFO_HTTP_CODE);
+
+        // Close the cURL session
+        curl_close($cURL);
+
+        // Check if the response is valid
+        if($status == 200){
+
+            // Decode the response
+            return json_decode($response, true);
+        }
+
+        return [];
     }
 }

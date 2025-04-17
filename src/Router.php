@@ -115,6 +115,21 @@ class Router {
     }
 
     /**
+     * Retrieve the routes or a specific route
+     *
+     * @param string|null $route
+     * @return array|null
+     */
+    public function routes(?string $route = null): mixed
+    {
+        if($route){
+            return $this->Routes[$route] ?? null;
+        }
+
+        return $this->Routes;
+    }
+
+    /**
      * Set the current route
      *
      * @param string $route

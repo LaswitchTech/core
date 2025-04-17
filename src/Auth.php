@@ -166,20 +166,45 @@ class Auth {
 
         // Check if the Authorization Header is set
         if (preg_match('/Bearer\s(\S+)/', $headers['Authorization'], $matches)) {
-            $token = $matches[1];
+            $tokens = $matches[1];
 
-            // Validate Token
+            // Check if the string is long enough
+            if (strlen($tokens) < 73) {
+                return false;
+            }
+
+            // Check if the splitter character is valid '-'
+            if (substr($tokens, 36, 1) !== '-') {
+                return false;
+            }
+
+            // Retrieve the user
             $query = $this->Database->query();
-            $result = $query->table('tokens')
-                ->select('user')
-                ->where('token', $token)
-                ->where('expires', date('Y-m-d H:i:s'), '>')
+            $user = $query->table('users')
+                ->select('*')
+                ->join('token', 'tokens', 'id')
+                ->where('uuid', substr($tokens, 0, 36))
+                ->where('id', 9999, '<>')
                 ->limit(1)
                 ->result();
 
             // Check if the token is valid
-            if (!empty($result)) {
-                return $this->authenticate(intval($result[0]['user']));
+            if (!empty($user)) {
+
+                // Select the user
+                $user = $user[0];
+
+                // Validate Token
+                if(password_verify(substr($tokens, -36), $user['token']['hash'])){
+
+                    // Check if the token is expired
+                    if (strtotime($user['token']['expires']) < time()) {
+                        return false;
+                    }
+
+                    // Return the user id
+                    return $this->authenticate(intval($user['id']));
+                }
             }
         }
 
@@ -292,11 +317,11 @@ class Auth {
     /**
      * Authenticate the user
      *
-     * @param int|string $user
+     * @param mixed $user
      * @param string|null $password
      * @return bool
      */
-    protected function authenticate(int|string $user, ?string $password = null): bool
+    protected function authenticate(mixed $user, ?string $password = null): bool
     {
         // Import Global Variables
         global $REQUEST;
@@ -304,44 +329,48 @@ class Auth {
         // Retrieve User
         $user = $this->user($user);
 
-        // Check if the user is logging out
-        if(!is_null($REQUEST->getParams('GET','logout') ?? $REQUEST->getParams('GET','signout'))){
+        // Check if the user is found
+        if($user->found()){
 
-            // Destroy Session
-            $user->session()->clear();
-        } else {
+            // Check if the user is logging out
+            if(!is_null($REQUEST->getParams('GET','logout') ?? $REQUEST->getParams('GET','signout'))){
 
-            // Validate Password
-            $load = ($password) ? (bool) $user->backend()->validate($password) : true;
+                // Destroy Session
+                $user->session()->clear();
+            } else {
 
-            // Check if the user can be loaded
-            if($load){
+                // Validate Password
+                $load = ($password) ? (bool) $user->backend()->validate($password) : true;
 
-                // Load User
-                $this->user = $user;
+                // Check if the user can be loaded
+                if($load){
 
-                // Check if the user is deleted
-                $status = !$this->user->deleted();
+                    // Load User
+                    $this->user = $user;
 
-                // Check if the user is banned
-                $status = ($status && !$this->user->banned());
+                    // Check if the user is deleted
+                    $status = !$this->user->deleted();
 
-                // Check if the user is verified
-                $status = ($status && $this->user->verified());
+                    // Check if the user is banned
+                    $status = ($status && !$this->user->banned());
 
-                // Check if the user's organization is active
-                $status = ($status && $this->user->organization['isActive'] > 0);
+                    // Check if the user is verified
+                    $status = ($status && $this->user->verified());
 
-                // Check the user status
-                if($status){
+                    // Check if the user's organization is active
+                    $status = ($status && $this->user->organization['isActive'] > 0);
 
-                    // Set User Last Login
-                    $this->user->lastLogin();
+                    // Check the user status
+                    if($status){
 
-                    // Set Session
-                    $this->user->session()->create();
+                        // Set User Last Login
+                        $this->user->lastLogin();
 
-                    return true;
+                        // Set Session
+                        $this->user->session()->create();
+
+                        return true;
+                    }
                 }
             }
         }
@@ -374,10 +403,10 @@ class Auth {
     /**
      * Create a new User object
      *
-     * @param string|int|null $user
+     * @param mixed $user
      * @return Objects\User
      */
-    public function user(string|int|null $user = null): ?Objects\User
+    public function user(mixed $user = null): ?Objects\User
     {
         return is_null($user) ? $this->user : new Objects\User($user);
     }
@@ -458,7 +487,7 @@ class Auth {
                         ->table('tokens')
                         ->insert([
                             'owner' => $config['username'],
-                            'token' => $UUID->toString($config['username'])
+                            'hash' => password_hash($UUID->toString($config['username']), PASSWORD_DEFAULT)
                         ]);
                     $affected += $Query->execute();
                     $userTokenId = $Query->lastId();
@@ -507,8 +536,17 @@ class Auth {
                         ->where('name', 'Administrator');
                     $affected += $Query->execute();
 
+                    // Update the user
+                    $Query = $this->Database->query()
+                        ->table('users')
+                        ->update([
+                            'uuid' => $UUID->toString($userId),
+                        ])
+                        ->where('id', $userId);
+                    $affected += $Query->execute();
+
                     // Check if the database records were created
-                    if($affected >= 9){
+                    if($affected >= 10){
 
                         // Add a true status
                         $status[] = true;
