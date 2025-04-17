@@ -13,7 +13,7 @@ use \LaswitchTech\Core\Abstracts\Helper;
 class CoreHelper extends Helper {
 
     // Constants
-    const HttpCodes = [400,401,403,404,405,422,423,427,428,429,430,432,500,501,503];
+    const HttpCodes = [400,401,403,404,405,422,423,428,429,500,501,503];
 
     /**
      * Init function
