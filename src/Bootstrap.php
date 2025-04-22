@@ -189,8 +189,7 @@ class Bootstrap {
         "ROUTER" => [
             "class" => "\\LaswitchTech\\Core\\Router",
             "scope" => [
-                "ROUTER",
-                "API"
+                "ROUTER"
             ]
         ],
         "API" => [
