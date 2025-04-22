@@ -198,7 +198,7 @@ class Auth {
                 if(password_verify(substr($tokens, -36), $user['token']['hash'])){
 
                     // Check if the token is expired
-                    if (strtotime($user['token']['expires']) < time()) {
+                    if (!is_null($user['token']['expires']) && strtotime($user['token']['expires']) < time()) {
                         return false;
                     }
 
