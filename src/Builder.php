@@ -80,11 +80,51 @@ class Builder {
             $param['items'] = [];
             $param['link'] = $route;
 
-            if($param['parent'] && isset($menu[$param['parent']])){
-                $menu[$param['parent']]['items'][$route] = $param;
+            if($param['parent']){
+                if(is_array($param['parent'])){
+                    foreach($param['parent'] as $parent){
+                        if(!array_key_exists($parent, $menu)){
+                            $menu[$parent] = [];
+                        }
+                        if(!array_key_exists('items', $menu[$parent])){
+                            $menu[$parent]['items'] = [];
+                        }
+                        $menu[$parent]['items'][$route] = $param;
+                    }
+                } else {
+                    if(!array_key_exists($param['parent'], $menu)){
+                        $menu[$param['parent']] = [];
+                    }
+                    if(!array_key_exists('items', $menu[$param['parent']])){
+                        $menu[$param['parent']]['items'] = [];
+                    }
+                    $menu[$param['parent']]['items'][$route] = $param;
+                }
             } else {
-                $menu[$route] = $param;
+                if(isset($menu[$route])){
+                    $menu[$route] = array_merge_recursive($menu[$route], $param);
+                } else {
+                    $menu[$route] = $param;
+                }
             }
+        }
+
+        foreach($menu as $route => $param) {
+            if(is_null($param['link']) && array_key_exists('items',$param)){
+                foreach($param['items'] as $item => $parameters){
+                    if(!is_null($parameters['link']) && !array_key_exists($parameters['link'],$menu)){
+                        $menu[$parameters['link']] = $parameters;
+                        unset($menu[$route]['items'][$item]);
+                    }
+                }
+            }
+        }
+
+        foreach($menu as $route => $param) {
+            if(is_null($param['link']) && array_key_exists('items',$param)){
+                if(empty($param['items'])){
+                    unset($menu[$route]);
+                }}
         }
 
         return $menu;
