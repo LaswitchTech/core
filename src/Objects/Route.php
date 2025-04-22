@@ -297,10 +297,10 @@ class Route {
     /**
      * Get or Set Parent.
      *
-     * @param string|null $parent
+     * @param mixed $parent
      * @return string
      */
-    public function parent(?string $parent = null): ?string
+    public function parent(mixed $parent = null): mixed
     {
         if(!is_null($parent)){
             $this->Parent = $parent;
