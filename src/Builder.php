@@ -110,7 +110,7 @@ class Builder {
         }
 
         foreach($menu as $route => $param) {
-            if(is_null($param['link']) && array_key_exists('items',$param)){
+            if((!array_key_exists('link',$param) || is_null($param['link'])) && array_key_exists('items',$param)){
                 foreach($param['items'] as $item => $parameters){
                     if(!is_null($parameters['link']) && !array_key_exists($parameters['link'],$menu)){
                         $menu[$parameters['link']] = $parameters;
@@ -121,10 +121,11 @@ class Builder {
         }
 
         foreach($menu as $route => $param) {
-            if(is_null($param['link']) && array_key_exists('items',$param)){
+            if((!array_key_exists('link',$param) || is_null($param['link'])) && array_key_exists('items',$param)){
                 if(empty($param['items'])){
                     unset($menu[$route]);
-                }}
+                }
+            }
         }
 
         return $menu;
