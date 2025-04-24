@@ -17,6 +17,10 @@ use Exception;
 class Router {
 
     // Constants
+    const Modules = ["css"];
+    const ModulesLabels = [
+        "css" => "CSS", // CSS Module
+    ];
     const HttpCodes = [400,401,403,404,405,422,423,427,428,429,430,432,500,501,503];
     const HttpCustomCodes = [427,430,432];
     const HttpLabels = [
@@ -81,6 +85,12 @@ class Router {
             $this->Routes[$Code] = $this->route($Code, ['label' => self::HttpLabels[$Code], 'view' => $Code . '.php']);
         }
 
+        // Load Modules Routes
+        foreach(self::Modules as $Module){
+            $Module = strval($Module);
+            $this->Routes['/'.$Module] = $this->route('/'.$Module, ['label' => self::ModulesLabels[$Module]]);
+        }
+
         // Load Routes
         if($this->Config->get('routes')){
             foreach($this->Config->get('routes') as $route => $param){
@@ -92,7 +102,7 @@ class Router {
         $pluginsPath = $this->Config->root() . DIRECTORY_SEPARATOR . 'lib' . DIRECTORY_SEPARATOR . 'plugins';
         foreach(array_diff(scandir($pluginsPath), array('..', '.')) as $plugin){
             $pluginPath = $pluginsPath . DIRECTORY_SEPARATOR . $plugin;
-            if(is_file($pluginPath . DIRECTORY_SEPARATOR . 'routes.cfg')){
+            if(is_dir($pluginPath) && is_file($pluginPath . DIRECTORY_SEPARATOR . 'routes.cfg')){
                 foreach(json_decode(file_get_contents($pluginPath . DIRECTORY_SEPARATOR . 'routes.cfg'),true) as $route => $param){
                     $this->Routes[$route] = $this->route($route, $param, 'lib' . DIRECTORY_SEPARATOR . 'plugins' . DIRECTORY_SEPARATOR . $plugin);
                 }

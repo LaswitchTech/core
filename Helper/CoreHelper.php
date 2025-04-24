@@ -253,20 +253,6 @@ class CoreHelper extends Helper {
         $status = $status && is_link($favicon);
 
         // Path to directory
-        $css = $webroot . DIRECTORY_SEPARATOR . "css";
-        $dist = $CONFIG->root() . DIRECTORY_SEPARATOR . "dist" . DIRECTORY_SEPARATOR . "css";
-
-        // Check if directory exists
-        if(is_dir($dist) && !is_dir($css) && !is_file($css) && !is_link($css)) {
-
-            // Create symbolic link
-            symlink($dist, $css);
-        }
-
-        // Update the status
-        $status = $status && is_link($css);
-
-        // Path to directory
         $js = $webroot . DIRECTORY_SEPARATOR . "js";
         $dist = $CONFIG->root() . DIRECTORY_SEPARATOR . "dist" . DIRECTORY_SEPARATOR . "js";
 
