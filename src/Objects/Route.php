@@ -297,10 +297,10 @@ class Route {
     /**
      * Get or Set Parent.
      *
-     * @param string|null $parent
+     * @param mixed $parent
      * @return string
      */
-    public function parent(?string $parent = null): ?string
+    public function parent(mixed $parent = null): mixed
     {
         if(!is_null($parent)){
             $this->Parent = $parent;
@@ -371,6 +371,11 @@ class Route {
      */
     public function save(): self
     {
+        // Check if the route is a module
+        if(in_array(str_replace('/','',$this->Route), $this->Router::Modules)){
+            return $this;
+        }
+
         // Check if the route is from a plugin
         if($this->Directory){
 
@@ -509,6 +514,19 @@ class Route {
      */
     public function render(): self
     {
+        // Check if the route is a module
+        if(in_array(str_replace('/','',$this->Route), $this->Router::Modules)){
+
+            // Handle the module
+            switch(str_replace('/','',$this->Route)){
+                case 'css':
+                    echo $this->Style->compile();
+                    break;
+            }
+
+            return $this;
+        }
+
         // Load the template
         if($this->Template && !$this->Interrupt){
 

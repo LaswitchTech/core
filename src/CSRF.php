@@ -60,14 +60,26 @@ class CSRF {
         // Parse the field
         $this->Field = $this->parse($this->Field);
 
+        // Retrieve the Request Headers
+        $headers = getallheaders();
+
         // Check if the method used should be validated
         if(!defined('STDIN') && in_array($this->Request->getMethod(), ['POST', 'PUT', 'PATCH', 'DELETE'])){
             if(in_array(get_class($this->Auth),["Module","LaswitchTech\Core\Module"]) || !$this->Auth->isLoaded() || !$this->Auth->isAuthenticated() || !in_array($this->Auth->method(),["bearer","basic"])){
-                if(!$this->validate($this->Request->getParams('POST', $this->Field) ?? null)){
-                    $this->Output->print(
-                        'Invalid CSRF Token',
-                        array('Content-Type: application/json', 'HTTP/1.1 403 Forbidden'),
-                    );
+                if(isset($headers['X-CSRF-Authorization'])){
+                    if($headers['X-CSRF-Authorization'] != $this->Field){
+                        $this->Output->print(
+                            'Invalid CSRF Token',
+                            array('Content-Type: application/json', 'HTTP/1.1 403 Forbidden'),
+                        );
+                    }
+                } else {
+                    if(!$this->validate($this->Request->getParams('POST', $this->Field) ?? null)){
+                        $this->Output->print(
+                            'Invalid CSRF Token',
+                            array('Content-Type: application/json', 'HTTP/1.1 403 Forbidden'),
+                        );
+                    }
                 }
             }
         }

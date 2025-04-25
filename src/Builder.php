@@ -47,6 +47,7 @@ class Builder {
      */
     public function menu($location = 'sidebar', $parent = null)
     {
+        // Import Global Variables
         global $AUTH;
         $menu = [];
         $routes = $this->Config->get('routes');
@@ -64,10 +65,13 @@ class Builder {
             }
         }
 
+        // Sort the routes
+        ksort($routes);
+
         foreach($routes as $route => $param) {
-            if($parent){
-                if(!isset($param['parent']) || $param['parent'] !== $parent) continue;
-            }
+            if(!isset($param['parent']) || is_null($param['parent'])) $param['parent'] = [];
+            if(!is_array($param['parent'])) $param['parent'] = [$param['parent']];
+            if($parent && !in_array($parent,$param['parent'])) continue;
             if(!isset($param['location'])) continue;
             if(is_string($param['location']) && $param['location'] !== $location) continue;
             if(is_array($param['location']) && !in_array($location,$param['location'])) continue;
@@ -80,10 +84,41 @@ class Builder {
             $param['items'] = [];
             $param['link'] = $route;
 
-            if($param['parent'] && isset($menu[$param['parent']])){
-                $menu[$param['parent']]['items'][$route] = $param;
+            if(!empty($param['parent'])){
+                foreach($param['parent'] as $par){
+                    if(!array_key_exists($par, $menu)){
+                        $menu[$par] = [];
+                    }
+                    if(!array_key_exists('items', $menu[$par])){
+                        $menu[$par]['items'] = [];
+                    }
+                    $menu[$par]['items'][$route] = $param;
+                }
             } else {
-                $menu[$route] = $param;
+                if(array_key_exists($route, $menu)){
+                    $menu[$route] = array_merge_recursive($menu[$route], $param);
+                } else {
+                    $menu[$route] = $param;
+                }
+            }
+        }
+
+        foreach($menu as $route => $param) {
+            if((!array_key_exists('link',$param) || is_null($param['link'])) && array_key_exists('items',$param)){
+                foreach($param['items'] as $item => $parameters){
+                    if(!is_null($parameters['link']) && !array_key_exists($parameters['link'],$menu)){
+                        $menu[$parameters['link']] = $parameters;
+                        unset($menu[$route]['items'][$item]);
+                    }
+                }
+            }
+        }
+
+        foreach($menu as $route => $param) {
+            if((!array_key_exists('link',$param) || is_null($param['link'])) && array_key_exists('items',$param)){
+                if(empty($param['items'])){
+                    unset($menu[$route]);
+                }
             }
         }
 

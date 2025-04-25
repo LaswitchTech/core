@@ -14,5 +14,8 @@
             "email": "louis_ouellet@hotmail.com"
         }
     ],
-    "minimum-stability": "stable"
+    "minimum-stability": "stable",
+    "require": {
+        "wikimedia/less.php": "^5.3"
+    }
 }
