@@ -25,6 +25,9 @@ class PDF {
     const PERMISSIONS = ['print', 'modify', 'copy', 'annot-forms', 'fill-forms', 'extract', 'assemble', 'print-highres'];
     const ENCRYPTIONS = [40, 128, 256];
 
+    // Global Properties
+    private $Log;
+
     // Properties
     private $pdf;
     private $html;
@@ -52,7 +55,16 @@ class PDF {
      * Constructor
      */
     public function __construct()
-    {}
+    {
+        // Import Global Variables
+        global $LOG;
+
+        // Set Properties
+        $this->Log = $LOG;
+
+        // Add the documents log
+        $this->Log->add('pdf');
+    }
 
     /**
      * Import HTML from a file
@@ -440,6 +452,9 @@ class PDF {
      */
     public function generate(): ?string
     {
+        // Set the Log
+        $this->Log->set('pdf');
+
         // Create an instance of the mPDF class
         $pdf = new Mpdf([
             'mode' => $this->mode,
@@ -491,6 +506,7 @@ class PDF {
 
         // Generate the final HTML
         $html = $this->replace($this->html, $this->values);
+        $this->Log->debug('HTML: '.$html);
 
         // Write the HTML content to the PDF
         $pdf->WriteHTML($html);
