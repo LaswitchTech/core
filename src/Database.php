@@ -32,7 +32,6 @@ class Database {
      */
     public function __construct()
     {
-
         // Import Global Variables
         global $CONFIG;
 
