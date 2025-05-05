@@ -32,7 +32,6 @@ class Database {
      */
     public function __construct()
     {
-
         // Import Global Variables
         global $CONFIG;
 
@@ -252,39 +251,6 @@ class Database {
 
                             // Set default auto increment
                             $autoIncrement = 10000;
-
-                            // Check if preload data should be loaded
-                            if(isset($config['preload']) && filter_var($config['preload'], FILTER_VALIDATE_BOOLEAN)){
-
-                                // Check if the data file exists
-                                if(is_file($path . DIRECTORY_SEPARATOR . "Data" . DIRECTORY_SEPARATOR . $definition . ".preload")){
-
-                                    // Retrieve the content of the data file
-                                    $records = json_decode(file_get_contents($path . DIRECTORY_SEPARATOR . "Data" . DIRECTORY_SEPARATOR . $definition . ".preload"),true);
-
-                                    // Loop through the records
-                                    foreach($records as $record){
-
-                                        // Set Record
-                                        $record['owner'] = $config['username'];
-                                        $record['created'] = date('Y-m-d H:i:s');
-                                        $record['modified'] = date('Y-m-d H:i:s');
-
-                                        // Create the Query
-                                        $Query = $this->query()
-                                            ->table($definition)
-                                            ->insert($record);
-
-                                        // Execute the Query
-                                        $Query->execute();
-
-                                        // Set auto increment
-                                        $autoIncrement = ($Query->lastId() + 1);
-                                    }
-                                } else {
-                                    $status[] = "Could not find the preload data file";
-                                }
-                            }
 
                             // Set auto increment on the table
                             $this->query()->table($definition)->autoIncrement($autoIncrement);

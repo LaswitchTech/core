@@ -146,7 +146,7 @@ class Style {
         if(is_dir($path)){
 
             // Loop through the files
-            foreach(array_diff(scandir($path), ['..', '.']) as $file) {
+            foreach(array_diff(scandir($path), ['..', '.','.DS_Store']) as $file) {
 
                 // Read the plugin styles
                 $this->read($path . DIRECTORY_SEPARATOR . $file);
