@@ -308,6 +308,19 @@ class CoreHelper extends Helper {
         // Update the status
         $status = $status && is_link($themes);
 
+        // Path to directory
+        $cli = $CONFIG->root() . DIRECTORY_SEPARATOR . "cli";
+
+        // Check if directory exists
+        if(is_file($cli)) {
+
+            // Set permissions to executable
+            chmod($cli, 0755);
+
+            // Update the status
+            $status = $status && is_executable($cli);
+        }
+
         // Return
         return $status;
     }
