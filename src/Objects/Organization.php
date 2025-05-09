@@ -63,7 +63,7 @@ class Organization {
 
         // Retrieve the users
         foreach($users as $key => $userId){
-            $this->add($userId);
+            $this->add($userId, true);
         }
     }
 
@@ -95,9 +95,10 @@ class Organization {
      * Add a Member from the Organization
      *
      * @param int $id
+     * @param bool $dry
      * @return self
      */
-    public function add(int $id): self
+    public function add(int $id, bool $dry = false): self
     {
         if(!isset($this->users[$id])){
 
@@ -117,6 +118,11 @@ class Organization {
 
                 // Add the user to the list
                 $this->users[$user[0]['id']] = $user[0];
+
+                // Check if we are in dry mode
+                if($dry){
+                    return $this;
+                }
 
                 // Create a new Query
                 $Query = $this->Database->query()

@@ -21,6 +21,167 @@ class CoreCommand extends Command {
     }
 
     /**
+     * Validate Cron Schedule
+     */
+    public function validateCronSchedule(string $expr): bool
+    {
+        $cron5 = '~^
+            (\*|[0-5]?\d)(/([1-5]?\d))?       # minute
+            \s+
+            (\*|1?\d|2[0-3])(/([1-5]?\d))?    # hour
+            \s+
+            (\*|0?[1-9]|[12]\d|3[01])(/([1-9]|[12]\d|3[01]))? # dom
+            \s+
+            (\*|0?[1-9]|1[0-2])(/([1-9]|1[0-2]))?            # month
+            \s+
+            (\*|[0-7])(/([0-7]))?                            # dow (0/7 = Sun)
+            $~x';
+
+        return (bool)preg_match($cron5, trim($expr));
+    }
+
+    /**
+     * Retrieve the cron schedule
+     */
+    public function getCronSchedule(string $expr): array
+    {
+        // Check if the schedule is valid
+        if(!$this->validateCronSchedule($expr)){
+            throw new Exception("Invalid cron schedule: $expr");
+        }
+
+        // Split the expression into parts
+        $parts = preg_split('/\s+/', $expr);
+
+        // Construct the schedule array
+        $schedule = [
+            'minute' => $parts[0],
+            'hour' => $parts[1],
+            'day' => $parts[2],
+            'month' => $parts[3],
+            'dow' => $parts[4]
+        ];
+
+        return $schedule;
+    }
+
+    // /**
+    //  * Compare the schedule with the current date
+    //  */
+    // public function compareSchedule(array $schedule, array $now): bool
+    // {
+    //     // Check if the schedule matches the current date
+    //     return (
+    //         ($schedule['minute'] == '*' || $schedule['minute'] == $now['minute']) &&
+    //         ($schedule['hour'] == '*' || $schedule['hour'] == $now['hour']) &&
+    //         ($schedule['day'] == '*' || $schedule['day'] == $now['day']) &&
+    //         ($schedule['month'] == '*' || $schedule['month'] == $now['month']) &&
+    //         ($schedule['dow'] == '*' || $schedule['dow'] == $now['dow'])
+    //     );
+    // }
+
+    /**
+     * Compare a parsed cron *schedule* (minute, hour, day, month, dow)
+     * with the current time held in $now (same 5 keys).
+     */
+    public function compareSchedule(array $schedule, array $now): bool
+    {
+        return
+            $this->matchCronField($schedule['minute'], $now['minute'], 0, 59) &&
+            $this->matchCronField($schedule['hour'],   $now['hour'],   0, 23) &&
+            $this->matchCronField($schedule['day'],    $now['day'],    1, 31) &&
+            $this->matchCronField($schedule['month'],  $now['month'],  1, 12, self::$monthNames) &&
+            $this->matchCronField($schedule['dow'],    $now['dow'],    0, 7,  self::$dowNames, true);
+    }
+
+    /**
+     * Decide whether $value matches a single cron field expression.
+     *
+     * @param string      $expr
+     * @param int|string  $value
+     * @param int         $min
+     * @param int         $max
+     * @param array|null  $names
+     * @param bool        $wrap7
+    */
+    private function matchCronField(string $expr, $value, int $min, int $max, ?array $names = null, bool $wrap7 = false): bool
+    {
+        $value = (int)$value;
+        if ($wrap7 && $value === 7) {
+            $value = 0; // Sun may be 0 or 7
+        }
+
+        // Fast path: '*' means "always"
+        if ($expr === '*') {
+            return true;
+        }
+
+        // Split lists: 1,5,10-15,*/10  …
+        foreach (explode(',', $expr) as $part) {
+            $part = trim($part);
+            if ($part === '') {
+                continue;
+            }
+
+            // Convert month/dow names to numbers if needed
+            if ($names) {
+                $part = preg_replace_callback('/[A-Za-z]+/', function ($m) use ($names) {
+                    $up = strtoupper($m[0]);
+                    return $names[$up] ?? $m[0];   // leave untouched if unknown
+                }, $part);
+            }
+
+            // Step syntax (*/15 or 5-55/10)
+            if (strpos($part, '/') !== false) {
+                [$range, $step] = explode('/', $part, 2);
+                $step = max(1, (int)$step);
+
+                // '*' → full range; otherwise a-b
+                [$start, $end] = ($range === '*')
+                    ? [$min, $max]
+                    : array_pad(explode('-', $range, 2), 2, null);
+
+                $start = (int)($start ?? $min);
+                $end   = (int)($end   ?? $max);
+
+                if ($value >= $start && $value <= $end &&
+                    (($value - $start) % $step) === 0) {
+                    return true;
+                }
+                continue;
+            }
+
+            // Simple range a-b
+            if (strpos($part, '-') !== false) {
+                [$start, $end] = explode('-', $part, 2);
+                if ($value >= (int)$start && $value <= (int)$end) {
+                    return true;
+                }
+                continue;
+            }
+
+            // Single literal number
+            if ($value === (int)$part) {
+                return true;
+            }
+        }
+
+        // No match in any list element
+        return false;
+    }
+
+    /**
+     * Lookup tables for names → numbers
+     */
+    private static array $monthNames = [
+        'JAN'=>1,'FEB'=>2,'MAR'=>3,'APR'=>4,'MAY'=>5,'JUN'=>6,
+        'JUL'=>7,'AUG'=>8,'SEP'=>9,'OCT'=>10,'NOV'=>11,'DEC'=>12,
+    ];
+    private static array $dowNames = [
+        'SUN'=>0,'MON'=>1,'TUE'=>2,'WED'=>3,'THU'=>4,'FRI'=>5,'SAT'=>6,
+    ];
+
+    /**
      * Initialize the framework
      */
     public function initAction()
@@ -230,6 +391,75 @@ class CoreCommand extends Command {
 
                 // Save the modules list
                 $CONFIG->set('installer', 'modules', $modules);
+            }
+        }
+    }
+
+    /**
+     * Execute CRON jobs
+     */
+    public function cronAction()
+    {
+        // Set Current Date and Time
+        $now = [
+            "minute" => date('i'),
+            "hour" => date('H'),
+            "day" => date('d'),
+            "month" => date('m'),
+            "dow" => date('w')
+        ];
+        var_dump($now);
+
+        // Set Path
+        $path = $this->Config->root() . "/lib/plugins";
+
+        // Check if the Model directory exists
+        if(is_dir($path)){
+
+            // Loop through all the files in the directory
+            foreach(array_diff(scandir($path), ['..', '.','.DS_Store']) as $plugin){
+
+                // Set Command path
+                $commandPath = $path . "/" . $plugin . "/Command.php";
+
+                // Check if the command file exists
+                if(is_file($commandPath)){
+
+                    // Include the Command
+                    require_once $commandPath;
+
+                    // Get the Command Base Name and Class Name
+                    $baseName = ucfirst($plugin);
+                    $className = $baseName . 'Command';
+
+                    // Check if the class exists
+                    if (class_exists($className)) {
+
+                        // Create the Command
+                        $Command = new $className();
+
+                        // Check if the command contains a cron method & schedule method
+                        if (method_exists($Command, 'cron') && method_exists($Command, 'schedule')) {
+
+                            // Retrieve the schedule
+                            $schedule = $Command->schedule();
+
+                            // Check if the schedule is valid (using the cron expression)
+                            if($this->validateCronSchedule($schedule)){
+
+                                // Parse the schedule
+                                $schedule = $this->getCronSchedule($schedule);
+
+                                // Check if the schedule matches the current date
+                                if($this->compareSchedule($schedule, $now)){
+
+                                    // Execute the command
+                                    $Command->cron();
+                                }
+                            }
+                        }
+                    }
+                }
             }
         }
     }
