@@ -65,21 +65,6 @@ class CoreCommand extends Command {
         return $schedule;
     }
 
-    // /**
-    //  * Compare the schedule with the current date
-    //  */
-    // public function compareSchedule(array $schedule, array $now): bool
-    // {
-    //     // Check if the schedule matches the current date
-    //     return (
-    //         ($schedule['minute'] == '*' || $schedule['minute'] == $now['minute']) &&
-    //         ($schedule['hour'] == '*' || $schedule['hour'] == $now['hour']) &&
-    //         ($schedule['day'] == '*' || $schedule['day'] == $now['day']) &&
-    //         ($schedule['month'] == '*' || $schedule['month'] == $now['month']) &&
-    //         ($schedule['dow'] == '*' || $schedule['dow'] == $now['dow'])
-    //     );
-    // }
-
     /**
      * Compare a parsed cron *schedule* (minute, hour, day, month, dow)
      * with the current time held in $now (same 5 keys).
@@ -408,7 +393,6 @@ class CoreCommand extends Command {
             "month" => date('m'),
             "dow" => date('w')
         ];
-        var_dump($now);
 
         // Set Path
         $path = $this->Config->root() . "/lib/plugins";
