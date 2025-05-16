@@ -371,6 +371,11 @@ class Route {
      */
     public function save(): self
     {
+        // Check if development mode is enabled
+        if(!$this->Config->get('application','development') ?? false){
+            return $this;
+        }
+
         // Check if the route is a module
         if(in_array(str_replace('/','',$this->Route), $this->Router::Modules)){
             return $this;

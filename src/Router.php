@@ -103,8 +103,11 @@ class Router {
         foreach(array_diff(scandir($pluginsPath), array('..', '.')) as $plugin){
             $pluginPath = $pluginsPath . DIRECTORY_SEPARATOR . $plugin;
             if(is_dir($pluginPath) && is_file($pluginPath . DIRECTORY_SEPARATOR . 'routes.cfg')){
-                foreach(json_decode(file_get_contents($pluginPath . DIRECTORY_SEPARATOR . 'routes.cfg'),true) as $route => $param){
-                    $this->Routes[$route] = $this->route($route, $param, 'lib' . DIRECTORY_SEPARATOR . 'plugins' . DIRECTORY_SEPARATOR . $plugin);
+                $content = file_get_contents($pluginPath . DIRECTORY_SEPARATOR . 'routes.cfg');
+                if($content){
+                    foreach(json_decode($content,true) as $route => $param){
+                        $this->Routes[$route] = $this->route($route, $param, 'lib' . DIRECTORY_SEPARATOR . 'plugins' . DIRECTORY_SEPARATOR . $plugin);
+                    }
                 }
             }
         }
