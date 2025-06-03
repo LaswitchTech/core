@@ -8,12 +8,12 @@
 ![Version](https://img.shields.io/github/v/release/LaswitchTech/core?label=Version&style=for-the-badge)
 
 ## Description
-**Author(s)**: [Louis Ouellet](louis@laswitchtech.com)
+**Author(s)**: [LaswitchTech](support@laswitchtech.com)
 
 The `Core` package is a collection of classes that provide the basic functionality for the LaswitchTech Core Framework. The classes are designed to be extended and used in other projects. Additional `Core` packages can be added to extend the functionality of the framework.
 
 ## License
-This software is distributed under the [MIT](LICENSE) license.
+This software is distributed under the [GPLv3](LICENSE) license.
 
 ## Installation
 Using Composer:
