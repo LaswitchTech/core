@@ -23,7 +23,7 @@ class CoreCommand extends Command {
     /**
      * Validate Cron Schedule
      */
-    public function validateCronSchedule(string $expr): bool
+    private function validateCronSchedule(string $expr): bool
     {
         $cron5 = '~^
             (\*|[0-5]?\d)(/([1-5]?\d))?       # minute
@@ -43,7 +43,7 @@ class CoreCommand extends Command {
     /**
      * Retrieve the cron schedule
      */
-    public function getCronSchedule(string $expr): array
+    private function getCronSchedule(string $expr): array
     {
         // Check if the schedule is valid
         if(!$this->validateCronSchedule($expr)){
@@ -69,7 +69,7 @@ class CoreCommand extends Command {
      * Compare a parsed cron *schedule* (minute, hour, day, month, dow)
      * with the current time held in $now (same 5 keys).
      */
-    public function compareSchedule(array $schedule, array $now): bool
+    private function compareSchedule(array $schedule, array $now): bool
     {
         return
             $this->matchCronField($schedule['minute'], $now['minute'], 0, 59) &&
