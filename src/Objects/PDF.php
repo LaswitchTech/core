@@ -37,7 +37,7 @@ class PDF {
     private $orientation = 'P';
     private $dpi = 96;
     private $font = 'Helvetica';
-    private $permissions = ['print','print-highres','annot-forms'];
+    private $permissions = ['print','print-highres','annot-forms','fill-forms'];
     private $encryption = 128;
     private $margins = [15, 15, 15, 15];
     private $title;
@@ -512,14 +512,19 @@ class PDF {
             );
         }
 
+        // Enable the use of active forms
+        if(in_array('annot-forms', $this->permissions) || in_array('fill-forms', $this->permissions)){
+            $pdf->useActiveForms = true;
+        }
+
+        // Set the Display Mode
+        $pdf->SetDisplayMode('fullpage', 'single');
+
         // Set the default font
         $pdf->SetDefaultFont($this->font);
 
         // Set the margins
         $pdf->SetMargins($this->margins[0], $this->margins[1], $this->margins[2], $this->margins[3]);
-
-        // Enable the use of active forms
-        $pdf->useActiveForms = true;
 
         // Generate the final HTML
         $html = $this->replace($this->html, $this->values);
