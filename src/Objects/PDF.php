@@ -12,6 +12,7 @@ namespace LaswitchTech\Core\Objects;
 
 // Import additionnal class into the global namespace
 use Mpdf\Mpdf;
+use setasign\Fpdi\Fpdi;
 use Exception;
 
 class PDF {
@@ -50,6 +51,7 @@ class PDF {
     private $path;
     private $values = [];
     private $letterhead;
+    private $signatures = [];
 
     /**
      * Constructor
@@ -316,6 +318,21 @@ class PDF {
         return $this;
     }
 
+    public function signature(string $name, int $x, int $y, int $w, int $h, int $p = 1): self
+    {
+        // Set the signature
+        $this->signatures[$name] = [
+            'x' => $x,
+            'y' => $y,
+            'width' => $w,
+            'height' => $h,
+            'page' => $p,
+        ];
+
+        // Return the instance
+        return $this;
+    }
+
     /**
      * Set the PDF owner password
      *
@@ -486,7 +503,7 @@ class PDF {
         $pdf->showWatermarkText = (!empty($this->watermark) && !is_null($this->watermark));
 
         // Set the PDF Security
-        if($this->passwordOwner){
+        if($this->passwordOwner && empty($this->signatures)){
             $pdf->SetProtection(
                 $this->permissions,
                 $this->passwordUser,
@@ -521,6 +538,42 @@ class PDF {
 
             // Save the PDF
             $pdf->Output($this->path, 'F');
+        }
+
+        // Check if signatures are set
+        if(!empty($this->signatures)){
+
+            // Create a new FPDI instance
+            $fpdf = new Fpdi();
+
+            // Set the source file
+            $fpdf->setSourceFile($this->path);
+
+            // Loop through the signatures
+            foreach($this->signatures as $name => $signature){
+
+                // Import the page where the signature should be placed
+                $page = $fpdf->importPage($signature['page']);
+
+                // Add a new page to the FPDI instance
+                $fpdf->AddPage($this->orientation, $this->format);
+
+                // Use the imported page as a template
+                $fpdf->useTemplate($page);
+
+                // Set the position for the signature
+                $fpdf->Annotation(
+                    $signature['x'], $signature['y'], $signature['width'], $signature['height'],
+                    [
+                        'Subtype' => 'Widget',
+                        'FT'      => 'Sig',
+                        'T'       => $name,
+                    ]
+                );
+            }
+
+            // Save the modified PDF with signatures
+            $fpdf->Output($this->path, 'F');
         }
 
         // Return the file path
