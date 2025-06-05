@@ -15,6 +15,7 @@ composer.phar
 *.log
 
 # Exclude Files
+!extensions.cfg
 # cli
 
 # Exclude Locales Configurations and Translations
