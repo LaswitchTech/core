@@ -644,6 +644,20 @@ class CoreHelper extends Helper {
         // Configure extended listing
         $listing = $this->Config->get('extensions');
 
+        // Set the path to the library folder
+        $listPath = $this->Config->root() . DIRECTORY_SEPARATOR . "config" . DIRECTORY_SEPARATOR . "extensions.cfg";
+
+        // Loop through the listing to retrieve additional details.
+        foreach($listing as $type => $extensions){
+
+            // Loop through the extensions
+            foreach($extensions as $base => $extension){
+
+                // Set the source in the extension
+                $listing[$type][$base]['source'] = $this->Config->root() . DIRECTORY_SEPARATOR . "lib" . DIRECTORY_SEPARATOR . $type . DIRECTORY_SEPARATOR . $base;
+            }
+        }
+
         // Load the core extensions
         $corePath = $this->Config->root() . DIRECTORY_SEPARATOR . "vendor" . DIRECTORY_SEPARATOR . "laswitchtech" . DIRECTORY_SEPARATOR . "core" . DIRECTORY_SEPARATOR . "config" . DIRECTORY_SEPARATOR . "extensions.cfg";
         if(file_exists($corePath)){
@@ -661,7 +675,12 @@ class CoreHelper extends Helper {
 
                     // Check if the extension is already defined
                     if(!array_key_exists($base, $listing[$type])){
+
+                        // Add the extension to the listing
                         $listing[$type][$base] = $extension;
+
+                        // Set the source in the extension
+                        $listing[$type][$base]['source'] = $corePath;
                     }
                 }
             }
@@ -690,6 +709,9 @@ class CoreHelper extends Helper {
 
                             // Add the extension to the listing
                             $listing[$type][$base] = $extension;
+
+                            // Set the source in the extension
+                            $listing[$type][$base]['source'] = $modulePath . DIRECTORY_SEPARATOR . "listing.cfg";
                         }
                     }
                 }
@@ -731,6 +753,9 @@ class CoreHelper extends Helper {
 
                 // Load the extension info
                 $meta[$type][$base] = $this->retrieve($extension['url'], $extension['token'] ?? null);
+
+                // Set the source
+                $meta[$type][$base]['source'] = $extension['source'] ?? null;
 
                 // Set the token
                 $meta[$type][$base]['token'] = $extension['token'] ?? null;
@@ -834,6 +859,9 @@ class CoreHelper extends Helper {
 
                             // Compare the current version with the latest version and set the latest version
                             $meta[$type][$base]['latest'] = !version_compare($meta[$type][$base]['current'], $meta[$type][$base]['version'], '<');
+
+                            // Set the source
+                            $meta[$type][$base]['source'] = null;
                         }
                     }
                 }
