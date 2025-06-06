@@ -791,7 +791,7 @@ class CoreHelper extends Helper {
                     $info = json_decode(file_get_contents($infoPath) ?? "[]", true);
 
                     // Set the current version
-                    $meta[$type][$base]['current'] = $info['version'] ?? $meta[$type][$base]['version'];
+                    $meta[$type][$base]['current'] = $info['version'];
                 } else {
 
                     // Set the current version to the version from the repository
