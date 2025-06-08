@@ -25,7 +25,7 @@ TOKEN
 # Unique Directories
 /tmp/
 /data/
-# /lib/
+/lib/
 
 # Apache
 .htaccess
