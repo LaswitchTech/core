@@ -54,12 +54,14 @@ class Builder {
 
         // Load Plugins Routes
         $pluginsPath = $this->Config->root() . DIRECTORY_SEPARATOR . 'lib' . DIRECTORY_SEPARATOR . 'plugins';
-        foreach(array_diff(scandir($pluginsPath), array('..', '.')) as $plugin){
-            $pluginPath = $pluginsPath . DIRECTORY_SEPARATOR . $plugin;
-            if(is_file($pluginPath . DIRECTORY_SEPARATOR . 'routes.cfg')){
-                foreach(json_decode(file_get_contents($pluginPath . DIRECTORY_SEPARATOR . 'routes.cfg'),true) as $route => $param){
-                    if(!isset($routes[$route])){
-                        $routes[$route] = $param;
+        if(is_dir($pluginsPath)){
+            foreach(array_diff(scandir($pluginsPath), array('..', '.')) as $plugin){
+                $pluginPath = $pluginsPath . DIRECTORY_SEPARATOR . $plugin;
+                if(is_file($pluginPath . DIRECTORY_SEPARATOR . 'routes.cfg')){
+                    foreach(json_decode(file_get_contents($pluginPath . DIRECTORY_SEPARATOR . 'routes.cfg'),true) as $route => $param){
+                        if(!isset($routes[$route])){
+                            $routes[$route] = $param;
+                        }
                     }
                 }
             }
@@ -190,23 +192,27 @@ class Builder {
             }
         }
         $path = $this->Config->root() . '/lib/themes';
-        $themes = array_diff(scandir($path), array('..', '.'));
-        foreach($themes as $file){
-            $filePath = $file . '/styles.css';
-            if(is_file($path.'/'.$filePath)){
-                if($this->Config->get('application','theme') == $file){
-                    $html .= '<link rel="stylesheet" type="text/css" href="/themes/'.trim($filePath,'/').'" data-theme="'.$file.'">' . PHP_EOL;
-                } else {
-                    $html .= '<link rel="stylesheet" type="text/css" href="/themes/'.trim($filePath,'/').'" data-theme="'.$file.'" disabled="">' . PHP_EOL;
+        if(is_dir($path)){
+            $themes = array_diff(scandir($path), array('..', '.'));
+            foreach($themes as $file){
+                $filePath = $file . '/styles.css';
+                if(is_file($path.'/'.$filePath)){
+                    if($this->Config->get('application','theme') == $file){
+                        $html .= '<link rel="stylesheet" type="text/css" href="/themes/'.trim($filePath,'/').'" data-theme="'.$file.'">' . PHP_EOL;
+                    } else {
+                        $html .= '<link rel="stylesheet" type="text/css" href="/themes/'.trim($filePath,'/').'" data-theme="'.$file.'" disabled="">' . PHP_EOL;
+                    }
                 }
             }
         }
         $path = $this->Config->root() . '/lib/plugins';
-        $plugins = array_diff(scandir($path), array('..', '.'));
-        foreach($plugins as $file){
-            $filePath = $file . '/style.css';
-            if(is_file($path.'/'.$filePath)){
-                $html .= '<link rel="stylesheet" type="text/css" href="/plugins/'.trim($filePath,'/').'" data-plugin="'.$file.'">' . PHP_EOL;
+        if(is_dir($path)){
+            $plugins = array_diff(scandir($path), array('..', '.'));
+            foreach($plugins as $file){
+                $filePath = $file . '/style.css';
+                if(is_file($path.'/'.$filePath)){
+                    $html .= '<link rel="stylesheet" type="text/css" href="/plugins/'.trim($filePath,'/').'" data-plugin="'.$file.'">' . PHP_EOL;
+                }
             }
         }
         return $html;
