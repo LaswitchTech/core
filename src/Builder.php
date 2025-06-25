@@ -236,11 +236,13 @@ class Builder {
             }
         }
         $path = $this->Config->root() . '/lib/plugins';
-        $plugins = array_diff(scandir($path), array('..', '.'));
-        foreach($plugins as $file){
-            $filePath = $file . '/library.js';
-            if(is_file($path.'/'.$filePath)){
-                $html .= '<script src="/plugins/'.trim($filePath,'/').'"></script>' . PHP_EOL;
+        if(is_dir($path)){
+            $plugins = array_diff(scandir($path), array('..', '.'));
+            foreach($plugins as $file){
+                $filePath = $file . '/library.js';
+                if(is_file($path.'/'.$filePath)){
+                    $html .= '<script src="/plugins/'.trim($filePath,'/').'"></script>' . PHP_EOL;
+                }
             }
         }
         foreach($plugins as $file){
