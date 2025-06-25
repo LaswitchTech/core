@@ -12,6 +12,7 @@ namespace LaswitchTech\Core\Objects;
 
 // Import additionnal class into the global namespace
 use Mpdf\Mpdf;
+use setasign\Fpdi\Fpdi;
 use Exception;
 
 class PDF {
@@ -36,7 +37,7 @@ class PDF {
     private $orientation = 'P';
     private $dpi = 96;
     private $font = 'Helvetica';
-    private $permissions = ['print','print-highres','annot-forms'];
+    private $permissions = ['print','print-highres','annot-forms','fill-forms'];
     private $encryption = 128;
     private $margins = [15, 15, 15, 15];
     private $title;
@@ -50,6 +51,7 @@ class PDF {
     private $path;
     private $values = [];
     private $letterhead;
+    private $signatures = [];
 
     /**
      * Constructor
@@ -316,6 +318,21 @@ class PDF {
         return $this;
     }
 
+    public function signature(string $name, int $x, int $y, int $w, int $h, int $p = 1): self
+    {
+        // Set the signature
+        $this->signatures[$name] = [
+            'x' => $x,
+            'y' => $y,
+            'width' => $w,
+            'height' => $h,
+            'page' => $p,
+        ];
+
+        // Return the instance
+        return $this;
+    }
+
     /**
      * Set the PDF owner password
      *
@@ -486,7 +503,7 @@ class PDF {
         $pdf->showWatermarkText = (!empty($this->watermark) && !is_null($this->watermark));
 
         // Set the PDF Security
-        if($this->passwordOwner){
+        if($this->passwordOwner && empty($this->signatures)){
             $pdf->SetProtection(
                 $this->permissions,
                 $this->passwordUser,
@@ -495,14 +512,19 @@ class PDF {
             );
         }
 
+        // Enable the use of active forms
+        if(in_array('annot-forms', $this->permissions) || in_array('fill-forms', $this->permissions)){
+            $pdf->useActiveForms = true;
+        }
+
+        // Set the Display Mode
+        $pdf->SetDisplayMode('fullpage', 'single');
+
         // Set the default font
         $pdf->SetDefaultFont($this->font);
 
         // Set the margins
         $pdf->SetMargins($this->margins[0], $this->margins[1], $this->margins[2], $this->margins[3]);
-
-        // Enable the use of active forms
-        $pdf->useActiveForms = true;
 
         // Generate the final HTML
         $html = $this->replace($this->html, $this->values);
@@ -521,6 +543,42 @@ class PDF {
 
             // Save the PDF
             $pdf->Output($this->path, 'F');
+        }
+
+        // Check if signatures are set
+        if(!empty($this->signatures)){
+
+            // Create a new FPDI instance
+            $fpdf = new Fpdi();
+
+            // Set the source file
+            $fpdf->setSourceFile($this->path);
+
+            // Loop through the signatures
+            foreach($this->signatures as $name => $signature){
+
+                // Import the page where the signature should be placed
+                $page = $fpdf->importPage($signature['page']);
+
+                // Add a new page to the FPDI instance
+                $fpdf->AddPage($this->orientation, $this->format);
+
+                // Use the imported page as a template
+                $fpdf->useTemplate($page);
+
+                // Set the position for the signature
+                $fpdf->Annotation(
+                    $signature['x'], $signature['y'], $signature['width'], $signature['height'],
+                    [
+                        'Subtype' => 'Widget',
+                        'FT'      => 'Sig',
+                        'T'       => $name,
+                    ]
+                );
+            }
+
+            // Save the modified PDF with signatures
+            $fpdf->Output($this->path, 'F');
         }
 
         // Return the file path

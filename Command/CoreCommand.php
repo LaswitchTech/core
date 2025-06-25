@@ -23,7 +23,7 @@ class CoreCommand extends Command {
     /**
      * Validate Cron Schedule
      */
-    public function validateCronSchedule(string $expr): bool
+    private function validateCronSchedule(string $expr): bool
     {
         $cron5 = '~^
             (\*|[0-5]?\d)(/([1-5]?\d))?       # minute
@@ -43,7 +43,7 @@ class CoreCommand extends Command {
     /**
      * Retrieve the cron schedule
      */
-    public function getCronSchedule(string $expr): array
+    private function getCronSchedule(string $expr): array
     {
         // Check if the schedule is valid
         if(!$this->validateCronSchedule($expr)){
@@ -69,7 +69,7 @@ class CoreCommand extends Command {
      * Compare a parsed cron *schedule* (minute, hour, day, month, dow)
      * with the current time held in $now (same 5 keys).
      */
-    public function compareSchedule(array $schedule, array $now): bool
+    private function compareSchedule(array $schedule, array $now): bool
     {
         return
             $this->matchCronField($schedule['minute'], $now['minute'], 0, 59) &&
@@ -445,6 +445,156 @@ class CoreCommand extends Command {
                     }
                 }
             }
+        }
+    }
+
+    public function extensionAction()
+    {
+        // Configure extended listing
+        $listing = $this->Helper->Core->loadExtensionsMeta();
+
+        // Set main path
+        $path = $this->Config->root() . DIRECTORY_SEPARATOR . "lib";
+
+        // Handle the request
+        switch($this->Request->getArguments(3)){
+            case 'list':
+                switch($this->Request->getArguments(4)){
+                    default:
+                        if(!array_key_exists($this->Request->getArguments(4), $listing)){
+                            $this->Output->print("Invalid type: " . $this->Request->getArguments(4));
+                            $this->Output->print("Available types: modules, plugins, themes");
+                            return;
+                        }
+                        $this->Output->print("Type: " . $this->Request->getArguments(4));
+                        foreach($listing[$this->Request->getArguments(4)] as $base => $extension){
+                            $this->Output->print(" - " . $base . ($extension['installed'] ? " (installed)" : "") . ($extension['git'] ? " (dev)" : ""));
+                        }
+                        return;
+                        return;
+                    case null:
+                        $this->Output->print("Usage: ./cli core extension ".$this->Request->getArguments(3)." <type>");
+                        $this->Output->print("Types: modules, plugins, themes");
+                        return;
+                }
+                return;
+            case 'info':
+            case 'import':
+            case 'update':
+            case 'install':
+            case 'uninstall':
+                switch($this->Request->getArguments(4)){
+                    case 'modules':
+                    case 'plugins':
+                    case 'themes':
+                        switch($this->Request->getArguments(5)){
+                            default:
+                                if($this->Request->getArguments(3) != 'import'){
+                                    $extension = $listing[$this->Request->getArguments(4)][$this->Request->getArguments(5)] ?? null;
+                                    if(is_null($extension)){
+                                        $this->Output->print("Extension not found: " . $this->Request->getArguments(5));
+                                        return;
+                                    }
+                                }
+                                switch($this->Request->getArguments(3)){
+                                    case 'info':
+                                        foreach($extension as $key => $value){
+                                            if(is_array($value)){
+                                                $this->Output->print(ucwords($key) . ": " . implode(", ", $value));
+                                            } else {
+                                                $this->Output->print(ucwords($key) . ": " . $value);
+                                            }
+                                        }
+                                        return;
+                                    case 'import':
+                                        switch($this->Request->getArguments(6)){
+                                            default:
+                                                $url = $this->Helper->Core->getRepo($this->Request->getArguments(6))['url'];
+                                                if($url){
+                                                    $listings = $this->Config->get('extensions');
+                                                    $listings[$this->Request->getArguments(4)][$this->Request->getArguments(5)] = ['url' => $this->Helper->Core->getRepo($this->Request->getArguments(6))['url']];
+                                                    if($this->Request->getArguments(7)){
+                                                        $listings[$this->Request->getArguments(4)][$this->Request->getArguments(5)]['token'] = $this->Request->getArguments(7);
+                                                    }
+                                                    $this->Config->set('extensions', $this->Request->getArguments(4), $listings[$this->Request->getArguments(4)]);
+                                                    $this->Output->print("Extension {$this->Request->getArguments(5)} imported successfully.");
+                                                } else {
+                                                    $this->Output->print("Invalid repository URL: " . $this->Request->getArguments(6));
+                                                    return;
+                                                }
+                                                return;
+                                            case null:
+                                                $this->Output->print("Usage: ./cli core extension ".$this->Request->getArguments(3)." ".$this->Request->getArguments(4)." ".$this->Request->getArguments(5)." <repository> <token>");
+                                                $this->Output->print("Repository: URL of the repository to import the extension from");
+                                                $this->Output->print("Token: Optional token for authentication");
+                                                return;
+                                        }
+                                        return;
+                                    case 'update':
+                                        if(is_dir($extension['path'])){
+                                            $tmpPath = $this->Config->root() . DIRECTORY_SEPARATOR . 'tmp';
+                                            $archivePath = $tmpPath . DIRECTORY_SEPARATOR . $extension['base'] . '.zip';
+                                            if($this->Helper->Core->download($extension['download'], $archivePath, $extension['token'] ?? null)){
+                                                if($this->Helper->Core->unpack($archivePath, $extension['path'])){
+                                                    $this->Output->print("Extension {$extension['base']} updated successfully.");
+                                                } else {
+                                                    $this->Output->print("Failed to unpack the extension {$extension['base']}.");
+                                                }
+                                            } else {
+                                                $this->Output->print("Failed to download the extension {$extension['base']}.");
+                                            }
+                                        } else {
+                                            $this->Output->print("Extension not installed: " . $this->Request->getArguments(5));
+                                        }
+                                        return;
+                                    case 'install':
+                                        if(!is_dir($extension['path'])){
+                                            $tmpPath = $this->Config->root() . DIRECTORY_SEPARATOR . 'tmp';
+                                            $archivePath = $tmpPath . DIRECTORY_SEPARATOR . $extension['base'] . '.zip';
+                                            if($this->Helper->Core->download($extension['download'], $archivePath, $extension['token'] ?? null)){
+                                                if($this->Helper->Core->unpack($archivePath, $extension['path'])){
+                                                    $this->Output->print("Extension {$extension['base']} installed successfully.");
+                                                } else {
+                                                    $this->Output->print("Failed to unpack the extension {$extension['base']}.");
+                                                }
+                                            } else {
+                                                $this->Output->print("Failed to download the extension {$extension['base']}.");
+                                            }
+                                        } else {
+                                            $this->Output->print("Extension already installed: " . $this->Request->getArguments(5));
+                                        }
+                                        return;
+                                    case 'uninstall':
+                                        if(is_dir($extension['path'])){
+                                            if($this->Helper->Core->delete($extension['path'])){
+                                                $this->Output->print("Extension uninstalled successfully.");
+                                            } else {
+                                                $this->Output->print("Failed to uninstall the extension.");
+                                            }
+                                        } else {
+                                            $this->Output->print("Extension not installed: " . $this->Request->getArguments(5));
+                                        }
+                                        return;
+                                }
+                            case null:
+                                $this->Output->print("Usage: ./cli core extension ".$this->Request->getArguments(3)." ".$this->Request->getArguments(4)." <base>");
+                                $this->Output->print("Base: name of the extension");
+                                return;
+                        }
+                        return;
+                    default:
+                        $this->Output->print("Usage: ./cli core extension ".$this->Request->getArguments(3)." <type> <base>");
+                        $this->Output->print("Types: modules, plugins, themes");
+                        $this->Output->print("Base: name of the extension");
+                        return;
+                }
+                return;
+            default:
+                $this->Output->print("Usage: ./cli core extension <sub-command> <type> <base>");
+                $this->Output->print("Sub-commands: list, info, import, update, install, uninstall");
+                $this->Output->print("Types: modules, plugins, themes");
+                $this->Output->print("Base: name of the extension");
+                return;
         }
     }
 }

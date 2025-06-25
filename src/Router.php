@@ -100,13 +100,15 @@ class Router {
 
         // Load Plugins Routes
         $pluginsPath = $this->Config->root() . DIRECTORY_SEPARATOR . 'lib' . DIRECTORY_SEPARATOR . 'plugins';
-        foreach(array_diff(scandir($pluginsPath), array('..', '.')) as $plugin){
-            $pluginPath = $pluginsPath . DIRECTORY_SEPARATOR . $plugin;
-            if(is_dir($pluginPath) && is_file($pluginPath . DIRECTORY_SEPARATOR . 'routes.cfg')){
-                $content = file_get_contents($pluginPath . DIRECTORY_SEPARATOR . 'routes.cfg');
-                if($content){
-                    foreach(json_decode($content,true) as $route => $param){
-                        $this->Routes[$route] = $this->route($route, $param, 'lib' . DIRECTORY_SEPARATOR . 'plugins' . DIRECTORY_SEPARATOR . $plugin);
+        if(is_dir($pluginsPath)){
+            foreach(array_diff(scandir($pluginsPath), array('..', '.')) as $plugin){
+                $pluginPath = $pluginsPath . DIRECTORY_SEPARATOR . $plugin;
+                if(is_dir($pluginPath) && is_file($pluginPath . DIRECTORY_SEPARATOR . 'routes.cfg')){
+                    $content = file_get_contents($pluginPath . DIRECTORY_SEPARATOR . 'routes.cfg');
+                    if($content){
+                        foreach(json_decode($content,true) as $route => $param){
+                            $this->Routes[$route] = $this->route($route, $param, 'lib' . DIRECTORY_SEPARATOR . 'plugins' . DIRECTORY_SEPARATOR . $plugin);
+                        }
                     }
                 }
             }

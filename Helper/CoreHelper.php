@@ -391,4 +391,529 @@ class CoreHelper extends Helper {
 
         return [];
     }
+
+    /**
+     * Fetch a JSON file (public or private) and return it as an associative array.
+     *
+     * @param string      $url    Full URL to the file or GitHub API endpoint.
+     * @param string|null $token  Personal‑access token (or fine‑grained token).
+     * @return array              Decoded JSON (or an empty array if the URL responds with HTTP 404).
+     * @throws RuntimeException   On network errors, other HTTP errors, or JSON decode errors.
+     */
+    public function retrieve(string $url, ?string $token = null): array
+    {
+        $ch       = curl_init($url);
+        $headers  = ['User-Agent: Core-Framework'];
+
+        // Ask GitHub’s REST API for the raw file
+        if (preg_match('#^https?://api\.github\.com/#', $url)) {
+            $headers[] = 'Accept: application/vnd.github.raw';
+        }
+
+        // Optional authentication
+        if ($token !== null) {
+            $headers[] = "Authorization: Bearer {$token}";
+        }
+
+        curl_setopt_array($ch, [
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_FOLLOWLOCATION => true,
+            CURLOPT_HTTPHEADER     => $headers,
+        ]);
+
+        $body = curl_exec($ch);
+
+        if ($body === false) {
+            throw new RuntimeException('cURL error: ' . curl_error($ch));
+        }
+
+        $status = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        curl_close($ch);
+
+        // ── HTTP error handling ───────────────────────────────────────
+        if ($status === 404) {
+            return [];                    // “not found” → empty result
+        }
+
+        if ($status >= 400) {             // any other 4xx/5xx → exception
+            throw new RuntimeException("HTTP $status returned for $url");
+        }
+
+        // ── Decode JSON ───────────────────────────────────────────────
+        $data = json_decode($body, true);
+
+        if (json_last_error() === JSON_ERROR_NONE) {
+            // If we accidentally received GitHub’s wrapper JSON, unwrap it
+            if (isset($data['encoding'], $data['content']) && $data['encoding'] === 'base64') {
+                $decoded = json_decode(base64_decode($data['content'], true), true);
+
+                if (json_last_error() !== JSON_ERROR_NONE) {
+                    throw new RuntimeException(
+                        'JSON decode error (inner content): ' . json_last_error_msg()
+                    );
+                }
+                return $decoded;
+            }
+            return $data;                 // regular JSON
+        }
+
+        throw new RuntimeException('JSON decode error: ' . json_last_error_msg());
+    }
+
+    /**
+     * Download a file
+     *
+     * @param string $url
+     * @param string $destination
+     * @return bool
+     */
+    public function download(string $url, string $destination, $token = null): bool
+    {
+        // Check if the URL is valid
+        if (!filter_var($url, FILTER_VALIDATE_URL)) {
+            return false;
+        }
+
+        // Retrieve the name
+        $name = $this->Config->get('installer','name');
+
+        // Check if the destination directory exists
+        if(!is_dir(dirname($destination))){
+            mkdir(dirname($destination), 0755, true);
+        }
+
+        // Check if the destination file exists
+        if(file_exists($destination)){
+            unlink($destination);
+        }
+
+        // Initialize curl
+        $cURL = curl_init($url);
+
+        // Set Headers
+        $headers = [
+            'User-Agent: ' . $name,
+            'Accept: application/octet-stream',
+        ];
+        if (!is_null($token) && !empty($token)) {
+            $headers[] = 'Authorization: token ' . $token;
+        }
+
+        // Set options for the cURL request
+        $cURLOptions = [
+            // Provide metadata
+            CURLOPT_USERAGENT => $name,
+            // Insert Headers
+            CURLOPT_HEADER => 0,
+            CURLOPT_HTTPHEADER => $headers,
+            // Return the transfer as a string
+            CURLOPT_RETURNTRANSFER => true,
+            // Handle Redirections
+            CURLOPT_FOLLOWLOCATION => true,
+            CURLOPT_MAXREDIRS => 10,
+            // Handle Connection Timeout
+            CURLOPT_TIMEOUT => 30,
+            // Disable SSL Verification
+            CURLOPT_SSL_VERIFYPEER => false,
+            CURLOPT_SSL_VERIFYHOST => false,
+        ];
+
+        // Set the cURL options
+        curl_setopt_array($cURL, $cURLOptions);
+
+        // Execute the request
+        $stream = curl_exec($cURL);
+        $status = curl_getinfo($cURL, CURLINFO_HTTP_CODE);
+        $error = curl_error($cURL);
+
+        // Close cURL session
+        curl_close($cURL);
+
+        // Check if the request was successful
+        if ($status !== 200) {
+            return false;
+        }
+
+        // Create the file using file_put_contents
+        $result = file_put_contents($destination, $stream);
+        if ($result === false) {
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * Unpack (extract) a zip archive to a given location.
+     *
+     * @param string $source Path to the ZIP file.
+     * @param string $destination Directory where files should be extracted.
+     * @return bool true on success, false on failure
+     */
+    public function unpack(string $source, string $destination): bool
+    {
+        // Check if the archive file exists
+        if (!file_exists($source) || !is_file($source)) {
+            return false;
+        }
+
+        // Attempt to create the destination directory if it doesn't exist
+        if (!is_dir($destination) && !mkdir($destination, 0755, true) && !is_dir($destination)) {
+            return false;
+        }
+
+        // Initialize a new ZipArchive instance
+        $zip = new ZipArchive();
+
+        // Try opening the ZIP file
+        if ($zip->open($source) !== true) {
+            return false;
+        }
+
+        // Extract the contents to the specified destination
+        if (!$zip->extractTo($destination)) {
+            $zip->close();
+            return false;
+        }
+
+        // Close the ZIP
+        $zip->close();
+
+        // Done
+        return true;
+    }
+
+    /**
+     * Recursively delete a directory (including its contents).
+     *
+     * @param string $directory Path to the directory you want to remove
+     * @return bool true on success, false on failure
+     */
+    public function delete(string $directory): bool
+    {
+        // If it doesn't exist, treat it as an error or success depending on your preference
+        if (!file_exists($directory)) {
+            // Option 1: Treat as an error
+            return false;
+        }
+
+        // If it's a file or symlink, just unlink it
+        if (!is_dir($directory)) {
+            if (!@unlink($directory)) {
+                return false;
+            }
+            return true;
+        }
+
+        // Otherwise, recursively remove contents
+        $items = scandir($directory);
+        if ($items === false) {
+            return false;
+        }
+
+        foreach ($items as $item) {
+            // Skip pointers
+            if ($item === '.' || $item === '..') {
+                continue;
+            }
+
+            $path = $directory . DIRECTORY_SEPARATOR . $item;
+
+            // Recursively call delete on each item
+            if (!$this->delete($path)) {
+                // If any item fails to be deleted, return false
+                return false;
+            }
+        }
+
+        // Finally, remove the now-empty directory
+        if (!@rmdir($directory)) {
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * Load the extensions urls from the configuration file
+     *
+     * @return array
+     */
+    public function loadExtensions(): array
+    {
+        // Configure extended listing
+        $listing = $this->Config->get('extensions');
+
+        // Set the path to the library folder
+        $listPath = $this->Config->root() . DIRECTORY_SEPARATOR . "config" . DIRECTORY_SEPARATOR . "extensions.cfg";
+
+        // Loop through the listing to retrieve additional details.
+        foreach($listing as $type => $extensions){
+
+            // Loop through the extensions
+            foreach($extensions as $base => $extension){
+
+                // Set the source in the extension
+                $listing[$type][$base]['source'] = $this->Config->root() . DIRECTORY_SEPARATOR . "lib" . DIRECTORY_SEPARATOR . $type . DIRECTORY_SEPARATOR . $base;
+            }
+        }
+
+        // Load the core extensions
+        $corePath = $this->Config->root() . DIRECTORY_SEPARATOR . "vendor" . DIRECTORY_SEPARATOR . "laswitchtech" . DIRECTORY_SEPARATOR . "core" . DIRECTORY_SEPARATOR . "config" . DIRECTORY_SEPARATOR . "extensions.cfg";
+        if(file_exists($corePath)){
+
+            // Loop through the core extensions
+            foreach(json_decode(file_get_contents($corePath) ?? "[]", true) as $type => $extensions){
+
+                // Loop through the extensions
+                foreach($extensions as $base => $extension){
+
+                    // Check if the type is already defined
+                    if(!array_key_exists($type, $listing)){
+                        $listing[$type] = [];
+                    }
+
+                    // Check if the extension is already defined
+                    if(!array_key_exists($base, $listing[$type])){
+
+                        // Add the extension to the listing
+                        $listing[$type][$base] = $extension;
+
+                        // Set the source in the extension
+                        $listing[$type][$base]['source'] = $corePath;
+                    }
+                }
+            }
+        }
+
+        // Loop through the existing modules to load additional plugins and themes.
+        foreach($listing['modules'] ?? [] as $name => $module){
+
+            // Check if the extension is already installed
+            $modulePath = $this->Config->root() . DIRECTORY_SEPARATOR . "lib" . DIRECTORY_SEPARATOR . "modules" . DIRECTORY_SEPARATOR . $name;
+            if(is_dir($modulePath) && file_exists($modulePath . DIRECTORY_SEPARATOR . "listing.cfg")){
+
+                // Load the module listing
+                foreach(json_decode(file_get_contents($modulePath . DIRECTORY_SEPARATOR . "listing.cfg") ?? "[]",true) as $type => $extensions){
+
+                    // Loop through the extensions
+                    foreach($extensions as $base => $extension){
+
+                        // Check if the type is already defined
+                        if(!array_key_exists($type, $listing)){
+                            $listing[$type] = [];
+                        }
+
+                        // Check if the extension is already defined
+                        if(!array_key_exists($base, $listing[$type])){
+
+                            // Add the extension to the listing
+                            $listing[$type][$base] = $extension;
+
+                            // Set the source in the extension
+                            $listing[$type][$base]['source'] = $modulePath . DIRECTORY_SEPARATOR . "listing.cfg";
+                        }
+                    }
+                }
+            }
+        }
+
+        return $listing;
+    }
+
+    /**
+     * Load the extensions Meta from the configuration file
+     *
+     * @param bool $local If true, also load local extensions
+     * @return array
+     */
+    public function loadExtensionsMeta(bool $local = false): array
+    {
+        // Configure extended listing
+        $listing = $this->loadExtensions();
+
+        // Initialize the meta array
+        $meta = [
+            'modules' => [],
+            'plugins' => [],
+            'themes'  => [],
+        ];
+
+        // Set the path to the library folder
+        $libPath = $this->Config->root() . DIRECTORY_SEPARATOR . "lib";
+
+        // Loop through the listing to retrieve additional details.
+        foreach($listing as $type => $extensions){
+
+            // Set the path to the type folder
+            $typePath = $libPath . DIRECTORY_SEPARATOR . $type;
+
+            // Loop through the extensions
+            foreach($extensions as $base => $extension){
+
+                // Load the extension info
+                $meta[$type][$base] = $this->retrieve($extension['url'], $extension['token'] ?? null);
+
+                // Set the source
+                $meta[$type][$base]['source'] = $extension['source'] ?? null;
+
+                // Set the token
+                $meta[$type][$base]['token'] = $extension['token'] ?? null;
+
+                // Set the path to the extension folder
+                $extensionPath = $typePath . DIRECTORY_SEPARATOR . $base;
+
+                // Set the path to the info file
+                $infoPath = $extensionPath . DIRECTORY_SEPARATOR . "info.cfg";
+
+                // Set the path to the git folder
+                $gitPath = $extensionPath . DIRECTORY_SEPARATOR . ".git";
+
+                // Set the path to the HEAD file
+                $headPath = $gitPath . DIRECTORY_SEPARATOR . "HEAD";
+
+                // Set the extension path
+                $meta[$type][$base]['path'] = $extensionPath;
+
+                // Set the installed status
+                $meta[$type][$base]['installed'] = is_dir($extensionPath) && file_exists($infoPath);
+
+                // Set the git status
+                $meta[$type][$base]['git'] = is_dir($gitPath) && file_exists($headPath);
+
+                // Set the publish status
+                $meta[$type][$base]['published'] = true;
+
+                // Check if the extension is installed
+                if($meta[$type][$base]['installed']){
+
+                    // Load the info file
+                    $info = json_decode(file_get_contents($infoPath) ?? "[]", true);
+
+                    // Set the current version
+                    $meta[$type][$base]['current'] = $info['version'];
+                } else {
+
+                    // Set the current version to the version from the repository
+                    $meta[$type][$base]['current'] = $meta[$type][$base]['version'];
+                }
+
+                // Compare the current version with the latest version and set the latest version
+                $meta[$type][$base]['latest'] = !version_compare($meta[$type][$base]['current'], $meta[$type][$base]['version'], '<');
+            }
+        }
+
+        // Check if we also want to load local extensions
+        if($local){
+
+            // Scan the directory for extensions
+            $types = array_diff(scandir($libPath), ['..', '.', '.DS_Store', 'skeleton', 'init.sh', 'publish.sh', 'tokens.sh']);
+
+            // Loop through the listing to retrieve additional details.
+            foreach($types as $type){
+
+                // Set the path to the type folder
+                $typePath = $libPath . DIRECTORY_SEPARATOR . $type;
+
+                // Scan the directory for extensions
+                $extensions = array_diff(scandir($typePath), ['..', '.', '.DS_Store', 'skeleton', 'init.sh', 'publish.sh', 'tokens.sh']);
+
+                // Loop through the extensions
+                foreach($extensions as $base){
+
+                    // Check if the extension is already defined
+                    if(!array_key_exists($base, $meta[$type])){
+
+                        // Set the path to the extension folder
+                        $extensionPath = $typePath . DIRECTORY_SEPARATOR . $base;
+
+                        // Set the path to the info file
+                        $infoPath = $extensionPath . DIRECTORY_SEPARATOR . "info.cfg";
+
+                        // Set the path to the git folder
+                        $gitPath = $extensionPath . DIRECTORY_SEPARATOR . ".git";
+
+                        // Set the path to the HEAD file
+                        $headPath = $gitPath . DIRECTORY_SEPARATOR . "HEAD";
+
+                        // Check if the extension has an info file
+                        if(file_exists($infoPath)){
+
+                            // Load the extension info
+                            $meta[$type][$base] = json_decode(file_get_contents($infoPath) ?? "[]", true);
+
+                            // Set the extension path
+                            $meta[$type][$base]['path'] = $extensionPath;
+
+                            // Set the installed status
+                            $meta[$type][$base]['installed'] = is_dir($extensionPath) && file_exists($infoPath);
+
+                            // Set the git status
+                            $meta[$type][$base]['git'] = is_dir($gitPath) && file_exists($headPath);
+
+                            // Set the publish status
+                            $meta[$type][$base]['published'] = false;
+
+                            // Set the current version to the version from the repository
+                            $meta[$type][$base]['current'] = $meta[$type][$base]['version'];
+
+                            // Compare the current version with the latest version and set the latest version
+                            $meta[$type][$base]['latest'] = !version_compare($meta[$type][$base]['current'], $meta[$type][$base]['version'], '<');
+
+                            // Set the source
+                            $meta[$type][$base]['source'] = null;
+                        }
+                    }
+                }
+            }
+        }
+
+        return $meta;
+    }
+
+    /**
+     * Get the repository information from a URL
+     *
+     * @param string $url The URL of the repository
+     * @return array An associative array containing the repository information
+     */
+    public function getRepo(string $url): array
+    {
+        // Initialize array
+        $array = [
+            'owner' => null,
+            'repo'  => null,
+            'url'   => null,
+            'token' => null,
+            'branch' => null,
+        ];
+
+        // Check if the repository is from GitHub
+        if(preg_match('#^https?://github\.com/#', $url)) {
+
+            // Extract the repository owner and name
+            if(preg_match('#^https?://github\.com/([^/]+)/([^/]+)(?:\.git)?$#', $url, $matches)) {
+                $array['owner'] = $matches[1];
+                $array['repo']  = $matches[2];
+                $array['url']   = "https://api.github.com/repos/{$matches[1]}/{$matches[2]}/contents/info.cfg";
+            } else {
+                throw new RuntimeException("The repository URL {$url} is not a valid GitHub repository.");
+            }
+        }
+
+        // Check if the repository is from GitLab
+        elseif(preg_match('#^https?://gitlab\.com/#', $url)) {
+
+            // Extract the repository owner and name
+            if(preg_match('#^https?://gitlab\.com/([^/]+)/([^/]+)(?:\.git)?$#', $url, $matches)) {
+                $array['owner'] = $matches[1];
+                $array['repo']  = $matches[2];
+                $array['url']   = "https://gitlab.com/api/v4/projects/{$matches[1]}%2F{$matches[2]}/repository/files/info.cfg/raw";
+            } else {
+                throw new RuntimeException("The repository URL {$url} is not a valid GitLab repository.");
+            }
+        }
+
+        return $array;
+    }
 }

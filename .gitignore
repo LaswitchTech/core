@@ -9,12 +9,18 @@ composer.phar
 
 # Git
 .git
+TOKEN
+
+# Framework
+/Definition/
+/lib/
 
 # Filetypes
 *.cfg
 *.log
 
 # Exclude Files
+!extensions.cfg
 # cli
 
 # Exclude Locales Configurations and Translations
@@ -23,7 +29,6 @@ composer.phar
 # Unique Directories
 /tmp/
 /data/
-# /lib/
 
 # Apache
 .htaccess
