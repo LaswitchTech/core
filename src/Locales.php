@@ -61,6 +61,7 @@ class Locales {
         $this->Key = $this->UUID->toString('LOCALE' . session_id());
         $this->Timezones = $this->getTimeZones();
         $this->timezone($this->Config->get('locale','timezone') ?? 'UTC');
+        $this->Locale = $this->Config->get('locale','locale') ?? self::Default;
 
         // Create Locale Directory
         if(!is_dir($this->Path)){
@@ -135,11 +136,11 @@ class Locales {
         // Check if Locale can be set by Browser
         if(!is_null($this->Request->getParams('SERVER','HTTP_ACCEPT_LANGUAGE'))){
 
-            return $this->set(strtolower(substr($this->Request->getParams('SERVER','HTTP_ACCEPT_LANGUAGE') ?? self::Default, 0, 5)));
+            return $this->set(strtolower(substr($this->Request->getParams('SERVER','HTTP_ACCEPT_LANGUAGE') ?? $this->Locale, 0, 5)));
         }
 
         // Set Default Locale
-        return $this->set(self::Default);
+        return $this->set($this->Locale);
     }
 
     /**
