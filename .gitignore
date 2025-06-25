@@ -11,6 +11,9 @@ composer.phar
 .git
 TOKEN
 
+# Framework
+/Definition/
+
 # Filetypes
 *.cfg
 *.log
