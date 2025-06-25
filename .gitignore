@@ -13,6 +13,7 @@ TOKEN
 
 # Framework
 /Definition/
+/lib/
 
 # Filetypes
 *.cfg
@@ -28,7 +29,6 @@ TOKEN
 # Unique Directories
 /tmp/
 /data/
-/lib/
 
 # Apache
 .htaccess
