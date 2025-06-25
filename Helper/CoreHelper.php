@@ -807,7 +807,7 @@ class CoreHelper extends Helper {
         if($local){
 
             // Scan the directory for extensions
-            $types = array_diff(scandir($libPath), ['..', '.', '.DS_Store']);
+            $types = array_diff(scandir($libPath), ['..', '.', '.DS_Store', 'skeleton', 'init.sh', 'publish.sh', 'tokens.sh']);
 
             // Loop through the listing to retrieve additional details.
             foreach($types as $type){
@@ -816,7 +816,7 @@ class CoreHelper extends Helper {
                 $typePath = $libPath . DIRECTORY_SEPARATOR . $type;
 
                 // Scan the directory for extensions
-                $extensions = array_diff(scandir($typePath), ['..', '.', '.DS_Store']);
+                $extensions = array_diff(scandir($typePath), ['..', '.', '.DS_Store', 'skeleton', 'init.sh', 'publish.sh', 'tokens.sh']);
 
                 // Loop through the extensions
                 foreach($extensions as $base){
