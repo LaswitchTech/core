@@ -244,11 +244,11 @@ class Builder {
                     $html .= '<script src="/plugins/'.trim($filePath,'/').'"></script>' . PHP_EOL;
                 }
             }
-        }
-        foreach($plugins as $file){
-            $filePath = $file . '/script.js';
-            if(is_file($path.'/'.$filePath)){
-                $html .= '<script src="/plugins/'.trim($filePath,'/').'"></script>' . PHP_EOL;
+            foreach($plugins as $file){
+                $filePath = $file . '/script.js';
+                if(is_file($path.'/'.$filePath)){
+                    $html .= '<script src="/plugins/'.trim($filePath,'/').'"></script>' . PHP_EOL;
+                }
             }
         }
         return $html;
