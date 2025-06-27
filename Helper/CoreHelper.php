@@ -916,4 +916,23 @@ class CoreHelper extends Helper {
 
         return $array;
     }
+
+    /**
+     * Check if an extension is installed
+     *
+     * @param string $name The name of the extension
+     * @param string $type The type of the extension (e.g., 'plugins', 'themes', 'modules')
+     * @return bool True if the extension is installed, false otherwise
+     */
+    public function isInstalled(string $name, string $type = 'plugins'): bool
+    {
+        // Set the path to the type folder
+        $typePath = $this->Config->root() . DIRECTORY_SEPARATOR . "lib" . DIRECTORY_SEPARATOR . $type;
+
+        // Set the path to the extension folder
+        $extensionPath = $typePath . DIRECTORY_SEPARATOR . $name;
+
+        // Check if the extension is installed
+        return is_dir($extensionPath) && file_exists($extensionPath . DIRECTORY_SEPARATOR . "info.cfg");
+    }
 }
