@@ -29,6 +29,7 @@ TOKEN
 # Unique Directories
 /tmp/
 /data/
+/Install/
 
 # Apache
 .htaccess
