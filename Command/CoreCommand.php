@@ -448,6 +448,9 @@ class CoreCommand extends Command {
         }
     }
 
+    /**
+     * Handle extension-related actions
+     */
     public function extensionAction()
     {
         // Configure extended listing
