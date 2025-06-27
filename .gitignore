@@ -2,6 +2,7 @@
 composer.phar
 *composer.phar
 /vendor/
+/.composer/
 
 # Mac OS X
 .DS_Store
@@ -29,6 +30,7 @@ TOKEN
 # Unique Directories
 /tmp/
 /data/
+/Install/
 
 # Apache
 .htaccess
