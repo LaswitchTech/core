@@ -200,16 +200,25 @@ class Message {
 
         // Replace Template Variables
         foreach($this->vars as $key => $value){
+            if(is_array($value)){
+                $value = json_encode($value, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+            }
             $string = str_replace('%' . strtoupper($key) . '%',$value ?? '',$string);
         }
 
         // Replace Server Variables
         foreach($this->Request->getParams('SERVER') as $key => $value){
+            if(is_array($value)){
+                $value = json_encode($value, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+            }
             $string = str_replace('%' . strtoupper($key) . '%',$value ?? '',$string);
         }
 
         // Replace Env Variables
         foreach($this->Request->getParams('ENV') as $key => $value){
+            if(is_array($value)){
+                $value = json_encode($value, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+            }
             $string = str_replace('%' . strtoupper($key) . '%',$value ?? '',$string);
         }
 
