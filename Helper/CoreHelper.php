@@ -137,7 +137,9 @@ class CoreHelper extends Helper {
             }
 
             // Create content
-            $content .= "Options +FollowSymLinks" . PHP_EOL . PHP_EOL;
+            $content .= "Options +FollowSymLinks" . PHP_EOL;
+            $content .= "Options -MultiViews" . PHP_EOL . PHP_EOL;
+            $content .= "AcceptPathInfo On" . PHP_EOL . PHP_EOL;
             $content .= "AddType application/javascript .mjs" . PHP_EOL . PHP_EOL;
             $content .= "<IfModule mod_php8.c>" . PHP_EOL;
             $content .= "    php_value session.cookie_samesite Strict" . PHP_EOL;
@@ -155,6 +157,9 @@ class CoreHelper extends Helper {
             $content .= "<IfModule mod_rewrite.c>" . PHP_EOL;
             $content .= "    RewriteEngine on" . PHP_EOL;
             $content .= "    RewriteBase /" . PHP_EOL . PHP_EOL;
+            $content .= "    # Route endpoint.php/anything to endpoint.php" . PHP_EOL;
+            $content .= "    RewriteRule ^api(.*)$ endpoint.php [QSA,L]" . PHP_EOL;
+            $content .= "    RewriteRule ^endpoint\.php(.*)$ endpoint.php [QSA,L]" . PHP_EOL . PHP_EOL;
             $content .= "    # Forbid any direct .php file access in plugins or themes" . PHP_EOL;
             $content .= "    RewriteRule ^(plugins|themes)/.*\.php$ - [F,L]" . PHP_EOL . PHP_EOL;
             $content .= "    # Forbid direct access to certain files" . PHP_EOL;
@@ -164,8 +169,6 @@ class CoreHelper extends Helper {
             $content .= "    RewriteCond %{REQUEST_FILENAME} -d [OR]" . PHP_EOL;
             $content .= "    RewriteCond %{REQUEST_FILENAME} -l" . PHP_EOL;
             $content .= "    RewriteRule ^.*$ - [L]" . PHP_EOL . PHP_EOL;
-            $content .= "    # Route endpoint.php/anything to endpoint.php" . PHP_EOL;
-            $content .= "    RewriteRule ^endpoint\.php(.*)$ endpoint.php [QSA,L]" . PHP_EOL . PHP_EOL;
             $content .= "    # Everything else goes to index.php" . PHP_EOL;
             $content .= "    RewriteRule ^.*$ index.php [QSA,L]" . PHP_EOL;
             $content .= "</IfModule>";
