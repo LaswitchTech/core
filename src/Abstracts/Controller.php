@@ -21,6 +21,7 @@ abstract class Controller {
     protected $Helper;
     protected $Output;
     protected $Request;
+    protected $Config;
 
     // Auth Properties
     protected $Level;
@@ -32,7 +33,7 @@ abstract class Controller {
     public function __construct(){
 
         // Import Global Variables
-        global $AUTH, $MODEL, $HELPER, $OUTPUT, $REQUEST;
+        global $AUTH, $MODEL, $HELPER, $OUTPUT, $REQUEST, $CONFIG;
 
         // Initialize Properties
         $this->Auth = $AUTH;
@@ -40,6 +41,7 @@ abstract class Controller {
         $this->Helper = $HELPER;
         $this->Output = $OUTPUT;
         $this->Request = $REQUEST;
+        $this->Config = $CONFIG;
     }
 
     /**
