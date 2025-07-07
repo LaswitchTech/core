@@ -1,11 +1,5 @@
 <?php
 
-/**
- * Core Framework - BaseModel
- *
- * @author     LaswitchTech <support@laswitchtech.com>
- */
-
 // Declaring namespace
 namespace LaswitchTech\Core\Base;
 
@@ -294,7 +288,7 @@ abstract class BaseModel extends Model {
             }
 
             // Check if the value is an array and encode it as JSON
-            if(is_array($value) && !array_key_exists('targetTable', $data) && !array_key_exists('targetId', $data)){
+            if(is_array($value)){
                 $data[$key] = json_encode($value, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
             }
         }
@@ -340,7 +334,7 @@ abstract class BaseModel extends Model {
             }
 
             // Check if the value is an array and encode it as JSON
-            if(is_array($value) && !array_key_exists('targetTable', $data) && !array_key_exists('targetId', $data)){
+            if(is_array($value)){
                 $data[$key] = json_encode($value, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
             }
         }
@@ -413,11 +407,13 @@ abstract class BaseModel extends Model {
             ->table($this->table)
             ->select('*')
             ->join('owner', 'users', 'username')
-            ->join('vcard', 'vcards', 'id')
-            ->join('organization', 'organizations', 'id')
             ->filter()
-            ->where('id', 9999, '<>')
-            ->where('organization', $this->Auth->user()->organization()->id);
+            ->where('id', 9999, '<>');
+
+        // Set the Owner
+        if(array_key_exists('organization',$this->definition)){
+            $Query->join('organization', 'organizations', 'id')->where('organization', $this->Auth->user()->organization()->id);
+        }
 
         // Check if the conditions are empty
         if(!empty($conditions)){
@@ -468,13 +464,16 @@ abstract class BaseModel extends Model {
             ->table($this->table)
             ->select('*')
             ->join('owner', 'users', 'username')
-            ->join('vcard', 'vcards', 'id')
-            ->join('organization', 'organizations', 'id')
             ->filter()
             ->where('id', 9999, '<>')
             ->filter()
             ->where($this->primary, $id)
             ->limit(1);
+
+        // Set the Owner
+        if(array_key_exists('organization',$this->definition)){
+            $Query->join('organization', 'organizations', 'id')->where('organization', $this->Auth->user()->organization()->id);
+        }
 
         // Retrieve the record
         $records = $Query->fetch();
@@ -512,5 +511,15 @@ abstract class BaseModel extends Model {
     {
         // Execute the Query
         return $this->update($id, ['isArchived' => 0]);
+    }
+
+    /**
+     * Describe the Table
+     *
+     * @return array
+     */
+    public function describe(): array
+    {
+        return $this->definitions;
     }
 }
