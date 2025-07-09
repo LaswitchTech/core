@@ -649,6 +649,6 @@ abstract class BaseModel extends Model {
      */
     public function describe(): array
     {
-        return $this->definitions;
+        return $this->definition;
     }
 }
