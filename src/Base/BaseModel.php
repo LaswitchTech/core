@@ -405,8 +405,11 @@ abstract class BaseModel extends Model {
 
             // Check if the value is an array and encode it as JSON
             if(is_array($value)){
-                $data[$key] = json_encode($value, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+                $value = json_encode($value, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
             }
+
+            // Set the value back to the data array
+            $data[$key] = $value;
         }
 
         // Sanitize the data
@@ -454,8 +457,11 @@ abstract class BaseModel extends Model {
 
             // Check if the value is an array and encode it as JSON
             if(is_array($value)){
-                $data[$key] = json_encode($value, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+                $value = json_encode($value, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
             }
+
+            // Set the value back to the data array
+            $data[$key] = $value;
         }
 
         // Sanitize the data
