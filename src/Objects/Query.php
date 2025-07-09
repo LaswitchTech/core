@@ -3,8 +3,7 @@
 /**
  * Core Framework - Query
  *
- * @license    MIT (https://mit-license.org/)
- * @author     Louis Ouellet <louis@laswitchtech.com>
+ * @author     LaswitchTech <support@laswitchtech.com>
  */
 
 // Declaring namespace
