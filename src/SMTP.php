@@ -22,6 +22,7 @@ class SMTP {
 	const SMTP_AUTH_OK = '334';
 	const SMTP_USERNAME_OK = '334';
 	const SMTP_PASSWORD_OK = '235';
+    const CRLF = "\r\n";
 
     // Global Properties
     private $Config;
@@ -163,6 +164,7 @@ class SMTP {
 
             // Greeting
             $greeting = fgets($this->connection, 1024);
+            $this->Log->set('smtp')->debug("Greeting: ".self::CRLF."$greeting");
             if (!$greeting) {
                 throw new Exception("No greeting received from SMTP server");
             }
@@ -171,7 +173,7 @@ class SMTP {
             }
 
             // EHLO
-            fputs($this->connection, "EHLO {$host}" . PHP_EOL);
+            fputs($this->connection, "EHLO {$host}" . self::CRLF);
             $ehlo_response = '';
             while ($line = fgets($this->connection, 1024)) {
                 $ehlo_response .= $line;
@@ -179,14 +181,16 @@ class SMTP {
                     break;
                 }
             }
+            $this->Log->set('smtp')->debug("EHLO: ".self::CRLF."$ehlo_response");
             if (substr($ehlo_response, 0, 3) != self::SMTP_OK) {
                 throw new Exception("{$ehlo_response}");
             }
 
             // TLS
             if ($ssl && strpos($ehlo_response, 'STARTTLS') !== false) {
-                fputs($this->connection, "STARTTLS" . PHP_EOL);
+                fputs($this->connection, "STARTTLS" . self::CRLF);
                 $tls_response = fgets($this->connection, 1024);
+                $this->Log->set('smtp')->debug("TLS: ".self::CRLF."$tls_response");
                 if (substr($tls_response, 0, 3) != '220') {
                     throw new Exception("{$tls_response}");
                 }
@@ -194,7 +198,7 @@ class SMTP {
                     throw new Exception("Could not start TLS encryption.");
                 }
                 // Re-issue EHLO
-                fputs($this->connection, "EHLO {$_SERVER['HTTP_HOST']}" . PHP_EOL);
+                fputs($this->connection, "EHLO {$_SERVER['HTTP_HOST']}" . self::CRLF);
                 $ehlo_response = '';
                 while ($line = fgets($this->connection, 1024)) {
                     $ehlo_response .= $line;
@@ -202,6 +206,7 @@ class SMTP {
                         break;
                     }
                 }
+                $this->Log->set('smtp')->debug("EHLO: ".self::CRLF."$ehlo_response");
                 if (substr($ehlo_response, 0, 3) != self::SMTP_OK) {
                     throw new Exception("{$ehlo_response}");
                 }
@@ -246,22 +251,25 @@ class SMTP {
 
             // Authenticate
             $this->Log->set('smtp')->info("Authenticating on SMTP server.");
-            fputs($this->connection, "AUTH LOGIN" . PHP_EOL);
+            fputs($this->connection, "AUTH LOGIN" . self::CRLF);
             $out = fgets($this->connection, 1024);
+            $this->Log->set('smtp')->debug("AUTH LOGIN: ".self::CRLF."$out");
             if (substr($out, 0, 3) != self::SMTP_AUTH_OK) {
                 throw new Exception("{$out}");
             }
 
             // Send username
-            fputs($this->connection, base64_encode($username) . PHP_EOL);
+            fputs($this->connection, base64_encode($username) . self::CRLF);
             $out = fgets($this->connection, 1024);
+            $this->Log->set('smtp')->debug("AUTH Username: ".self::CRLF."$out");
             if (substr($out, 0, 3) != self::SMTP_USERNAME_OK) {
                 throw new Exception("{$out}");
             }
 
             // Send password
-            fputs($this->connection, base64_encode($password) . PHP_EOL);
+            fputs($this->connection, base64_encode($password) . self::CRLF);
             $out = fgets($this->connection, 1024);
+            $this->Log->set('smtp')->debug("AUTH Password: ".self::CRLF."$out");
             if (substr($out, 0, 3) != self::SMTP_PASSWORD_OK) {
                 throw new Exception("{$out}");
             }

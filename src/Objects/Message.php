@@ -20,6 +20,7 @@ class Message {
 	const SMTP_OK = '250';
 	const SMTP_DATA_OK = '354';
 	const SMTP_DATA_DIRECTORY = 'data/messages';
+    const CRLF = "\r\n";
 
     // Global Properties
     private $Request;
@@ -112,11 +113,11 @@ class Message {
             $content = preg_replace('/\n\s+\n/', "\n\n", $content);
 
             // Convert to array based on lines
-            $lines = explode(PHP_EOL,$content);
+            $lines = explode(self::CRLF,$content);
 
             // Trim each lines of extra spaces add them to the $text string
             foreach($lines as $line){
-                $text .= trim($line) . PHP_EOL;
+                $text .= trim($line) . self::CRLF;
             }
 
             // Return $text string
@@ -374,7 +375,7 @@ class Message {
         try {
 
             // Sender
-            fputs($this->connection, "MAIL FROM:<{$this->from}>" . PHP_EOL);
+            fputs($this->connection, "MAIL FROM:<{$this->from}>" . self::CRLF);
             $out = fgets($this->connection, 1024);
             $this->Log->set('smtp')->debug("SMTP Sender: {$out}");
             if (substr($out, 0, 3) != self::SMTP_OK) {
@@ -385,7 +386,7 @@ class Message {
             if(!empty($this->to)){
                 foreach ($this->to as $recipient) {
                     $this->Log->set('smtp')->debug("Sending RCPT TO for TO: {$recipient}");
-                    fputs($this->connection, "RCPT TO:<{$recipient}>" . PHP_EOL);
+                    fputs($this->connection, "RCPT TO:<{$recipient}>" . self::CRLF);
                     $out = fgets($this->connection, 1024);
                     $this->Log->set('smtp')->debug("SMTP TO Recipient: {$out}");
                     if (substr($out, 0, 3) != self::SMTP_OK) {
@@ -398,7 +399,7 @@ class Message {
             if(!empty($this->cc)){
                 foreach ($this->cc as $recipient) {
                     $this->Log->set('smtp')->debug("Sending RCPT TO for CC: {$recipient}");
-                    fputs($this->connection, "RCPT TO:<{$recipient}>" . PHP_EOL);
+                    fputs($this->connection, "RCPT TO:<{$recipient}>" . self::CRLF);
                     $out = fgets($this->connection, 1024);
                     $this->Log->set('smtp')->debug("SMTP CC Recipient: {$out}");
                     if (substr($out, 0, 3) != self::SMTP_OK) {
@@ -411,7 +412,7 @@ class Message {
             if(!empty($this->bcc)){
                 foreach ($this->bcc as $recipient) {
                     $this->Log->set('smtp')->debug("Sending RCPT TO for BCC: {$recipient}");
-                    fputs($this->connection, "RCPT TO:<{$recipient}>" . PHP_EOL);
+                    fputs($this->connection, "RCPT TO:<{$recipient}>" . self::CRLF);
                     $out = fgets($this->connection, 1024);
                     $this->Log->set('smtp')->debug("SMTP BCC Recipient: {$out}");
                     if (substr($out, 0, 3) != self::SMTP_OK) {
@@ -421,7 +422,7 @@ class Message {
             }
 
             // Data
-            fputs($this->connection, "DATA" . PHP_EOL);
+            fputs($this->connection, "DATA" . self::CRLF);
             $out = fgets($this->connection, 1024);
             $this->Log->set('smtp')->debug("SMTP Data: {$out}");
             if (substr($out, 0, 3) != self::SMTP_DATA_OK) {
@@ -442,26 +443,26 @@ class Message {
             $boundary = strtoupper(uniqid(time() . '-'));
 
             // Headers setup
-            $headers = "From: {$this->from}" . PHP_EOL;
-            $headers .= "To: " . implode(',', $this->to) . PHP_EOL;
+            $headers = "From: {$this->from}" . self::CRLF;
+            $headers .= "To: " . implode(',', $this->to) . self::CRLF;
             if (!empty($this->replyTo)) {
-                $headers .= "Reply-To: " . implode(',', $this->replyTo) . PHP_EOL;
+                $headers .= "Reply-To: " . implode(',', $this->replyTo) . self::CRLF;
             }
             if (!empty($this->cc)) {
-                $headers .= "Cc: " . implode(',', $this->cc) . PHP_EOL;
+                $headers .= "Cc: " . implode(',', $this->cc) . self::CRLF;
             }
-            $headers .= "Subject: " . $this->subject . PHP_EOL;
-            $headers .= "Date: " . date('r') . PHP_EOL;
-            $headers .= "MIME-Version: 1.0" . PHP_EOL;
+            $headers .= "Subject: " . $this->subject . self::CRLF;
+            $headers .= "Date: " . date('r') . self::CRLF;
+            $headers .= "MIME-Version: 1.0" . self::CRLF;
 
             // Add custom headers (including JSON if needed)
             foreach ($this->headers as $header) {
                 if (is_array($header)) {
                     // JSON-encode the header value if it is an array
                     $header_value = json_encode($header, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
-                    $headers .= "X-Custom-Header: {$header_value}" . PHP_EOL;
+                    $headers .= "X-Custom-Header: {$header_value}" . self::CRLF;
                 } else {
-                    $headers .= $header . PHP_EOL;
+                    $headers .= $header . self::CRLF;
                 }
             }
 
@@ -477,26 +478,26 @@ class Message {
             // Determine if multipart
             $multipart = (count($this->attachment) > 0 || $this->hasHTML($html));
             if ($multipart) {
-                $headers .= "Content-Type: multipart/alternative; boundary={$boundary}" . PHP_EOL . PHP_EOL;
+                $headers .= "Content-Type: multipart/alternative; boundary={$boundary}" . self::CRLF . self::CRLF;
             }
 
             // Message preparation
             $message = '';
             if ($multipart) {
-                $message .= "--{$boundary}" . PHP_EOL;
+                $message .= "--{$boundary}" . self::CRLF;
             }
 
             // Insert plain text part
-            $message .= "Content-Type: text/plain; charset=UTF-8" . PHP_EOL;
-            $message .= "Content-Transfer-Encoding: " . $this->encoding . PHP_EOL . PHP_EOL;
-            $message .= $encodedTextBody . PHP_EOL;
+            $message .= "Content-Type: text/plain; charset=UTF-8" . self::CRLF;
+            $message .= "Content-Transfer-Encoding: " . $this->encoding . self::CRLF . self::CRLF;
+            $message .= $encodedTextBody . self::CRLF;
 
             // Insert HTML part if present
             if ($this->hasHTML($html)) {
-                $message .= "--{$boundary}" . PHP_EOL;
-                $message .= "Content-Type: text/html; charset=UTF-8" . PHP_EOL;
-                $message .= "Content-Transfer-Encoding: " . $this->encoding . PHP_EOL . PHP_EOL;
-                $message .= $encodedHtmlBody . PHP_EOL;
+                $message .= "--{$boundary}" . self::CRLF;
+                $message .= "Content-Type: text/html; charset=UTF-8" . self::CRLF;
+                $message .= "Content-Transfer-Encoding: " . $this->encoding . self::CRLF . self::CRLF;
+                $message .= $encodedHtmlBody . self::CRLF;
             }
 
             // Handle attachments
@@ -505,21 +506,21 @@ class Message {
                 $file_name = basename($file_path);
                 $file_mime_type = mime_content_type($file_path);
                 $file_content = chunk_split(base64_encode(file_get_contents($file_path)));
-                $message .= "--{$boundary}" . PHP_EOL;
-                $message .= "Content-Type: $file_mime_type; name=\"$file_name\"" . PHP_EOL;
-                $message .= "Content-Transfer-Encoding: base64" . PHP_EOL;
-                $message .= "Content-Disposition: attachment; filename=\"$file_name\"" . PHP_EOL . PHP_EOL;
-                $message .= $file_content . PHP_EOL;
+                $message .= "--{$boundary}" . self::CRLF;
+                $message .= "Content-Type: $file_mime_type; name=\"$file_name\"" . self::CRLF;
+                $message .= "Content-Transfer-Encoding: base64" . self::CRLF;
+                $message .= "Content-Disposition: attachment; filename=\"$file_name\"" . self::CRLF . self::CRLF;
+                $message .= $file_content . self::CRLF;
             }
 
             // Finalize message
             if ($multipart) {
-                $message .= "--{$boundary}--" . PHP_EOL;
+                $message .= "--{$boundary}--" . self::CRLF;
             }
-            $message .= "." . PHP_EOL;
+            $message .= "." . self::CRLF;
 
             // Log the message
-            $this->Log->set('smtp')->debug("SMTP Message: " . PHP_EOL . $headers . $message);
+            $this->Log->set('smtp')->debug("SMTP Message: " . self::CRLF . $headers . $message);
 
             // Send message
             fputs($this->connection, $headers . $message);
