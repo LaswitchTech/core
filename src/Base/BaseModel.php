@@ -535,6 +535,7 @@ abstract class BaseModel extends Model {
             ->table($this->table)
             ->select('*')
             ->join('owner', 'users', 'username')
+            ->index($this->primary)
             ->filter()
             ->where('id', 9999, '<>');
 
