@@ -273,8 +273,8 @@ abstract class BaseModel extends Model {
         // Save the discovered root (could be the same as the original record).
         $record['root'] = [
             "target" => $current,
-            "targetTable" => $currentTargetTable,
-            "targetId" => $currentTargetId,
+            "targetTable" => $currentTargetTable ?? null,
+            "targetId" => $currentTargetId ?? ($current['id'] ?? null),
         ];
 
         return $record;
