@@ -19,6 +19,34 @@ abstract class BaseModel extends Model {
     protected $definition;
     protected $definitions = [];
 
+    // Map MySQL base types -> PHP cast callable
+    protected $typeMap = [
+        // integers
+        'int'      => 'intval',
+        'integer'  => 'intval',
+        'tinyint'  => 'intval',
+        'smallint' => 'intval',
+        'mediumint'=> 'intval',
+        'bigint'   => 'intval',
+
+        // floating point / fixed
+        'float'    => 'floatval',
+        'double'   => 'floatval',
+        'decimal'  => 'floatval',
+
+        // booleans (MySQL often stores them as TINYINT(1))
+        'bool'     => 'boolval',
+        'boolean'  => 'boolval',
+
+        // json → decode to array / object, keep original on failure
+        'json'     => [self::class, 'castJson'],
+
+        // date/time → DateTimeImmutable (custom helper)
+        'datetime' => [self::class, 'castDateTime'],
+        'timestamp'=> [self::class, 'castDateTime'],
+        'date'     => [self::class, 'castDateTime'],
+    ];
+
     /**
      * Constructor
      */
@@ -259,6 +287,68 @@ abstract class BaseModel extends Model {
     }
 
     /**
+     * Sanitize the data before inserting or updating
+     *
+     * @param array $data
+     * @return array
+     */
+    protected function sanitize(array $data): array
+    {
+
+        // Loop through the data and cast types
+        foreach ($data as $key => $value) {
+            // ──1. Get base type («bigint(20) unsigned» ➜ «bigint»)
+            if (!isset($this->definition[$key]['Type'])) {
+                continue; // unknown column, leave untouched
+            }
+            $rawType  = strtolower($this->definition[$key]['Type']);
+            preg_match('/^[a-z]+/', $rawType, $m);
+            $baseType = $m[0] ?? '';
+
+            // ──2. Cast using lookup table or fallback
+            if (isset($this->typeMap[$baseType])) {
+                $caster      = $this->typeMap[$baseType];
+                $data[$key]  = is_callable($caster) ? $caster($value) : $value;
+            } else {
+                $data[$key] = (string) $value;   // sensible default
+            }
+        }
+
+        return $data;
+    }
+
+    /**
+     * Cast a JSON string to an array or object, or return the original string on error.
+     *
+     * @param string $v
+     * @return mixed
+     */
+    protected static function castJson($v): mixed
+    {
+        $decoded = json_decode($v, true);
+        return (json_last_error() === JSON_ERROR_NONE) ? $decoded : $v;
+    }
+
+    /**
+     * Turn anything MySQL gives us into a DateTimeImmutable or null on error.
+     *
+     * @param string|null $value
+     * @return \DateTimeImmutable|null
+     */
+    protected static function castDateTime($value): ?string
+    {
+        if ($value === null || $value === '' || $value === '0000-00-00 00:00:00') {
+            return null;
+        }
+        try {
+            $DateTime = new \DateTimeImmutable($value);
+            return $DateTime->format('Y-m-d H:i:s');
+        } catch (\Exception $e) {
+            return null; // or keep original string if you prefer
+        }
+    }
+
+    /**
      * Create a new record and return the id
      *
      * @param array $data
@@ -292,6 +382,9 @@ abstract class BaseModel extends Model {
                 $data[$key] = json_encode($value, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
             }
         }
+
+        // Sanitize the data
+        $data = $this->sanitize($data);
 
         // Create the Query
         $Query = $this->Database->query()
@@ -338,6 +431,9 @@ abstract class BaseModel extends Model {
                 $data[$key] = json_encode($value, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
             }
         }
+
+        // Sanitize the data
+        $data = $this->sanitize($data);
 
         // Create the Query
         $Query = $this->Database->query()
