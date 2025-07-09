@@ -92,18 +92,41 @@ abstract class BaseModel extends Model {
      * @param string $value
      * @return bool
      */
-    protected function isJson($value): bool
+    protected function isJson(mixed $value, ?string $key = null): bool
     {
+        // Check if the function json_validate exists
         if (function_exists('json_validate')) {
             return json_validate($value);
         }
 
-        if ($value === '' || !is_string($value)) {
+        // Check if the value is empty or not a string
+        if ($value === null || $value === '' || !is_string($value)) {
             return false;
         }
 
-        $data = json_decode($value, true);
-        return (json_last_error() === JSON_ERROR_NONE && is_array($data));
+        // Check if the key is set in the definition
+        if ($key === null || !array_key_exists($key, $this->definition)){
+
+            // Attempt to decode the JSON value
+            $data = json_decode($value, true);
+            return (json_last_error() === JSON_ERROR_NONE && is_array($data));
+        } else {
+
+            // Retrieve the field type from the definition
+            $rawType  = strtolower($this->definition[$key]['Type']);
+            preg_match('/^[a-z]+/', $rawType, $m);
+            $baseType = $m[0] ?? '';
+
+            // Check if the base type is json
+            if ($baseType === 'json') {
+                // Attempt to decode the JSON value
+                $data = json_decode($value, true);
+                return (json_last_error() === JSON_ERROR_NONE && is_array($data));
+            } else {
+                // If the base type is not json, return false
+                return false;
+            }
+        }
     }
 
     /**
@@ -269,11 +292,14 @@ abstract class BaseModel extends Model {
         foreach($record as $key => $value){
 
             // Check if the value is a valid JSON string
-            if(is_string($value) && $this->isJson($value)){
+            if($this->isJson($value, $key)){
 
                 // Decode the JSON value
-                $record[$key] = json_decode($value, true);
+                $value = json_decode($value, true);
             }
+
+            // Set the value back to the record
+            $record[$key] = $value;
         }
 
         // Retrieve the Target
