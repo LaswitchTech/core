@@ -181,7 +181,14 @@ class Query {
         $operator = (in_array($operator,self::operators)) ? $operator : '=';
         $type = (in_array($type,self::types)) ? $type : 'LEFT';
 
+        // Check if there is a parent key
+        $parent = null;
+        if (strpos($key, '.') !== false) {
+            [$parent, $key] = explode('.', $key, 2);
+        }
+
         $this->join[] = [
+            'parent' => $parent,
             'table' => $table,
             'column' => $column,
             'key' => $key,
@@ -387,11 +394,18 @@ class Query {
                     }
                 } else {
                     $parts = explode('__', substr($key, 3));
-                    $key = $parts[0];
-                    $column = $parts[1];
-                    $row[$key] = (!isset($row[$key])) ? [] : $row[$key];
-                    $row[$key] = (!is_array($row[$key])) ? [] : $row[$key];
-                    $row[$key][$column] = $value;
+                    $column = array_pop($parts);
+                    $key    = implode('__', $parts);
+                    // Create the nested structure step-by-step
+                    $ref = &$row;
+                    foreach ($parts as $segment) {
+                        if (!isset($ref[$segment]) || !is_array($ref[$segment])) {
+                            $ref[$segment] = [];
+                        }
+                        $ref = &$ref[$segment];
+                    }
+                    $ref[$column] = $value;
+                    unset($ref);
                 }
             }
             if($this->index && isset($result['t__'.$this->index])){
@@ -483,9 +497,10 @@ class Query {
                 $fields[] = "t.`{$column['Field']}` AS `t__{$column['Field']}`";
             }
             foreach ($this->join as $join) {
+                $alias = $join['parent'] ? "j__{$join['parent']}__{$join['key']}" : "j__{$join['key']}";
                 $columns = $this->connector->describe($join['table']);
                 foreach ($columns as $column) {
-                    $fields[] = "j__{$join['key']}.`{$column['Field']}` AS `j__{$join['key']}__{$column['Field']}`";
+                    $fields[] = "{$alias}.`{$column['Field']}` AS `{$alias}__{$column['Field']}`";
                 }
             }
         } else {
@@ -514,7 +529,9 @@ class Query {
     {
         $clauses = [];
         foreach ($this->join as $join) {
-            $clauses[] = "{$join['type']} JOIN `{$join['table']}` AS `j__{$join['key']}` ON t.`{$join['key']}` {$join['operator']} `j__{$join['key']}`.`{$join['column']}`";
+            $leftAlias = $join['parent'] ? "`j__{$join['parent']}`" : 't';
+            $alias = $join['parent'] ? "j__{$join['parent']}__{$join['key']}" : "j__{$join['key']}";
+            $clauses[] = "{$join['type']} JOIN `{$join['table']}` AS `{$alias}` " . "ON {$leftAlias}.`{$join['key']}` {$join['operator']} " . "`{$alias}`.`{$join['column']}`";
         }
         return implode(' ', $clauses);
     }
