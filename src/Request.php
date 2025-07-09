@@ -92,7 +92,7 @@ class Request {
     public function getNamespace(){
         $namespace = "";
         foreach($this->getUriSegments() as $Segment){
-            if(strpos($Segment, '.') === false){
+            if(strpos($Segment, '.') === false && $Segment != 'api'){
                 $namespace .= "/{$Segment}";
             }
         };

@@ -137,7 +137,9 @@ class CoreHelper extends Helper {
             }
 
             // Create content
-            $content .= "Options +FollowSymLinks" . PHP_EOL . PHP_EOL;
+            $content .= "Options +FollowSymLinks" . PHP_EOL;
+            $content .= "Options -MultiViews" . PHP_EOL . PHP_EOL;
+            $content .= "AcceptPathInfo On" . PHP_EOL . PHP_EOL;
             $content .= "AddType application/javascript .mjs" . PHP_EOL . PHP_EOL;
             $content .= "<IfModule mod_php8.c>" . PHP_EOL;
             $content .= "    php_value session.cookie_samesite Strict" . PHP_EOL;
@@ -155,6 +157,9 @@ class CoreHelper extends Helper {
             $content .= "<IfModule mod_rewrite.c>" . PHP_EOL;
             $content .= "    RewriteEngine on" . PHP_EOL;
             $content .= "    RewriteBase /" . PHP_EOL . PHP_EOL;
+            $content .= "    # Route endpoint.php/anything to endpoint.php" . PHP_EOL;
+            $content .= "    RewriteRule ^api(.*)$ endpoint.php [QSA,L]" . PHP_EOL;
+            $content .= "    RewriteRule ^endpoint\.php(.*)$ endpoint.php [QSA,L]" . PHP_EOL . PHP_EOL;
             $content .= "    # Forbid any direct .php file access in plugins or themes" . PHP_EOL;
             $content .= "    RewriteRule ^(plugins|themes)/.*\.php$ - [F,L]" . PHP_EOL . PHP_EOL;
             $content .= "    # Forbid direct access to certain files" . PHP_EOL;
@@ -164,8 +169,6 @@ class CoreHelper extends Helper {
             $content .= "    RewriteCond %{REQUEST_FILENAME} -d [OR]" . PHP_EOL;
             $content .= "    RewriteCond %{REQUEST_FILENAME} -l" . PHP_EOL;
             $content .= "    RewriteRule ^.*$ - [L]" . PHP_EOL . PHP_EOL;
-            $content .= "    # Route endpoint.php/anything to endpoint.php" . PHP_EOL;
-            $content .= "    RewriteRule ^endpoint\.php(.*)$ endpoint.php [QSA,L]" . PHP_EOL . PHP_EOL;
             $content .= "    # Everything else goes to index.php" . PHP_EOL;
             $content .= "    RewriteRule ^.*$ index.php [QSA,L]" . PHP_EOL;
             $content .= "</IfModule>";
@@ -233,7 +236,7 @@ class CoreHelper extends Helper {
 
         // Path to file
         $favicon = $webroot . DIRECTORY_SEPARATOR . "favicon.ico";
-        $icon = $CONFIG->root() . DIRECTORY_SEPARATOR . "src" . DIRECTORY_SEPARATOR . "icons". DIRECTORY_SEPARATOR . "icon.ico";
+        $icon = ".." . DIRECTORY_SEPARATOR . "src" . DIRECTORY_SEPARATOR . "icons". DIRECTORY_SEPARATOR . "icon.ico";
 
         // Check if the file exist
         if($force && is_file($favicon)) {
@@ -254,7 +257,7 @@ class CoreHelper extends Helper {
 
         // Path to directory
         $js = $webroot . DIRECTORY_SEPARATOR . "js";
-        $dist = $CONFIG->root() . DIRECTORY_SEPARATOR . "dist" . DIRECTORY_SEPARATOR . "js";
+        $dist = ".." . DIRECTORY_SEPARATOR . "dist" . DIRECTORY_SEPARATOR . "js";
 
         // Check if directory exists
         if(is_dir($dist) && !is_dir($js) && !is_file($js) && !is_link($js)) {
@@ -268,7 +271,7 @@ class CoreHelper extends Helper {
 
         // Path to directory
         $img = $webroot . DIRECTORY_SEPARATOR . "img";
-        $dist = $CONFIG->root() . DIRECTORY_SEPARATOR . "dist" . DIRECTORY_SEPARATOR . "img";
+        $dist = ".." . DIRECTORY_SEPARATOR . "dist" . DIRECTORY_SEPARATOR . "img";
 
         // Check if directory exists
         if(is_dir($dist) && !is_dir($img) && !is_file($img) && !is_link($img)) {
@@ -282,7 +285,7 @@ class CoreHelper extends Helper {
 
         // Path to directory
         $plugins = $webroot . DIRECTORY_SEPARATOR . "plugins";
-        $dist = $CONFIG->root() . DIRECTORY_SEPARATOR . "lib" . DIRECTORY_SEPARATOR . "plugins";
+        $dist = ".." . DIRECTORY_SEPARATOR . "lib" . DIRECTORY_SEPARATOR . "plugins";
 
         // Check if directory exists
         if(is_dir($dist) && !is_dir($plugins) && !is_file($plugins) && !is_link($plugins)) {
@@ -296,7 +299,7 @@ class CoreHelper extends Helper {
 
         // Path to directory
         $themes = $webroot . DIRECTORY_SEPARATOR . "themes";
-        $dist = $CONFIG->root() . DIRECTORY_SEPARATOR . "lib" . DIRECTORY_SEPARATOR . "themes";
+        $dist = ".." . DIRECTORY_SEPARATOR . "lib" . DIRECTORY_SEPARATOR . "themes";
 
         // Check if directory exists
         if(is_dir($dist) && !is_dir($themes) && !is_file($themes) && !is_link($themes)) {
