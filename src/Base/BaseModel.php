@@ -159,18 +159,25 @@ abstract class BaseModel extends Model {
         // Check if the table has a particular column and join if necessary
         if(array_key_exists('organization', $this->definitions[$table])){
             $Query->join('organization', 'organizations', 'id');
+            $Query->join('organization.vcard', 'vcards', 'id');
         }
         if(array_key_exists('lead', $this->definitions[$table])){
             $Query->join('lead', 'leads', 'id');
+            $Query->join('lead.vcard', 'vcards', 'id');
         }
         if(array_key_exists('client', $this->definitions[$table])){
             $Query->join('client', 'clients', 'id');
+            $Query->join('client.vcard', 'vcards', 'id');
         }
         if(array_key_exists('vcard', $this->definitions[$table])){
             $Query->join('vcard', 'vcards', 'id');
         }
         if(array_key_exists('contact', $this->definitions[$table])){
             $Query->join('contact', 'contacts', 'id');
+            $Query->join('contact.vcard', 'vcards', 'id');
+        }
+        if(array_key_exists('assignedTo', $this->definitions[$table])){
+            $Query->join('assignedTo', 'users', 'id');
         }
 
         // Retrieve the Record
