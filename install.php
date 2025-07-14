@@ -16,6 +16,11 @@ if (!class_exists('ZipArchive')) {
     die("ZipArchive class is not available.");
 }
 
+// Configure PHP Settings - increase execution time and memory limit
+ini_set('max_execution_time', '600'); // 10 minutes
+ini_set('memory_limit', '1024M');
+
+
 // Check if required commands are available
 function checkCommand($command): bool
 {
