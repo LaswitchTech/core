@@ -418,7 +418,7 @@ if(!executeCMD(PHP_BINDIR . DIRECTORY_SEPARATOR . 'php cli core init')){
 function installExtensions(): bool
 {
     // Load the extensions to install from the config file
-    $configPath = __DIR__ . DIRECTORY_SEPARATOR . 'config' . DIRECTORY_SEPARATOR . 'requirement.cfg';
+    $configPath = __DIR__ . DIRECTORY_SEPARATOR . 'vendor' . DIRECTORY_SEPARATOR . 'laswitchtech' . DIRECTORY_SEPARATOR . 'core' . DIRECTORY_SEPARATOR . 'config' . DIRECTORY_SEPARATOR . 'requirement.cfg';
 
     // Check if the config file exists
     if (!file_exists($configPath)) {
