@@ -430,6 +430,9 @@ function installExtensions(): bool
     // Loop through the extensions (modules) and install them
     foreach ($config['modules'] as $extension) {
 
+        // Show the extension being installed
+        echo "Installing module: $extension" . PHP_EOL;
+
         // Execute the command to install the extension
         if(!executeCMD(PHP_BINDIR . DIRECTORY_SEPARATOR . 'php cli core extension install modules ' . escapeshellarg($extension))){
             return false;
@@ -439,6 +442,9 @@ function installExtensions(): bool
     // Loop through the extensions (plugins) and install them
     foreach ($config['plugins'] as $extension) {
 
+        // Show the extension being installed
+        echo "Installing plugin: $extension" . PHP_EOL;
+
         // Execute the command to install the extension
         if(!executeCMD(PHP_BINDIR . DIRECTORY_SEPARATOR . 'php cli core extension install plugins ' . escapeshellarg($extension))){
             return false;
@@ -447,6 +453,9 @@ function installExtensions(): bool
 
     // Loop through the extensions (themes) and install them
     foreach ($config['themes'] as $extension) {
+
+        // Show the extension being installed
+        echo "Installing theme: $extension" . PHP_EOL;
 
         // Execute the command to install the extension
         if(!executeCMD(PHP_BINDIR . DIRECTORY_SEPARATOR . 'php cli core extension install themes ' . escapeshellarg($extension))){
