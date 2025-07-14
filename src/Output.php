@@ -270,16 +270,18 @@ class Output {
 
             // List available commands
             $this->print("Available Commands:");
-            foreach(scandir($CONFIG->root() . "/Command/") as $command){
-                if(str_contains($command, 'Command.php')){
-                    $this->print(" - " . strtolower(str_replace('Command.php','',$command)));
+            if(is_dir($CONFIG->root() . "/Command/")){
+                foreach(scandir($CONFIG->root() . "/Command/") as $command){
+                    if(str_contains($command, 'Command.php')){
+                        $this->print(" - " . strtolower(str_replace('Command.php','',$command)));
+                    }
                 }
             }
-
-            // List available commands
-            foreach(scandir($CONFIG->root() . "/lib/plugins/") as $command){
-                if(is_file($CONFIG->root() . "/lib/plugins/" . $command . "/Command.php")){
-                    $this->print(" - " . strtolower(str_replace('Command.php','',$command)));
+            if(is_dir($CONFIG->root() . "/lib/plugins/")){
+                foreach(scandir($CONFIG->root() . "/lib/plugins/") as $command){
+                    if(is_file($CONFIG->root() . "/lib/plugins/" . $command . "/Command.php")){
+                        $this->print(" - " . strtolower(str_replace('Command.php','',$command)));
+                    }
                 }
             }
         }
