@@ -1,12 +1,5 @@
 <?php
 
-/**
- * Core Framework - Router
- *
- * @license    MIT (https://mit-license.org/)
- * @author     Louis Ouellet <louis@laswitchtech.com>
- */
-
 // Declaring namespace
 namespace LaswitchTech\Core;
 
@@ -270,7 +263,11 @@ class Router {
         $HELPER->Core->init();
 
         // Render the route
-        $this->render($this->Request->getNamespace());
+        if($this->Config->get('application','installed')){
+            $this->render($this->Request->getNamespace());
+        } else {
+            $this->render('/install');
+        }
 
         // Return the instance
         return $this;
