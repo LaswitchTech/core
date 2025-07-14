@@ -22,6 +22,7 @@ TOKEN
 
 # Exclude Files
 !extensions.cfg
+!requirement.cfg
 # cli
 
 # Exclude Locales Configurations and Translations

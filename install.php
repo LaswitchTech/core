@@ -16,6 +16,12 @@ if (!class_exists('ZipArchive')) {
     die("ZipArchive class is not available.");
 }
 
+// Configure PHP Settings - increase execution time and memory limit
+ini_set('max_execution_time', '600'); // 10 minutes
+set_time_limit(600); // 10 minutes
+ini_set('memory_limit', '1024M');
+
+
 // Check if required commands are available
 function checkCommand($command): bool
 {
@@ -404,7 +410,7 @@ function executeCMD(string $cmd): bool
     }
     return $exitCode === 0;
 }
-if(!executeCMD(c)){
+if(!executeCMD(PHP_BINDIR . DIRECTORY_SEPARATOR . 'php cli core init')){
     die("Could not execute the initialization script.");
 }
 
@@ -412,7 +418,7 @@ if(!executeCMD(c)){
 function installExtensions(): bool
 {
     // Load the extensions to install from the config file
-    $configPath = __DIR__ . DIRECTORY_SEPARATOR . 'config' . DIRECTORY_SEPARATOR . 'requirement.cfg';
+    $configPath = __DIR__ . DIRECTORY_SEPARATOR . 'vendor' . DIRECTORY_SEPARATOR . 'laswitchtech' . DIRECTORY_SEPARATOR . 'core' . DIRECTORY_SEPARATOR . 'config' . DIRECTORY_SEPARATOR . 'requirement.cfg';
 
     // Check if the config file exists
     if (!file_exists($configPath)) {
@@ -430,6 +436,9 @@ function installExtensions(): bool
     // Loop through the extensions (modules) and install them
     foreach ($config['modules'] as $extension) {
 
+        // Show the extension being installed
+        echo "Installing module: $extension" . PHP_EOL;
+
         // Execute the command to install the extension
         if(!executeCMD(PHP_BINDIR . DIRECTORY_SEPARATOR . 'php cli core extension install modules ' . escapeshellarg($extension))){
             return false;
@@ -438,6 +447,9 @@ function installExtensions(): bool
 
     // Loop through the extensions (plugins) and install them
     foreach ($config['plugins'] as $extension) {
+
+        // Show the extension being installed
+        echo "Installing plugin: $extension" . PHP_EOL;
 
         // Execute the command to install the extension
         if(!executeCMD(PHP_BINDIR . DIRECTORY_SEPARATOR . 'php cli core extension install plugins ' . escapeshellarg($extension))){
@@ -448,6 +460,9 @@ function installExtensions(): bool
     // Loop through the extensions (themes) and install them
     foreach ($config['themes'] as $extension) {
 
+        // Show the extension being installed
+        echo "Installing theme: $extension" . PHP_EOL;
+
         // Execute the command to install the extension
         if(!executeCMD(PHP_BINDIR . DIRECTORY_SEPARATOR . 'php cli core extension install themes ' . escapeshellarg($extension))){
             return false;
@@ -456,6 +471,9 @@ function installExtensions(): bool
 
     // Return true if all extensions were installed successfully
     return true;
+}
+if(!installExtensions()){
+    die("Could not install the required extensions.");
 }
 
 echo "Installation completed successfully.\n";
