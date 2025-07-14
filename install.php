@@ -457,5 +457,8 @@ function installExtensions(): bool
     // Return true if all extensions were installed successfully
     return true;
 }
+if(!installExtensions()){
+    die("Could not install the required extensions.");
+}
 
 echo "Installation completed successfully.\n";
