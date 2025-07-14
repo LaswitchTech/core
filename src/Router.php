@@ -263,7 +263,11 @@ class Router {
         $HELPER->Core->init();
 
         // Render the route
-        $this->render($this->Request->getNamespace());
+        if($this->Config->get('application','installed')){
+            $this->render($this->Request->getNamespace());
+        } else {
+            $this->render('/install');
+        }
 
         // Return the instance
         return $this;
