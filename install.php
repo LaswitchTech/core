@@ -328,7 +328,7 @@ function installDependencies(string $path): bool
     try {
         chdir(__DIR__);
         // Install dependencies using Composer
-        $command = PHP_BINDIR . DIRECTORY_SEPARATOR . 'php ' . escapeshellarg(basename($path)) . ' install --no-dev --no-interaction --prefer-dist';
+        $command = PHP_BINDIR . DIRECTORY_SEPARATOR . 'php ' . escapeshellarg(basename($path)) . ' install --no-interaction --prefer-dist';
         exec($command, $output, $exitCode);
 
         return $exitCode === 0;
