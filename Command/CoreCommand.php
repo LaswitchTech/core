@@ -1,16 +1,20 @@
 <?php
 
-/**
- * Core Framework - CoreCommand
- *
- * @license    MIT (https://mit-license.org/)
- * @author     Louis Ouellet <louis@laswitchtech.com>
- */
-
 // Import additionnal class into the global namespace
 use LaswitchTech\Core\Abstracts\Command;
 
 class CoreCommand extends Command {
+
+    /**
+     * Lookup tables for names → numbers
+     */
+    private static array $monthNames = [
+        'JAN'=>1,'FEB'=>2,'MAR'=>3,'APR'=>4,'MAY'=>5,'JUN'=>6,
+        'JUL'=>7,'AUG'=>8,'SEP'=>9,'OCT'=>10,'NOV'=>11,'DEC'=>12,
+    ];
+    private static array $dowNames = [
+        'SUN'=>0,'MON'=>1,'TUE'=>2,'WED'=>3,'THU'=>4,'FRI'=>5,'SAT'=>6,
+    ];
 
     /**
      * Constructor
@@ -156,17 +160,6 @@ class CoreCommand extends Command {
     }
 
     /**
-     * Lookup tables for names → numbers
-     */
-    private static array $monthNames = [
-        'JAN'=>1,'FEB'=>2,'MAR'=>3,'APR'=>4,'MAY'=>5,'JUN'=>6,
-        'JUL'=>7,'AUG'=>8,'SEP'=>9,'OCT'=>10,'NOV'=>11,'DEC'=>12,
-    ];
-    private static array $dowNames = [
-        'SUN'=>0,'MON'=>1,'TUE'=>2,'WED'=>3,'THU'=>4,'FRI'=>5,'SAT'=>6,
-    ];
-
-    /**
      * Initialize the framework
      */
     public function initAction()
@@ -251,31 +244,7 @@ class CoreCommand extends Command {
     public function compileAction()
     {
         // Import Global Variables
-        global $BOOTSTRAP, $DATABASE, $CONFIG, $REQUEST;
-
-        // Create an Update directory
-        $path = $CONFIG->root() . DIRECTORY_SEPARATOR . "Install";
-
-        // Check if the Update directory exists
-        if(!is_dir($path)){
-
-            // Create the Update directory recursively
-            mkdir($path, 0755, true);
-        }
-
-        // Check if the Update directory exists
-        if(!is_dir($path . DIRECTORY_SEPARATOR . "Definition")){
-
-            // Create the Update directory recursively
-            mkdir($path . DIRECTORY_SEPARATOR . "Definition", 0755, true);
-        }
-
-        // Check if the Update directory exists
-        if(!is_dir($path . DIRECTORY_SEPARATOR . "Data")){
-
-            // Create the Update directory recursively
-            mkdir($path . DIRECTORY_SEPARATOR . "Data", 0755, true);
-        }
+        global $DATABASE, $REQUEST;
 
         // Check if Database is connected
         if($DATABASE->isConnected()){
@@ -286,6 +255,40 @@ class CoreCommand extends Command {
                 // Output the name of the table
                 $this->Output->print("Compiling {$table}...");
 
+                // Set the path
+                $path = $this->Config->root() . DIRECTORY_SEPARATOR . "lib" . DIRECTORY_SEPARATOR . "plugins" . DIRECTORY_SEPARATOR . $table;
+
+                // Check if the directory exists
+                if(!is_dir($path)){
+
+                    // Set the path
+                    $path = $this->Config->root();
+                }
+
+                // Set the path
+                $path = $path . DIRECTORY_SEPARATOR . "Install";
+
+                // Check if the directory exists
+                if(!is_dir($path)){
+
+                    // Create the directory recursively
+                    mkdir($path, 0755, true);
+                }
+
+                // Check if the directory exists
+                if(!is_dir($path . DIRECTORY_SEPARATOR . "Definition")){
+
+                    // Create the directory recursively
+                    mkdir($path . DIRECTORY_SEPARATOR . "Definition", 0755, true);
+                }
+
+                // Check if the directory exists
+                if(!is_dir($path . DIRECTORY_SEPARATOR . "Data")){
+
+                    // Create the directory recursively
+                    mkdir($path . DIRECTORY_SEPARATOR . "Data", 0755, true);
+                }
+
                 // Check if we compile the schema
                 if(is_null($REQUEST->getArguments(3)) || in_array("--schema",$REQUEST->getArguments())){
 
@@ -295,7 +298,7 @@ class CoreCommand extends Command {
                         ->save();
 
                     // Move the Schema to the Update directory
-                    rename($CONFIG->root() . DIRECTORY_SEPARATOR . "Definition" . DIRECTORY_SEPARATOR . $table . ".map", $path . DIRECTORY_SEPARATOR . "Definition" . DIRECTORY_SEPARATOR . $table . ".map");
+                    rename($this->Config->root() . DIRECTORY_SEPARATOR . "Definition" . DIRECTORY_SEPARATOR . $table . ".map", $path . DIRECTORY_SEPARATOR . "Definition" . DIRECTORY_SEPARATOR . $table . ".map");
 
                     // Output the Definition path
                     $this->Output->print("Definition: " . $path . DIRECTORY_SEPARATOR . "Definition" . DIRECTORY_SEPARATOR . $table . ".map");
@@ -356,26 +359,6 @@ class CoreCommand extends Command {
                     // Save the data as JSON
                     file_put_contents($path . DIRECTORY_SEPARATOR . "Data" . DIRECTORY_SEPARATOR . $table . ".sample", json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
                 }
-            }
-        }
-
-        // Check if we compile the installer
-        if(is_null($REQUEST->getArguments(3)) || in_array("--installer",$REQUEST->getArguments())){
-
-            // Load/Create the installer configuration
-            $CONFIG->add('installer');
-
-            // Modules
-            $modules = $CONFIG->get('installer', 'modules');
-
-            // Check if modules are defined
-            if(is_null($modules)){
-
-                // Set default modules list to empty
-                $modules = [];
-
-                // Save the modules list
-                $CONFIG->set('installer', 'modules', $modules);
             }
         }
     }
@@ -539,7 +522,11 @@ class CoreCommand extends Command {
                                             $archivePath = $tmpPath . DIRECTORY_SEPARATOR . $extension['base'] . '.zip';
                                             if($this->Helper->Core->download($extension['download'], $archivePath, $extension['token'] ?? null)){
                                                 if($this->Helper->Core->unpack($archivePath, $extension['path'])){
-                                                    $this->Output->print("Extension {$extension['base']} updated successfully.");
+                                                    if($this->Model->Core->import($extension['path'] . DIRECTORY_SEPARATOR . "Install", file_get_contents($extension['path'] . DIRECTORY_SEPARATOR . 'VERSION'))){
+                                                        $this->Output->print("Extension {$extension['base']} updated successfully.");
+                                                    } else {
+                                                        $this->Output->print("Failed to create the database.");
+                                                    }
                                                 } else {
                                                     $this->Output->print("Failed to unpack the extension {$extension['base']}.");
                                                 }
@@ -556,7 +543,11 @@ class CoreCommand extends Command {
                                             $archivePath = $tmpPath . DIRECTORY_SEPARATOR . $extension['base'] . '.zip';
                                             if($this->Helper->Core->download($extension['download'], $archivePath, $extension['token'] ?? null)){
                                                 if($this->Helper->Core->unpack($archivePath, $extension['path'])){
-                                                    $this->Output->print("Extension {$extension['base']} installed successfully.");
+                                                    if($this->Model->Core->import($extension['path'] . DIRECTORY_SEPARATOR . "Install")){
+                                                        $this->Output->print("Extension {$extension['base']} installed successfully.");
+                                                    } else {
+                                                        $this->Output->print("Failed to create the database.");
+                                                    }
                                                 } else {
                                                     $this->Output->print("Failed to unpack the extension {$extension['base']}.");
                                                 }
