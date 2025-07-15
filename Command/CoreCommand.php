@@ -244,31 +244,7 @@ class CoreCommand extends Command {
     public function compileAction()
     {
         // Import Global Variables
-        global $BOOTSTRAP, $DATABASE, $CONFIG, $REQUEST;
-
-        // Create an Update directory
-        $path = $CONFIG->root() . DIRECTORY_SEPARATOR . "Install";
-
-        // Check if the Update directory exists
-        if(!is_dir($path)){
-
-            // Create the Update directory recursively
-            mkdir($path, 0755, true);
-        }
-
-        // Check if the Update directory exists
-        if(!is_dir($path . DIRECTORY_SEPARATOR . "Definition")){
-
-            // Create the Update directory recursively
-            mkdir($path . DIRECTORY_SEPARATOR . "Definition", 0755, true);
-        }
-
-        // Check if the Update directory exists
-        if(!is_dir($path . DIRECTORY_SEPARATOR . "Data")){
-
-            // Create the Update directory recursively
-            mkdir($path . DIRECTORY_SEPARATOR . "Data", 0755, true);
-        }
+        global $DATABASE, $REQUEST;
 
         // Check if Database is connected
         if($DATABASE->isConnected()){
@@ -279,6 +255,40 @@ class CoreCommand extends Command {
                 // Output the name of the table
                 $this->Output->print("Compiling {$table}...");
 
+                // Set the path
+                $path = $this->Config->root() . DIRECTORY_SEPARATOR . "lib" . DIRECTORY_SEPARATOR . "plugins" . DIRECTORY_SEPARATOR . $table;
+
+                // Check if the directory exists
+                if(!is_dir($path)){
+
+                    // Set the path
+                    $path = $this->Config->root();
+                }
+
+                // Set the path
+                $path = $path . DIRECTORY_SEPARATOR . "Install";
+
+                // Check if the directory exists
+                if(!is_dir($path)){
+
+                    // Create the directory recursively
+                    mkdir($path, 0755, true);
+                }
+
+                // Check if the directory exists
+                if(!is_dir($path . DIRECTORY_SEPARATOR . "Definition")){
+
+                    // Create the directory recursively
+                    mkdir($path . DIRECTORY_SEPARATOR . "Definition", 0755, true);
+                }
+
+                // Check if the directory exists
+                if(!is_dir($path . DIRECTORY_SEPARATOR . "Data")){
+
+                    // Create the directory recursively
+                    mkdir($path . DIRECTORY_SEPARATOR . "Data", 0755, true);
+                }
+
                 // Check if we compile the schema
                 if(is_null($REQUEST->getArguments(3)) || in_array("--schema",$REQUEST->getArguments())){
 
@@ -288,7 +298,7 @@ class CoreCommand extends Command {
                         ->save();
 
                     // Move the Schema to the Update directory
-                    rename($CONFIG->root() . DIRECTORY_SEPARATOR . "Definition" . DIRECTORY_SEPARATOR . $table . ".map", $path . DIRECTORY_SEPARATOR . "Definition" . DIRECTORY_SEPARATOR . $table . ".map");
+                    rename($this->Config->root() . DIRECTORY_SEPARATOR . "Definition" . DIRECTORY_SEPARATOR . $table . ".map", $path . DIRECTORY_SEPARATOR . "Definition" . DIRECTORY_SEPARATOR . $table . ".map");
 
                     // Output the Definition path
                     $this->Output->print("Definition: " . $path . DIRECTORY_SEPARATOR . "Definition" . DIRECTORY_SEPARATOR . $table . ".map");
@@ -512,7 +522,11 @@ class CoreCommand extends Command {
                                             $archivePath = $tmpPath . DIRECTORY_SEPARATOR . $extension['base'] . '.zip';
                                             if($this->Helper->Core->download($extension['download'], $archivePath, $extension['token'] ?? null)){
                                                 if($this->Helper->Core->unpack($archivePath, $extension['path'])){
-                                                    $this->Output->print("Extension {$extension['base']} updated successfully.");
+                                                    if($this->Model->Core->import($extension['path'] . DIRECTORY_SEPARATOR . "Install", file_get_contents($extension['path'] . DIRECTORY_SEPARATOR . 'VERSION'))){
+                                                        $this->Output->print("Extension {$extension['base']} updated successfully.");
+                                                    } else {
+                                                        $this->Output->print("Failed to create the database.");
+                                                    }
                                                 } else {
                                                     $this->Output->print("Failed to unpack the extension {$extension['base']}.");
                                                 }
@@ -529,7 +543,11 @@ class CoreCommand extends Command {
                                             $archivePath = $tmpPath . DIRECTORY_SEPARATOR . $extension['base'] . '.zip';
                                             if($this->Helper->Core->download($extension['download'], $archivePath, $extension['token'] ?? null)){
                                                 if($this->Helper->Core->unpack($archivePath, $extension['path'])){
-                                                    $this->Output->print("Extension {$extension['base']} installed successfully.");
+                                                    if($this->Model->Core->import($extension['path'] . DIRECTORY_SEPARATOR . "Install")){
+                                                        $this->Output->print("Extension {$extension['base']} installed successfully.");
+                                                    } else {
+                                                        $this->Output->print("Failed to create the database.");
+                                                    }
                                                 } else {
                                                     $this->Output->print("Failed to unpack the extension {$extension['base']}.");
                                                 }

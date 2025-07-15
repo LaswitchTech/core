@@ -312,7 +312,7 @@ function installComposer(string $destination): bool
         chdir(__DIR__);
 
         // Create a symlink to the Composer executable
-        $composerPath = $destination . DIRECTORY_SEPARATOR . 'composer.phar';
+        $composerPath = '.composer' . DIRECTORY_SEPARATOR . 'composer.phar';
         $symlinkPath = __DIR__ . DIRECTORY_SEPARATOR . 'composer';
         if (file_exists($symlinkPath)) {
             unlink($symlinkPath);
