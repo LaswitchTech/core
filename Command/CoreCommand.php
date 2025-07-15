@@ -1,16 +1,20 @@
 <?php
 
-/**
- * Core Framework - CoreCommand
- *
- * @license    MIT (https://mit-license.org/)
- * @author     Louis Ouellet <louis@laswitchtech.com>
- */
-
 // Import additionnal class into the global namespace
 use LaswitchTech\Core\Abstracts\Command;
 
 class CoreCommand extends Command {
+
+    /**
+     * Lookup tables for names → numbers
+     */
+    private static array $monthNames = [
+        'JAN'=>1,'FEB'=>2,'MAR'=>3,'APR'=>4,'MAY'=>5,'JUN'=>6,
+        'JUL'=>7,'AUG'=>8,'SEP'=>9,'OCT'=>10,'NOV'=>11,'DEC'=>12,
+    ];
+    private static array $dowNames = [
+        'SUN'=>0,'MON'=>1,'TUE'=>2,'WED'=>3,'THU'=>4,'FRI'=>5,'SAT'=>6,
+    ];
 
     /**
      * Constructor
@@ -154,17 +158,6 @@ class CoreCommand extends Command {
         // No match in any list element
         return false;
     }
-
-    /**
-     * Lookup tables for names → numbers
-     */
-    private static array $monthNames = [
-        'JAN'=>1,'FEB'=>2,'MAR'=>3,'APR'=>4,'MAY'=>5,'JUN'=>6,
-        'JUL'=>7,'AUG'=>8,'SEP'=>9,'OCT'=>10,'NOV'=>11,'DEC'=>12,
-    ];
-    private static array $dowNames = [
-        'SUN'=>0,'MON'=>1,'TUE'=>2,'WED'=>3,'THU'=>4,'FRI'=>5,'SAT'=>6,
-    ];
 
     /**
      * Initialize the framework
@@ -356,26 +349,6 @@ class CoreCommand extends Command {
                     // Save the data as JSON
                     file_put_contents($path . DIRECTORY_SEPARATOR . "Data" . DIRECTORY_SEPARATOR . $table . ".sample", json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
                 }
-            }
-        }
-
-        // Check if we compile the installer
-        if(is_null($REQUEST->getArguments(3)) || in_array("--installer",$REQUEST->getArguments())){
-
-            // Load/Create the installer configuration
-            $CONFIG->add('installer');
-
-            // Modules
-            $modules = $CONFIG->get('installer', 'modules');
-
-            // Check if modules are defined
-            if(is_null($modules)){
-
-                // Set default modules list to empty
-                $modules = [];
-
-                // Save the modules list
-                $CONFIG->set('installer', 'modules', $modules);
             }
         }
     }
