@@ -246,7 +246,7 @@ class coreModel extends Model {
 
                         // Retrieve the last inserted id
                         $lastId = 0;
-                        $lastRecord = $this->Database->query()->table($definition)->select()->orderBy('id', 'DESC')->limit(1)->execute();
+                        $lastRecord = $this->Database->query()->table($definition)->select()->order('id', 'DESC')->limit(1)->execute();
                         if(!empty($lastRecord)){
                             $lastId = $lastRecord[0]['id'];
                         }
