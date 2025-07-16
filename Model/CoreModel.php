@@ -223,7 +223,7 @@ class coreModel extends Model {
                                 $record['modified'] = date('Y-m-d H:i:s');
 
                                 // Create the Query
-                                $Query = $this->query()
+                                $Query = $this->Database->query()
                                     ->table($definition)
                                     ->insert($record)
                                     ->execute();
@@ -237,7 +237,7 @@ class coreModel extends Model {
                             foreach($dictionary[$definition] as $record){
 
                                 // Create the Query
-                                $Query = $this->query()
+                                $Query = $this->Database->query()
                                     ->table($definition)
                                     ->insert($record)
                                     ->execute();
@@ -246,7 +246,7 @@ class coreModel extends Model {
 
                         // Retrieve the last inserted id
                         $lastId = 0;
-                        $lastRecord = $this->query()->table($definition)->select()->orderBy('id', 'DESC')->limit(1)->execute();
+                        $lastRecord = $this->Database->query()->table($definition)->select()->orderBy('id', 'DESC')->limit(1)->execute();
                         if(!empty($lastRecord)){
                             $lastId = $lastRecord[0]['id'];
                         }
@@ -255,7 +255,7 @@ class coreModel extends Model {
                         $autoIncrement = ($lastId >= 10000) ? $lastId + 1 : 10000;
 
                         // Set auto increment on the table
-                        $this->query()->table($definition)->autoIncrement($autoIncrement);
+                        $this->Database->query()->table($definition)->autoIncrement($autoIncrement);
                     }
                 }
             } catch (\Exception $e) {
