@@ -260,6 +260,8 @@ class coreModel extends Model {
                     }
                 }
             } catch (\Exception $e) {
+                // Log the error
+                var_dump("Failed to import the module: " . $e->getMessage());
                 return false;
             }
         }
