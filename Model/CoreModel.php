@@ -171,7 +171,7 @@ class coreModel extends Model {
                         copy($definitionDir . DIRECTORY_SEPARATOR . $definition . ".map", $CONFIG->root() . DIRECTORY_SEPARATOR . "Definition" . DIRECTORY_SEPARATOR . $definition . ".map");
 
                         // Create the Schema
-                        $Schema = $this->schema()->define($definition);
+                        $Schema = $this->Database->schema()->define($definition);
 
                         // Check if the Schema is already exists
                         if($Schema->exists()){
