@@ -231,17 +231,28 @@ class coreModel extends Model {
                         }
 
                         // Check if the dictionary has the definition
-                        var_dump(array_key_exists($definition, $dictionary), !empty($dictionary[$definition]), $dictionary[$definition] ?? 'No Data');
                         if(array_key_exists($definition, $dictionary) && !empty($dictionary[$definition])){
 
                             // Loop through the dictionary
                             foreach($dictionary[$definition] as $record){
 
-                                // Create the Query
-                                $Query = $this->Database->query()
-                                    ->table($definition)
-                                    ->insert($record)
-                                    ->execute();
+                                // Check if the record ID is higher than 9999
+                                if($record['id'] > 9999){
+
+                                    // Create the Query
+                                    $Query = $this->Database->query()
+                                        ->table($definition)
+                                        ->insert($record)
+                                        ->execute();
+                                } else {
+
+                                    // Create the Query
+                                    $Query = $this->Database->query()
+                                        ->table($definition)
+                                        ->update($record)
+                                        ->where('id', $record['id'])
+                                        ->execute();
+                                }
                             }
                         }
 
@@ -261,7 +272,7 @@ class coreModel extends Model {
                 }
             } catch (\Exception $e) {
                 // Log the error
-                var_dump("Failed to import the module: " . $e->getMessage());
+                var_dump("Failed to update the extension: " . $e->getMessage());
                 return false;
             }
         }
