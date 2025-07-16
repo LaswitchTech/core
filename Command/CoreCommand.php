@@ -246,17 +246,41 @@ class CoreCommand extends Command {
         // Import Global Variables
         global $DATABASE, $REQUEST;
 
+        // Initialize the path
+        $path = $this->Config->root() . DIRECTORY_SEPARATOR . "lib" . DIRECTORY_SEPARATOR . "plugins";
+
+        // Retrieve the list of plugins
+        $plugins = array_diff(scandir($path), array('..', '.','.DS_Store'));
+
         // Check if Database is connected
         if($DATABASE->isConnected()){
 
             // Loop through the tables
             foreach($DATABASE->schema()->tables() as $table){
 
-                // Output the name of the table
-                $this->Output->print("Compiling {$table}...");
+                // Loop through the plugins
+                foreach($plugins as $plugin){
 
-                // Set the path
-                $path = $this->Config->root() . DIRECTORY_SEPARATOR . "lib" . DIRECTORY_SEPARATOR . "plugins" . DIRECTORY_SEPARATOR . $table;
+                    // Set the path
+                    $path = $this->Config->root() . DIRECTORY_SEPARATOR . "lib" . DIRECTORY_SEPARATOR . "plugins" . DIRECTORY_SEPARATOR . $plugin;
+
+                    // Check if the directory exists
+                    if(is_dir($path . DIRECTORY_SEPARATOR . "Install") && file_exists($path . DIRECTORY_SEPARATOR . "Install" . DIRECTORY_SEPARATOR . "Definition" . DIRECTORY_SEPARATOR . $table.".map")){
+
+                        // Break the loop
+                        break;
+                    }
+
+                    // Reset the path
+                    $path = '';
+                }
+
+                // Check if the directory exists
+                if(!is_dir($path)){
+
+                    // Set the path
+                    $path = $this->Config->root() . DIRECTORY_SEPARATOR . "lib" . DIRECTORY_SEPARATOR . "plugins" . DIRECTORY_SEPARATOR . $table;
+                }
 
                 // Check if the directory exists
                 if(!is_dir($path)){
@@ -264,6 +288,9 @@ class CoreCommand extends Command {
                     // Set the path
                     $path = $this->Config->root();
                 }
+
+                // Output the name of the table and path
+                $this->Output->print("Compiling {$table} at {$path}...");
 
                 // Set the path
                 $path = $path . DIRECTORY_SEPARATOR . "Install";
@@ -299,10 +326,6 @@ class CoreCommand extends Command {
 
                     // Move the Schema to the Update directory
                     rename($this->Config->root() . DIRECTORY_SEPARATOR . "Definition" . DIRECTORY_SEPARATOR . $table . ".map", $path . DIRECTORY_SEPARATOR . "Definition" . DIRECTORY_SEPARATOR . $table . ".map");
-
-                    // Output the Definition path
-                    $this->Output->print("Definition: " . $path . DIRECTORY_SEPARATOR . "Definition" . DIRECTORY_SEPARATOR . $table . ".map");
-
                 }
 
                 // Check if we compile the required data
@@ -333,9 +356,6 @@ class CoreCommand extends Command {
                         }
                     }
 
-                    // Output the number of records
-                    $this->Output->print("Records [required]: " . count($data));
-
                     // Save the data as JSON
                     file_put_contents($path . DIRECTORY_SEPARATOR . "Data" . DIRECTORY_SEPARATOR . $table . ".required", json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
                 }
@@ -352,9 +372,6 @@ class CoreCommand extends Command {
 
                     // Retrieve the data
                     $data = $Query->fetch();
-
-                    // Output the number of records
-                    $this->Output->print("Records [sample]: " . count($data));
 
                     // Save the data as JSON
                     file_put_contents($path . DIRECTORY_SEPARATOR . "Data" . DIRECTORY_SEPARATOR . $table . ".sample", json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
