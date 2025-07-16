@@ -231,6 +231,7 @@ class coreModel extends Model {
                         }
 
                         // Check if the dictionary has the definition
+                        var_dump(array_key_exists($definition, $dictionary), !empty($dictionary[$definition]), $dictionary[$definition] ?? 'No Data');
                         if(array_key_exists($definition, $dictionary) && !empty($dictionary[$definition])){
 
                             // Loop through the dictionary
