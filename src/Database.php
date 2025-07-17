@@ -147,7 +147,7 @@ class Database {
             if($this->isConnected()){
 
                 // Loop through the tables in the database
-                foreach ($this->Database->schema()->tables() as $table) {
+                foreach ($this->schema()->tables() as $table) {
 
                     // Drop the Table
                     $this->schema()->define($table)->drop();
