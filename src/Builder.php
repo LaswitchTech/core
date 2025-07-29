@@ -181,34 +181,35 @@ class Builder {
         $html = '';
         $css = $this->Config->get('css');
         foreach($css as $file){
-            if(is_file($this->Config->root().'/webroot/'.trim($file,'/'))){
-                $html .= '<link rel="stylesheet" type="text/css" href="/'.trim($file,'/').'">' . PHP_EOL;
+            if(is_file($this->Config->root().'/webroot/assets/css/'.trim($file,'/'))){
+                $html .= '<link rel="stylesheet" type="text/css" href="/assets/css/'.trim($file,'/').'">' . PHP_EOL;
+            } elseif(is_file($this->Config->root().'/webroot/assets/js/'.trim($file,'/'))){
+                $html .= '<link rel="stylesheet" type="text/css" href="/assets/js/'.trim($file,'/').'">' . PHP_EOL;
             }
         }
-        $path = $this->Config->root() . '/lib/themes';
+        $path = $this->Config->root() . '/webroot/assets/themes';
         if(is_dir($path)){
             $themes = array_diff(scandir($path), array('..', '.'));
             foreach($themes as $file){
                 $filePath = $file . '/styles.css';
                 if(is_file($path.'/'.$filePath)){
                     if($this->Config->get('application','theme') == $file){
-                        $html .= '<link rel="stylesheet" type="text/css" href="/themes/'.trim($filePath,'/').'" data-theme="'.$file.'">' . PHP_EOL;
-                    } else {
-                        $html .= '<link rel="stylesheet" type="text/css" href="/themes/'.trim($filePath,'/').'" data-theme="'.$file.'" disabled="">' . PHP_EOL;
+                        $html .= '<link rel="stylesheet" type="text/css" href="/assets/themes/'.trim($filePath,'/').'" data-theme="'.$file.'">' . PHP_EOL;
                     }
                 }
             }
         }
-        $path = $this->Config->root() . '/lib/plugins';
+        $path = $this->Config->root() . '/webroot/assets/plugins';
         if(is_dir($path)){
             $plugins = array_diff(scandir($path), array('..', '.'));
             foreach($plugins as $file){
-                $filePath = $file . '/style.css';
+                $filePath = $file . '/styles.css';
                 if(is_file($path.'/'.$filePath)){
-                    $html .= '<link rel="stylesheet" type="text/css" href="/plugins/'.trim($filePath,'/').'" data-plugin="'.$file.'">' . PHP_EOL;
+                    $html .= '<link rel="stylesheet" type="text/css" href="/assets/plugins/'.trim($filePath,'/').'" data-plugin="'.$file.'">' . PHP_EOL;
                 }
             }
         }
+        $html .= '<link rel="stylesheet" href="/css">' . PHP_EOL;
         return $html;
     }
 
@@ -239,31 +240,95 @@ class Builder {
         // Load Global JS
         $js = $this->Config->get('js');
         foreach($js as $file){
-            if(is_file($this->Config->root().'/dist/'.trim($file,'/'))){
+            if(is_file($this->Config->root().'/webroot/assets/js/'.trim($file,'/'))){
                 // Check if the file is a module by looking for the file extension
                 if(str_ends_with($file, '.mjs')){
-                    $html .= '<script type="module" src="/'.trim($file,'/').'"></script>' . PHP_EOL;
+                    $html .= '<script type="module" src="/assets/js/'.trim($file,'/').'"></script>' . PHP_EOL;
                 } else {
-                    $html .= '<script src="/'.trim($file,'/').'"></script>' . PHP_EOL;
+                    $html .= '<script src="/assets/js/'.trim($file,'/').'"></script>' . PHP_EOL;
                 }
             }
         }
+
+        // Load Core JS
+        $path = $this->Config->root() . '/vendor/laswitchtech/core/assets/js';
+        if(is_dir($path)){
+            $assets = array_diff(scandir($path), array('..', '.'));
+            foreach($assets as $file){
+                if(is_file($path.'/'.$file)){
+                    if(str_ends_with($file, '.mjs')){
+                        $html .= '<script type="module" src="/assets/core/js/'.trim($file,'/').'"></script>' . PHP_EOL;
+                    } else {
+                        $html .= '<script src="/assets/core/js/'.trim($file,'/').'"></script>' . PHP_EOL;
+                    }
+                }
+            }
+        }
+
+        // Load Themes JS
+        $path = $this->Config->root() . '/lib/themes';
+        if(is_dir($path)){
+            $themes = array_diff(scandir($path), array('..', '.'));
+            foreach($themes as $file){
+                $filePath = $file . '/library.js';
+                if(is_file($path.'/'.$filePath)){
+                    if($this->Config->get('application','theme') == $file){
+                        $html .= '<script src="/assets/themes/'.trim($filePath,'/').'"></script>' . PHP_EOL;
+                    }
+                }
+            }
+            foreach($themes as $file){
+                $filePath = $file . '/script.js';
+                if(is_file($path.'/'.$filePath)){
+                    if($this->Config->get('application','theme') == $file){
+                        $html .= '<script src="/assets/themes/'.trim($filePath,'/').'"></script>' . PHP_EOL;
+                    }
+                }
+            }
+        }
+
+        // Load Plugins JS
         $path = $this->Config->root() . '/lib/plugins';
         if(is_dir($path)){
             $plugins = array_diff(scandir($path), array('..', '.'));
             foreach($plugins as $file){
                 $filePath = $file . '/library.js';
                 if(is_file($path.'/'.$filePath)){
-                    $html .= '<script src="/plugins/'.trim($filePath,'/').'"></script>' . PHP_EOL;
+                    $html .= '<script src="/assets/plugins/'.trim($filePath,'/').'"></script>' . PHP_EOL;
                 }
             }
             foreach($plugins as $file){
                 $filePath = $file . '/script.js';
                 if(is_file($path.'/'.$filePath)){
-                    $html .= '<script src="/plugins/'.trim($filePath,'/').'"></script>' . PHP_EOL;
+                    $html .= '<script src="/assets/plugins/'.trim($filePath,'/').'"></script>' . PHP_EOL;
                 }
             }
         }
+
+        // Return the HTML
         return $html;
+    }
+
+    /**
+     * Get the logo path
+     *
+     * @return string
+     */
+    public function logo()
+    {
+        $src = '/assets/img/logo.svg';
+        if(!is_file($this->Config->root() . '/webroot/' . $src)){
+            $src = '/assets/img/logo.jpg';
+        }
+        if(!is_file($this->Config->root() . '/webroot/' . $src)){
+            $src = '/assets/img/logo.gif';
+        }
+        if(!is_file($this->Config->root() . '/webroot/' . $src)){
+            $src = '/assets/img/logo.webp';
+        }
+        if(!is_file($this->Config->root() . '/webroot/' . $src)){
+            $src = '/assets/img/logo.png';
+        }
+        return $src;
     }
 }
