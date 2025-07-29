@@ -93,6 +93,19 @@ class CoreHelper extends Helper {
         $status = $status && is_dir($webroot);
 
         // Path to file
+        $assets = $CONFIG->root() . DIRECTORY_SEPARATOR . "webroot" . DIRECTORY_SEPARATOR . "assets";
+
+        // Check if directory exists
+        if(!is_dir($assets) && !is_file($assets) && !is_link($assets)) {
+
+            // Create directory
+            mkdir($assets, 0755, true);
+        }
+
+        // Update the status
+        $status = $status && is_dir($assets);
+
+        // Path to file
         $htaccess = $webroot . DIRECTORY_SEPARATOR . ".htaccess";
 
         // Check if the file exist
