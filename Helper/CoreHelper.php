@@ -242,7 +242,7 @@ class CoreHelper extends Helper {
 
         // Path to file
         $favicon = $webroot . DIRECTORY_SEPARATOR . "favicon.ico";
-        $icon = ".." . DIRECTORY_SEPARATOR . "src" . DIRECTORY_SEPARATOR . "icons". DIRECTORY_SEPARATOR . "icon.ico";
+        $icon = ".." . DIRECTORY_SEPARATOR . "assets" . DIRECTORY_SEPARATOR . "img". DIRECTORY_SEPARATOR . "favicon.ico";
 
         // Check if the file exist
         if($force && is_file($favicon)) {
@@ -262,56 +262,70 @@ class CoreHelper extends Helper {
         $status = $status && is_link($favicon);
 
         // Path to directory
-        $js = $webroot . DIRECTORY_SEPARATOR . "js";
-        $dist = ".." . DIRECTORY_SEPARATOR . "dist" . DIRECTORY_SEPARATOR . "js";
+        $js = $assets . DIRECTORY_SEPARATOR . "js";
+        $directory = ".." . DIRECTORY_SEPARATOR . ".." . DIRECTORY_SEPARATOR . "assets" . DIRECTORY_SEPARATOR . "js";
 
         // Check if directory exists
-        if(is_dir($dist) && !is_dir($js) && !is_file($js) && !is_link($js)) {
+        if(!is_dir($js) && !is_file($js) && !is_link($js)) {
 
             // Create symbolic link
-            symlink($dist, $js);
+            symlink($directory, $js);
         }
 
         // Update the status
         $status = $status && is_link($js);
 
         // Path to directory
-        $img = $webroot . DIRECTORY_SEPARATOR . "img";
-        $dist = ".." . DIRECTORY_SEPARATOR . "dist" . DIRECTORY_SEPARATOR . "img";
+        $core = $assets . DIRECTORY_SEPARATOR . "core";
+        $directory = ".." . DIRECTORY_SEPARATOR . ".." . DIRECTORY_SEPARATOR . "vendor" . DIRECTORY_SEPARATOR . "laswitchtech" . DIRECTORY_SEPARATOR . "core" . DIRECTORY_SEPARATOR . "assets";
 
         // Check if directory exists
-        if(is_dir($dist) && !is_dir($img) && !is_file($img) && !is_link($img)) {
+        if(!is_dir($core) && !is_file($core) && !is_link($core)) {
 
             // Create symbolic link
-            symlink($dist, $img);
+            symlink($directory, $core);
+        }
+
+        // Update the status
+        $status = $status && is_link($core);
+
+        // Path to directory
+        $img = $assets . DIRECTORY_SEPARATOR . "img";
+        $directory = ".." . DIRECTORY_SEPARATOR . ".." . DIRECTORY_SEPARATOR . "assets" . DIRECTORY_SEPARATOR . "img";
+
+        // Check if directory exists
+        if(!is_dir($img) && !is_file($img) && !is_link($img)) {
+
+            // Create symbolic link
+            symlink($directory, $img);
         }
 
         // Update the status
         $status = $status && is_link($img);
 
         // Path to directory
-        $plugins = $webroot . DIRECTORY_SEPARATOR . "plugins";
-        $dist = ".." . DIRECTORY_SEPARATOR . "lib" . DIRECTORY_SEPARATOR . "plugins";
+        $plugins = $assets . DIRECTORY_SEPARATOR . "plugins";
+        $lib = ".." . DIRECTORY_SEPARATOR . ".." . DIRECTORY_SEPARATOR . "lib" . DIRECTORY_SEPARATOR . "plugins";
 
         // Check if directory exists
-        if(is_dir($dist) && !is_dir($plugins) && !is_file($plugins) && !is_link($plugins)) {
+        if(!is_dir($plugins) && !is_file($plugins) && !is_link($plugins)) {
 
             // Create symbolic link
-            symlink($dist, $plugins);
+            symlink($lib, $plugins);
         }
 
         // Update the status
         $status = $status && is_link($plugins);
 
         // Path to directory
-        $themes = $webroot . DIRECTORY_SEPARATOR . "themes";
-        $dist = ".." . DIRECTORY_SEPARATOR . "lib" . DIRECTORY_SEPARATOR . "themes";
+        $themes = $assets . DIRECTORY_SEPARATOR . "themes";
+        $lib = ".." . DIRECTORY_SEPARATOR . ".." . DIRECTORY_SEPARATOR . "lib" . DIRECTORY_SEPARATOR . "themes";
 
         // Check if directory exists
-        if(is_dir($dist) && !is_dir($themes) && !is_file($themes) && !is_link($themes)) {
+        if(!is_dir($themes) && !is_file($themes) && !is_link($themes)) {
 
             // Create symbolic link
-            symlink($dist, $themes);
+            symlink($lib, $themes);
         }
 
         // Update the status
