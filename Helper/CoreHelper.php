@@ -167,7 +167,7 @@ class CoreHelper extends Helper {
             $content .= "    RewriteRule ^api(.*)$ endpoint.php [QSA,L]" . PHP_EOL;
             $content .= "    RewriteRule ^endpoint\.php(.*)$ endpoint.php [QSA,L]" . PHP_EOL . PHP_EOL;
             $content .= "    # Forbid any direct .php file access in plugins or themes" . PHP_EOL;
-            $content .= "    RewriteRule ^(plugins|themes)/.*\.php$ - [F,L]" . PHP_EOL . PHP_EOL;
+            $content .= "    RewriteRule ^(assets/plugins|assets/themes)/.*\.php$ - [F,L]" . PHP_EOL . PHP_EOL;
             $content .= "    # Forbid direct access to certain files" . PHP_EOL;
             $content .= "    RewriteRule ^(cli|\.htaccess)$ - [F,L]" . PHP_EOL . PHP_EOL;
             $content .= "    # Serve existing files, directories, or symlinks directly" . PHP_EOL;
