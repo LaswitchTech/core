@@ -1,12 +1,5 @@
 <?php
 
-/**
- * Core Framework - Route
- *
- * @license    MIT (https://mit-license.org/)
- * @author     Louis Ouellet <louis@laswitchtech.com>
- */
-
 // Declaring namespace
 namespace LaswitchTech\Core\Objects;
 
@@ -162,29 +155,12 @@ class Route {
         }
 
         // Generate the path
-        $path = $this->Config->root();
-        if($this->Directory){
-            $path .= DIRECTORY_SEPARATOR . $this->Directory;
+        $path = $this->Config->root() . DIRECTORY_SEPARATOR . 'Template' . DIRECTORY_SEPARATOR . 'View' . DIRECTORY_SEPARATOR . $this->Template;
+        if(!file_exists($path)){
+            $path = $this->Config->root() . DIRECTORY_SEPARATOR . 'lib' . DIRECTORY_SEPARATOR . 'themes' . DIRECTORY_SEPARATOR . $this->Config->get('application','theme') . DIRECTORY_SEPARATOR . 'Template' . DIRECTORY_SEPARATOR . 'View' . DIRECTORY_SEPARATOR . $this->Template;
         }
-        $path .= DIRECTORY_SEPARATOR . 'Template' . DIRECTORY_SEPARATOR . 'View' . DIRECTORY_SEPARATOR . $this->Template;
-
-        // Set Template
-        if(!is_null($template)){
-
-            // Check if the template directory exists recursively and create it if it does not
-            if(!is_dir(dirname($path))){
-                mkdir(dirname($path), 0755, true);
-            }
-
-            // Create the file if it does not exist
-            if(!is_file($path)){
-                $content = "<!--" . PHP_EOL;
-                $content .= "  Core Framework - Template File" . PHP_EOL . PHP_EOL;
-                $content .= "  @license    MIT (https://mit-license.org/)" . PHP_EOL;
-                $content .= "  @author     Full Name <user@domain.com>" . PHP_EOL;
-                $content .= "-->" . PHP_EOL;
-                file_put_contents($path, $content);
-            }
+        if(!file_exists($path)){
+            $path = $this->Config->root() . DIRECTORY_SEPARATOR . 'vendor' . DIRECTORY_SEPARATOR . 'laswitchtech' . DIRECTORY_SEPARATOR . 'core' . DIRECTORY_SEPARATOR . 'Template' . DIRECTORY_SEPARATOR . 'View' . DIRECTORY_SEPARATOR . $this->Template;
         }
 
         return $path;
