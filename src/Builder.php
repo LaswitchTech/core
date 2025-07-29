@@ -1,12 +1,5 @@
 <?php
 
-/**
- * Core Framework - Builder
- *
- * @license    MIT (https://mit-license.org/)
- * @author     Louis Ouellet <louis@laswitchtech.com>
- */
-
 // Declaring namespace
 namespace LaswitchTech\Core;
 
@@ -18,21 +11,22 @@ class Builder {
     // Constants
 
     // Global Properties
-    private $Config;
-
-    // Properties
+    protected $Config;
+    protected $CSRF;
+    protected $Auth;
 
     /**
      * Constructor
      */
     public function __construct()
     {
-
         // Global Variables
-        global $CONFIG;
+        global $CONFIG, $CSRF, $AUTH;
 
         // Set Global Properties
         $this->Config = $CONFIG;
+        $this->CSRF = $CSRF;
+        $this->Auth = $AUTH;
 
         // Configure Globals
         $this->Config->add('css')->add('js')->add('routes');
@@ -224,6 +218,25 @@ class Builder {
     public function js()
     {
         $html = '';
+
+        // Load Constants JS
+        $html .= '<script>' . PHP_EOL;
+        $html .= '' . PHP_EOL;
+        $html .= '    // Global Variables' . PHP_EOL;
+        $html .= '    const CSRF_KEY = "' . $this->CSRF->key() . '"' . PHP_EOL;
+        $html .= '    var CSRF_TOKEN = "' . $this->CSRF->token() . '"' . PHP_EOL;
+        $html .= '    const PUBLIC = ' . ($this->Config->get('application','public') ? 'true' : 'false') . ';' . PHP_EOL;
+        $html .= '    const AUTHENTICATED = ' . ($this->Auth->isAuthenticated() ? 'true' : 'false') . ';' . PHP_EOL;
+        $html .= '    const USER_ID = ' . ($this->Auth->isAuthenticated() ? $this->Auth->user()->id : null) . ';' . PHP_EOL;
+        $html .= '    const USER_USERNAME = "' . ($this->Auth->isAuthenticated() ? $this->Auth->user()->username : '') . '";' . PHP_EOL;
+        $html .= '    const USER_ORGANIZATION = ' . ($this->Auth->isAuthenticated() ? $this->Auth->user()->organization()->id : 'null') . ';' . PHP_EOL;
+        $html .= '    const USER_TOKEN = "' . ($this->Auth->isAuthenticated() ? $this->Auth->user()->token() : '') . '";' . PHP_EOL;
+        $html .= '    const USER_ROLES = ' . json_encode($this->Auth->isAuthenticated() ? $this->Auth->user()->roles() : null) . ';' . PHP_EOL;
+        $html .= '    const DEV_MODE = ' . ($this->Auth->isAuthorized('Developer', 1) ? 'true' : 'false') . ';' . PHP_EOL;
+        $html .= '    const ADMIN_MODE = ' . ($this->Auth->isAuthorized('Administrator', 1) ? 'true' : 'false') . ';' . PHP_EOL;
+        $html .= '</script>' . PHP_EOL;
+
+        // Load Global JS
         $js = $this->Config->get('js');
         foreach($js as $file){
             if(is_file($this->Config->root().'/dist/'.trim($file,'/'))){
