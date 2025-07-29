@@ -822,7 +822,7 @@ class CoreHelper extends Helper {
                 }
 
                 // Compare the current version with the latest version and set the latest version
-                $meta[$type][$base]['latest'] = !version_compare($meta[$type][$base]['current'], $meta[$type][$base]['version'], '<');
+                $meta[$type][$base]['latest'] = !version_compare($meta[$type][$base]['current'], $meta[$type][$base]['version'] ?? $meta[$type][$base]['current'], '<');
             }
         }
 
