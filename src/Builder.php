@@ -189,6 +189,19 @@ class Builder {
                 $html .= '<link rel="stylesheet" type="text/css" href="/assets/js/'.trim($file,'/').'">' . PHP_EOL;
             }
         }
+
+        // Load Core CSS
+        $path = $this->Config->root() . '/vendor/laswitchtech/core/assets/css';
+        if(is_dir($path)){
+            $assets = array_diff(scandir($path), array('..', '.'));
+            foreach($assets as $file){
+                if(is_file($path.'/'.$file)){
+                    $html .= '<link rel="stylesheet" type="text/css" href="/assets/core/css/'.trim($file,'/').'">' . PHP_EOL;
+                }
+            }
+        }
+
+        // Load Theme CSS
         $path = $this->Config->root() . '/webroot/assets/themes';
         if(is_dir($path)){
             $themes = array_diff(scandir($path), array('..', '.'));
