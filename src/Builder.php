@@ -179,6 +179,8 @@ class Builder {
     public function css()
     {
         $html = '';
+
+        // Load Global CSS
         $css = $this->Config->get('css');
         foreach($css as $file){
             if(is_file($this->Config->root().'/webroot/assets/css/'.trim($file,'/'))){
@@ -199,6 +201,8 @@ class Builder {
                 }
             }
         }
+
+        // Load Plugins CSS
         $path = $this->Config->root() . '/webroot/assets/plugins';
         if(is_dir($path)){
             $plugins = array_diff(scandir($path), array('..', '.'));
@@ -209,7 +213,11 @@ class Builder {
                 }
             }
         }
+
+        // Load Less CSS
         $html .= '<link rel="stylesheet" href="/css">' . PHP_EOL;
+
+        // Return the HTML
         return $html;
     }
 

@@ -9,35 +9,38 @@ use Exception;
 class Route {
 
     // Global Properties
-    private $Config;
-    private $Auth;
-    private $Locale;
-    private $Request;
-    private $Output;
-    private $CSRF;
-    private $Model;
-    private $Helper;
-    private $Builder;
-    private $Style;
+    protected $Config;
+    protected $Auth;
+    protected $Locale;
+    protected $Request;
+    protected $Output;
+    protected $CSRF;
+    protected $Model;
+    protected $Helper;
+    protected $Builder;
+    protected $Style;
 
     // Parent Object
     public $Router;
 
     // Properties
-    private $Route;
-    private $Directory;
-    private $Template;
-    private $View;
-    private $Public = true;
-    private $Location = [];
-    private $Level = 0;
-    private $Parent;
-    private $Label;
-    private $Icon;
-    private $Color;
-    private $Action;
-    private $Call;
-    private $Interrupt = false;
+    protected $Route;
+    protected $Directory;
+    protected $Template;
+    protected $View;
+    protected $Public = true;
+    protected $Location = [];
+    protected $Level = 0;
+    protected $Parent;
+    protected $Label;
+    protected $Icon;
+    protected $Color;
+    protected $Action;
+    protected $Call;
+    protected $Interrupt = false;
+    protected $Hooks = [
+        "widgets" => "Widget.php",
+    ];
 
     /**
      * Constructor
@@ -405,7 +408,7 @@ class Route {
      * @param string|null $key
      * @return mixed
      */
-    private function call(?string $key = null): mixed
+    protected function call(?string $key = null): mixed
     {
         // Check if the action was already called
         if(empty($this->Call) || is_null($this->Call)){
@@ -466,7 +469,7 @@ class Route {
      *
      * @return array
      */
-    public function metadata(): array
+    protected function metadata(): array
     {
         return [
             'route' => $this->Route,
@@ -483,7 +486,7 @@ class Route {
      *
      * @return self
      */
-    public function interrupt(): self
+    protected function interrupt(): self
     {
         // Interrupt the execution
         $this->Interrupt = true;
