@@ -19,7 +19,41 @@
             <?= $this->Builder->js(); ?>
         </head>
         <body>
-            <?php require_once $this->view(); ?>
+            <!-- App Layout -->
+            <div id="app" class="app">
+
+                <!-- Controls -->
+                <div id="controls" class="d-flex position-fixed bottom-0 end-0 mb-3 me-3" style="z-index:1041;">
+                    <!-- Back to Top -->
+                    <button type="button" class="back-to-top btn btn-lg btn-primary"><i class="bi bi-arrow-up"></i></button>
+                </div>
+
+                <!-- Main Column -->
+                <div class="app-main">
+                    <!-- Navbar -->
+                    <nav class="navbar border-bottom sticky-top">
+                        <div class="container-fluid">
+                            <!-- Branding -->
+                            <a class="brand d-flex justify-content-start align-items-center text-decoration-none" href="/">
+                                <img class="logo me-1" src="<?= $this->Builder->logo(); ?>" alt="Logo">
+                                <h4 class="brand m-0 ms-2 fs-2"><?= $this->Config->get('application','name') ?></h4>
+                            </a>
+
+                            <!-- Nav - Widgets -->
+                            <?php require_once dirname(__FILE__) . DIRECTORY_SEPARATOR . 'widgets.php'; ?>
+                        </div>
+                    </nav>
+                    <!-- Content -->
+                    <main class="content">
+                        <!-- Page Content -->
+                        <div class="app-content">
+                            <?php if(is_null($this->Request->getParams('GET','query'))): ?>
+                                <?php require_once $this->view(); ?>
+                            <?php else: $this->interrupt()->Router->render('search'); endif; ?>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </body>
     </html>
 <?php else: $this->interrupt()->Router->render('503'); endif; ?>
