@@ -548,8 +548,20 @@ class Query {
             $clauses = [];
             foreach ($where['clauses'] as $i => $condition) {
                 $conjunction = $condition['conjunction'];
-                if($this->type === 'select'){
-                    $col = (strpos($condition['column'], '.') !== false) ? "`".str_replace('.','`.`',$condition['column'])."`" : "t.`{$condition['column']}`";
+                if ($this->type === 'select') {
+                    $spec = $condition['column'];
+                    if (strpos($spec, '.') === false) {
+                        $col = "t.`{$spec}`";
+                    } else {
+                        $parts = explode('.', $spec);
+                        if ($parts[0] === 't' && count($parts) === 2) {
+                            $col = "t.`{$parts[1]}`";
+                        } else {
+                            $column = array_pop($parts);
+                            $alias  = 'j__' . implode('__', $parts);
+                            $col    = "`{$alias}`.`{$column}`";
+                        }
+                    }
                 } else {
                     $col = "`{$condition['column']}`";
                 }
