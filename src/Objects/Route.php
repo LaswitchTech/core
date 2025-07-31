@@ -530,6 +530,8 @@ class Route {
             // Handle the module
             switch(str_replace('/','',$this->Route)){
                 case 'css':
+                    header('Content-Type: text/css; charset=utf-8');
+                    header('Cache-Control: public, max-age=31536000, immutable');
                     echo $this->Style->compile();
                     break;
             }
