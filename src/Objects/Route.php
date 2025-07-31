@@ -494,6 +494,32 @@ class Route {
     }
 
     /**
+     * Load the hooks
+     *
+     * @param string $hook
+     * @return self
+     */
+    protected function hook(string $hook): self
+    {
+        // Check if the hook is valid
+        if(array_key_exists($hook, $this->Hooks)){
+            // Load Plugins Hooks
+            $path = $this->Config->root() . '/lib/plugins';
+            if(is_dir($path)){
+                $plugins = array_diff(scandir($path), array('..', '.','.git','.DS_Store'));
+                foreach($plugins as $file){
+                    $filePath = $file . DIRECTORY_SEPARATOR . $this->Hooks[$hook];
+                    if(is_file($path.DIRECTORY_SEPARATOR.$filePath)){
+                        include_once $path . DIRECTORY_SEPARATOR . $filePath;
+                    }
+                }
+            }
+        }
+
+        return $this;
+    }
+
+    /**
      * Render the route
      */
     public function render(): self
