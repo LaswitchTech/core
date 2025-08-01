@@ -180,6 +180,53 @@ class Builder {
     {
         $html = '';
 
+        // Load Core CSS
+        $path = $this->Config->root() . '/vendor/laswitchtech/core/assets/css';
+        if(is_file($path.'.cfg')){
+            if(is_dir($path)){
+                $assets = json_decode(file_get_contents($path.'.cfg') ?? '[]',true);
+                foreach($assets as $file){
+                    if(is_file($path.'/'.$file)){
+                        $html .= '<link rel="stylesheet" type="text/css" href="/assets/core/css/'.trim($file,'/').'">' . PHP_EOL;
+                    }
+                }
+            }
+        }
+
+        // Load Themes Assets CSS
+        $path = $this->Config->root() . '/lib/themes';
+        if(is_dir($path)){
+            $themes = array_diff(scandir($path), array('..', '.','.DS_Store'));
+            foreach($themes as $extension){
+                $assetsPath = $path . DIRECTORY_SEPARATOR . $extension . DIRECTORY_SEPARATOR . 'assets' . DIRECTORY_SEPARATOR . 'css';
+                if(is_file($assetsPath.'.cfg')){
+                    if(is_dir($assetsPath)){
+                        $assets = json_decode(file_get_contents($assetsPath.'.cfg') ?? '[]',true);
+                        foreach($assets as $asset){
+                            $html .= '<link rel="stylesheet" type="text/css" href="/assets/themes/'.$extension.'/assets/css/'.trim($asset,'/').'">' . PHP_EOL;
+                        }
+                    }
+                }
+            }
+        }
+
+        // Load Plugins Assets CSS
+        $path = $this->Config->root() . '/lib/plugins';
+        if(is_dir($path)){
+            $plugins = array_diff(scandir($path), array('..', '.','.DS_Store'));
+            foreach($plugins as $extension){
+                $assetsPath = $path . DIRECTORY_SEPARATOR . $extension . DIRECTORY_SEPARATOR . 'assets' . DIRECTORY_SEPARATOR . 'css';
+                if(is_file($assetsPath.'.cfg')){
+                    if(is_dir($assetsPath)){
+                        $assets = json_decode(file_get_contents($assetsPath.'.cfg') ?? '[]',true);
+                        foreach($assets as $asset){
+                            $html .= '<link rel="stylesheet" type="text/css" href="/assets/themes/'.$extension.'/assets/css/'.trim($asset,'/').'">' . PHP_EOL;
+                        }
+                    }
+                }
+            }
+        }
+
         // Load Global CSS
         $css = $this->Config->get('css');
         foreach($css as $file){
@@ -190,21 +237,10 @@ class Builder {
             }
         }
 
-        // Load Core CSS
-        $path = $this->Config->root() . '/vendor/laswitchtech/core/assets/css';
-        if(is_dir($path)){
-            $assets = array_diff(scandir($path), array('..', '.'));
-            foreach($assets as $file){
-                if(is_file($path.'/'.$file)){
-                    $html .= '<link rel="stylesheet" type="text/css" href="/assets/core/css/'.trim($file,'/').'">' . PHP_EOL;
-                }
-            }
-        }
-
         // Load Theme CSS
         $path = $this->Config->root() . '/webroot/assets/themes';
         if(is_dir($path)){
-            $themes = array_diff(scandir($path), array('..', '.'));
+            $themes = array_diff(scandir($path), array('..', '.','.DS_Store'));
             foreach($themes as $file){
                 $filePath = $file . '/styles.css';
                 if(is_file($path.'/'.$filePath)){
@@ -218,7 +254,7 @@ class Builder {
         // Load Plugins CSS
         $path = $this->Config->root() . '/webroot/assets/plugins';
         if(is_dir($path)){
-            $plugins = array_diff(scandir($path), array('..', '.'));
+            $plugins = array_diff(scandir($path), array('..', '.','.DS_Store'));
             foreach($plugins as $file){
                 $filePath = $file . '/styles.css';
                 if(is_file($path.'/'.$filePath)){
@@ -258,6 +294,65 @@ class Builder {
         $html .= '    const ADMIN_MODE = ' . ($this->Auth->isAuthorized('Administrator', 1) ? 'true' : 'false') . ';' . PHP_EOL;
         $html .= '</script>' . PHP_EOL;
 
+        // Load Core JS
+        $path = $this->Config->root() . '/vendor/laswitchtech/core/assets/js';
+        if(is_file($path.'.cfg')){
+            if(is_dir($path)){
+                $assets = json_decode(file_get_contents($path.'.cfg') ?? '[]',true);
+                foreach($assets as $file){
+                    if(is_file($path.'/'.$file)){
+                        if(str_ends_with($file, '.mjs')){
+                            $html .= '<script type="module" src="/assets/core/js/'.trim($file,'/').'"></script>' . PHP_EOL;
+                        } else {
+                            $html .= '<script src="/assets/core/js/'.trim($file,'/').'"></script>' . PHP_EOL;
+                        }
+                    }
+                }
+            }
+        }
+
+        // Load Themes Assets JS
+        $path = $this->Config->root() . '/lib/themes';
+        if(is_dir($path)){
+            $themes = array_diff(scandir($path), array('..', '.','.DS_Store'));
+            foreach($themes as $extension){
+                $assetsPath = $path . DIRECTORY_SEPARATOR . $extension . DIRECTORY_SEPARATOR . 'assets' . DIRECTORY_SEPARATOR . 'js';
+                if(is_file($assetsPath.'.cfg')){
+                    if(is_dir($assetsPath)){
+                        $assets = json_decode(file_get_contents($assetsPath.'.cfg') ?? '[]',true);
+                        foreach($assets as $asset){
+                            if(str_ends_with($asset, '.mjs')){
+                                $html .= '<script type="module" src="/assets/themes/'.$extension.'/assets/js/'.trim($asset,'/').'"></script>' . PHP_EOL;
+                            } else {
+                                $html .= '<script src="/assets/themes/'.$extension.'/assets/js/'.trim($asset,'/').'"></script>' . PHP_EOL;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        // Load Plugins Assets JS
+        $path = $this->Config->root() . '/lib/plugins';
+        if(is_dir($path)){
+            $plugins = array_diff(scandir($path), array('..', '.','.DS_Store'));
+            foreach($plugins as $extension){
+                $assetsPath = $path . DIRECTORY_SEPARATOR . $extension . DIRECTORY_SEPARATOR . 'assets' . DIRECTORY_SEPARATOR . 'js';
+                if(is_file($assetsPath.'.cfg')){
+                    if(is_dir($assetsPath)){
+                        $assets = json_decode(file_get_contents($assetsPath.'.cfg') ?? '[]',true);
+                        foreach($assets as $asset){
+                            if(str_ends_with($asset, '.mjs')){
+                                $html .= '<script type="module" src="/assets/plugins/'.$extension.'/assets/js/'.trim($asset,'/').'"></script>' . PHP_EOL;
+                            } else {
+                                $html .= '<script src="/assets/plugins/'.$extension.'/assets/js/'.trim($asset,'/').'"></script>' . PHP_EOL;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
         // Load Global JS
         $js = $this->Config->get('js');
         foreach($js as $file){
@@ -271,25 +366,10 @@ class Builder {
             }
         }
 
-        // Load Core JS
-        $path = $this->Config->root() . '/vendor/laswitchtech/core/assets/js';
-        if(is_dir($path)){
-            $assets = array_diff(scandir($path), array('..', '.'));
-            foreach($assets as $file){
-                if(is_file($path.'/'.$file)){
-                    if(str_ends_with($file, '.mjs')){
-                        $html .= '<script type="module" src="/assets/core/js/'.trim($file,'/').'"></script>' . PHP_EOL;
-                    } else {
-                        $html .= '<script src="/assets/core/js/'.trim($file,'/').'"></script>' . PHP_EOL;
-                    }
-                }
-            }
-        }
-
         // Load Themes JS
         $path = $this->Config->root() . '/lib/themes';
         if(is_dir($path)){
-            $themes = array_diff(scandir($path), array('..', '.'));
+            $themes = array_diff(scandir($path), array('..', '.','.DS_Store'));
             foreach($themes as $file){
                 $filePath = $file . '/library.js';
                 if(is_file($path.'/'.$filePath)){
@@ -311,7 +391,7 @@ class Builder {
         // Load Plugins JS
         $path = $this->Config->root() . '/lib/plugins';
         if(is_dir($path)){
-            $plugins = array_diff(scandir($path), array('..', '.'));
+            $plugins = array_diff(scandir($path), array('..', '.','.DS_Store'));
             foreach($plugins as $file){
                 $filePath = $file . '/library.js';
                 if(is_file($path.'/'.$filePath)){
