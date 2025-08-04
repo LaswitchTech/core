@@ -290,7 +290,7 @@ if(!setupEnvironment()){
 }
 
 // Step 7: Install Composer
-function installComposer(string $destination, string $version = ''): bool
+function installComposer(string $destination): bool
 {
     try {
 
@@ -307,7 +307,7 @@ function installComposer(string $destination, string $version = ''): bool
 
         // Run the Composer installer
         chdir($destination);
-        $command = PHP_BINDIR . DIRECTORY_SEPARATOR . 'php' . $version . ' ' . escapeshellarg(basename($installerPath)) . ' --install-dir=' . escapeshellarg($destination) . ' --filename=composer.phar';
+        $command = PHP_BINDIR . DIRECTORY_SEPARATOR . 'php ' . escapeshellarg(basename($installerPath)) . ' --install-dir=' . escapeshellarg($destination) . ' --filename=composer.phar';
         exec($command, $output, $exitCode);
         chdir(__DIR__);
 
@@ -325,18 +325,16 @@ function installComposer(string $destination, string $version = ''): bool
     }
 }
 if(!installComposer(__DIR__ . DIRECTORY_SEPARATOR . '.composer')){
-    if(!installComposer(__DIR__ . DIRECTORY_SEPARATOR . '.composer', '8.2')){
-        die("Could not install Composer.");
-    }
+    die("Could not install Composer.");
 }
 
 // Step 8: Install Dependencies
-function installDependencies(string $path, string $version = ''): bool
+function installDependencies(string $path): bool
 {
     try {
         chdir(__DIR__);
         // Install dependencies using Composer
-        $command = PHP_BINDIR . DIRECTORY_SEPARATOR . 'php' . $version . ' ' . escapeshellarg(basename($path)) . ' install --no-dev --no-interaction --prefer-dist';
+        $command = PHP_BINDIR . DIRECTORY_SEPARATOR . 'php ' . escapeshellarg(basename($path)) . ' install --no-dev --no-interaction --prefer-dist';
         exec($command, $output, $exitCode);
 
         return $exitCode === 0;
@@ -345,9 +343,7 @@ function installDependencies(string $path, string $version = ''): bool
     }
 }
 if(!installDependencies(__DIR__ . DIRECTORY_SEPARATOR . 'composer')){
-    if(!installDependencies(__DIR__ . DIRECTORY_SEPARATOR . 'composer', '8.2')){
-        die("Could not install dependencies.");
-    }
+    die("Could not install dependencies.");
 }
 
 // Step 9: Cleanup
@@ -415,9 +411,7 @@ function executeCMD(string $cmd): bool
     return $exitCode === 0;
 }
 if(!executeCMD(PHP_BINDIR . DIRECTORY_SEPARATOR . 'php cli core init')){
-    if(!executeCMD(PHP_BINDIR . DIRECTORY_SEPARATOR . 'php8.2 cli core init')){
-        die("Could not execute the initialization script.");
-    }
+    die("Could not execute the initialization script.");
 }
 
 // Step 11: Install the required extensions
