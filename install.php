@@ -290,7 +290,7 @@ if(!setupEnvironment()){
 }
 
 // Step 7: Install Composer
-function installComposer(string $destination): bool
+function installComposer(string $destination, string $version = ''): bool
 {
     try {
 
@@ -307,7 +307,7 @@ function installComposer(string $destination): bool
 
         // Run the Composer installer
         chdir($destination);
-        $command = PHP_BINDIR . DIRECTORY_SEPARATOR . 'php ' . escapeshellarg(basename($installerPath)) . ' --install-dir=' . escapeshellarg($destination) . ' --filename=composer.phar';
+        $command = PHP_BINDIR . DIRECTORY_SEPARATOR . 'php' . $version . ' ' . escapeshellarg(basename($installerPath)) . ' --install-dir=' . escapeshellarg($destination) . ' --filename=composer.phar';
         exec($command, $output, $exitCode);
         chdir(__DIR__);
 
@@ -325,7 +325,9 @@ function installComposer(string $destination): bool
     }
 }
 if(!installComposer(__DIR__ . DIRECTORY_SEPARATOR . '.composer')){
-    die("Could not install Composer.");
+    if(!installComposer(__DIR__ . DIRECTORY_SEPARATOR . '.composer', '8.2')){
+        die("Could not install Composer.");
+    }
 }
 
 // Step 8: Install Dependencies
