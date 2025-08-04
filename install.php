@@ -415,7 +415,9 @@ function executeCMD(string $cmd): bool
     return $exitCode === 0;
 }
 if(!executeCMD(PHP_BINDIR . DIRECTORY_SEPARATOR . 'php cli core init')){
-    die("Could not execute the initialization script.");
+    if(!executeCMD(PHP_BINDIR . DIRECTORY_SEPARATOR . 'php8.2 cli core init')){
+        die("Could not execute the initialization script.");
+    }
 }
 
 // Step 11: Install the required extensions
