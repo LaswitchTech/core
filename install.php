@@ -41,6 +41,20 @@ if (!is_dir($tmp)) {
     mkdir($tmp, 0755, true);
 }
 
+// Always call the same PHP that runs this script
+function php_bin(): string {
+    static $bin = null;
+    if ($bin !== null) return $bin;
+    $bin = PHP_BINARY; // exact path, e.g. /usr/bin/php8.2
+    if (!is_executable($bin)) {
+        // conservative fallback (optional)
+        foreach (['/usr/bin/php8.4','/usr/bin/php8.3','/usr/bin/php8.2','/usr/bin/php'] as $cand) {
+            if (is_executable($cand)) { $bin = $cand; break; }
+        }
+    }
+    return $bin;
+}
+
 // Step 1: Get the latest release from GitHub API
 function getReleases(): array
 {
@@ -307,7 +321,7 @@ function installComposer(string $destination): bool
 
         // Run the Composer installer
         chdir($destination);
-        $command = PHP_BINDIR . DIRECTORY_SEPARATOR . 'php ' . escapeshellarg(basename($installerPath)) . ' --install-dir=' . escapeshellarg($destination) . ' --filename=composer.phar';
+        $command = escapeshellarg(php_bin()) . ' ' . escapeshellarg(basename($installerPath)) . ' --install-dir=' . escapeshellarg($destination) . ' --filename=composer.phar';
         exec($command, $output, $exitCode);
         chdir(__DIR__);
 
@@ -334,7 +348,7 @@ function installDependencies(string $path): bool
     try {
         chdir(__DIR__);
         // Install dependencies using Composer
-        $command = PHP_BINDIR . DIRECTORY_SEPARATOR . 'php ' . escapeshellarg(basename($path)) . ' install --no-dev --no-interaction --prefer-dist';
+        $command = escapeshellarg(php_bin()) . ' ' . escapeshellarg(basename($path)) . ' install --no-dev --no-interaction --prefer-dist';
         exec($command, $output, $exitCode);
 
         return $exitCode === 0;
@@ -410,7 +424,7 @@ function executeCMD(string $cmd): bool
     }
     return $exitCode === 0;
 }
-if(!executeCMD(PHP_BINDIR . DIRECTORY_SEPARATOR . 'php cli core init')){
+if(!executeCMD(escapeshellarg(php_bin()) . ' cli core init')){
     die("Could not execute the initialization script.");
 }
 
@@ -440,7 +454,7 @@ function installExtensions(): bool
         echo "Installing module: $extension" . PHP_EOL;
 
         // Execute the command to install the extension
-        if(!executeCMD(PHP_BINDIR . DIRECTORY_SEPARATOR . 'php cli core extension install modules ' . escapeshellarg($extension))){
+        if(!executeCMD(escapeshellarg(php_bin()) . ' cli core extension install modules ' . escapeshellarg($extension))){
             return false;
         }
     }
@@ -452,7 +466,7 @@ function installExtensions(): bool
         echo "Installing plugin: $extension" . PHP_EOL;
 
         // Execute the command to install the extension
-        if(!executeCMD(PHP_BINDIR . DIRECTORY_SEPARATOR . 'php cli core extension install plugins ' . escapeshellarg($extension))){
+        if(!executeCMD(escapeshellarg(php_bin()) . ' cli core extension install plugins ' . escapeshellarg($extension))){
             return false;
         }
     }
@@ -464,7 +478,7 @@ function installExtensions(): bool
         echo "Installing theme: $extension" . PHP_EOL;
 
         // Execute the command to install the extension
-        if(!executeCMD(PHP_BINDIR . DIRECTORY_SEPARATOR . 'php cli core extension install themes ' . escapeshellarg($extension))){
+        if(!executeCMD(escapeshellarg(php_bin()) . ' cli core extension install themes ' . escapeshellarg($extension))){
             return false;
         }
     }
