@@ -329,12 +329,12 @@ if(!installComposer(__DIR__ . DIRECTORY_SEPARATOR . '.composer')){
 }
 
 // Step 8: Install Dependencies
-function installDependencies(string $path): bool
+function installDependencies(string $path, string $version = ''): bool
 {
     try {
         chdir(__DIR__);
         // Install dependencies using Composer
-        $command = PHP_BINDIR . DIRECTORY_SEPARATOR . 'php ' . escapeshellarg(basename($path)) . ' install --no-dev --no-interaction --prefer-dist';
+        $command = PHP_BINDIR . DIRECTORY_SEPARATOR . 'php' . $version . ' ' . escapeshellarg(basename($path)) . ' install --no-dev --no-interaction --prefer-dist';
         exec($command, $output, $exitCode);
 
         return $exitCode === 0;
@@ -343,7 +343,9 @@ function installDependencies(string $path): bool
     }
 }
 if(!installDependencies(__DIR__ . DIRECTORY_SEPARATOR . 'composer')){
-    die("Could not install dependencies.");
+    if(!installDependencies(__DIR__ . DIRECTORY_SEPARATOR . 'composer', '8.2')){
+        die("Could not install dependencies.");
+    }
 }
 
 // Step 9: Cleanup
