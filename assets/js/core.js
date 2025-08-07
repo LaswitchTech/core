@@ -233,6 +233,171 @@ document.addEventListener('DOMContentLoaded', () => {
         })();
 
         // Panel
+        if(document.querySelector('[data-bs-template="panel"]')){
+            $('footer.copyright').click(function(){
+                builder.Component(
+                    "modal",
+                    {
+                        onEnter: true,
+                        destroy:true,
+                        icon: "info-circle",
+                        title: builder.Locale.get("About"),
+                        cancel: false,
+                        submit: false,
+                        fullscreen: false,
+                        size: "md",
+                        callback: {
+                            load: function(component, modal){
+                                return new Promise((resolve, reject) => {
+                                    try {
+                                        $.ajax({
+                                            url: '/api/core/info',
+                                            type: 'GET',dataType: 'json',
+                                            success: function(response) {
+
+                                                // Update the component with the response
+                                                component.body.container.title.name.text(response.name);
+                                                component.body.container.title.version.text(response.version);
+                                                component.body.container.copyright.owner.html(response.owner + ' ' + builder.Locale.get('All rights reserved') + '.');
+                                                for(const [key, author] of Object.entries(response.authors)){
+                                                    $(document.createElement('a')).attr({
+                                                        "class": "btn btn-link p-0",
+                                                        "href": author.url,
+                                                        "target": "_blank",
+                                                    }).text(author.name).appendTo(component.body.container.developed)
+                                                }
+                                                component.body.container.license.button.text(response.license.type);
+
+                                                // Add click event to the version button
+                                                component.body.container.title.version.click(function(){
+                                                    builder.Component(
+                                                        "modal",
+                                                        {
+                                                            onEnter: true,
+                                                            destroy:true,
+                                                            icon: "file-earmark-diff",
+                                                            title: builder.Locale.get("Changelog"),
+                                                            cancel: false,
+                                                            submit: false,
+                                                            fullscreen: false,
+                                                            size: "lg",
+                                                        },
+                                                        function(modal,component){
+
+                                                            // Styling
+                                                            component.addClass('modal-primary');
+                                                            component.dialog.css({'max-width': '720px'});
+                                                            component.body.addClass('text-bg-dark');
+                                                            component.footer.remove();
+
+                                                            // Add a preformatted text
+                                                            component.body.container = $(document.createElement('div')).attr({
+                                                                "class": "vh-70 overflow-y-auto",
+                                                            }).html(marked.parse(response.changelog)).appendTo(component.body);
+
+                                                            // Show Modal
+                                                            modal.show();
+                                                        }
+                                                    );
+                                                });
+
+                                                // Add click event to the license button
+                                                component.body.container.license.button.click(function(){
+                                                    builder.Component(
+                                                        "modal",
+                                                        {
+                                                            onEnter: true,
+                                                            destroy:true,
+                                                            icon: "key",
+                                                            title: response.license.type,
+                                                            cancel: false,
+                                                            submit: false,
+                                                            fullscreen: false,
+                                                            size: "lg",
+                                                        },
+                                                        function(modal,component){
+
+                                                            // Styling
+                                                            component.addClass('modal-primary');
+                                                            component.dialog.css({'max-width': '720px'});
+                                                            component.body.addClass('text-bg-dark');
+                                                            component.footer.remove();
+
+                                                            // Add a preformatted text
+                                                            component.body.container = $(document.createElement('pre')).attr({
+                                                                "class": "vh-70",
+                                                            }).text(response.license.content).appendTo(component.body);
+
+                                                            // Show Modal
+                                                            modal.show();
+                                                        }
+                                                    );
+                                                });
+
+                                                // Resolve the promise
+                                                resolve();
+                                            }
+                                        });
+                                    } catch(e) { reject(e); }
+                                });
+                            },
+                        }
+                    },
+                    function(modal,component){
+
+                        // Styling
+                        component.addClass('modal-primary');
+                        component.footer.remove();
+
+                        // Content Container
+                        component.body.container = $(document.createElement('div')).attr({
+                            "class": "d-flex flex-column justify-content-center align-items-center user-select-none",
+                        }).appendTo(component.body);
+
+                        // Logo
+                        component.body.container.logo = $(document.createElement('img')).attr({
+                            "src": LOGO,
+                            "class": "img-fluid",
+                            "style": "max-width: 200px; margin-bottom: 20px;",
+                        }).appendTo(component.body.container);
+
+                        // Application Name & Version
+                        component.body.container.title = $(document.createElement('div')).attr({
+                            "class": "d-flex justify-content-center align-items-center",
+                        }).appendTo(component.body.container);
+                        component.body.container.title.name = $(document.createElement('h2')).appendTo(component.body.container.title);
+                        component.body.container.title.version = $(document.createElement('span')).attr({
+                            "class": "badge bg-primary ms-2 cursor-pointer",
+                        }).appendTo(component.body.container.title);
+
+                        // Copyright
+                        component.body.container.copyright = $(document.createElement('div')).attr({
+                            "class": "d-flex flex-column justify-content-center align-items-center mt-3",
+                        }).appendTo(component.body.container);
+                        component.body.container.copyright.header = $(document.createElement('strong')).text(builder.Locale.get('Copyright')).appendTo(component.body.container.copyright);
+                        component.body.container.copyright.owner = $(document.createElement('span')).appendTo(component.body.container.copyright)
+
+                        // Developers
+                        component.body.container.developed = $(document.createElement('div')).attr({
+                            "class": "d-flex flex-column justify-content-center align-items-center mt-3",
+                        }).appendTo(component.body.container);
+                        component.body.container.developed.header = $(document.createElement('strong')).text(builder.Locale.get('Developed by')).appendTo(component.body.container.developed);
+
+                        // License
+                        component.body.container.license = $(document.createElement('div')).attr({
+                            "class": "d-flex flex-column justify-content-center align-items-center mt-3",
+                        }).appendTo(component.body.container);
+                        component.body.container.license.header = $(document.createElement('strong')).text(builder.Locale.get('License')).appendTo(component.body.container.license);
+                        component.body.container.license.button = $(document.createElement('btn')).attr({
+                            "class": "btn btn-link p-0",
+                        }).appendTo(component.body.container.license)
+
+                        // Show Modal
+                        modal.show();
+                    },
+                );
+            });
+        }
         if(document.querySelector('[data-bs-template="panel"],[data-bs-template="fullscreen"]')){
         }
 
