@@ -193,28 +193,28 @@ class Builder {
             }
         }
 
-        // Load Themes Assets CSS
-        $path = $this->Config->root() . '/lib/themes';
+        // Load Plugins Assets CSS
+        $path = $this->Config->root() . '/lib/plugins';
         if(is_dir($path)){
-            $themes = array_diff(scandir($path), array('..', '.','.DS_Store'));
-            foreach($themes as $extension){
+            $plugins = array_diff(scandir($path), array('..', '.','.DS_Store'));
+            foreach($plugins as $extension){
                 $assetsPath = $path . DIRECTORY_SEPARATOR . $extension . DIRECTORY_SEPARATOR . 'assets' . DIRECTORY_SEPARATOR . 'css';
                 if(is_file($assetsPath.'.cfg')){
                     if(is_dir($assetsPath)){
                         $assets = json_decode(file_get_contents($assetsPath.'.cfg') ?? '[]',true);
                         foreach($assets as $asset){
-                            $html .= '<link rel="stylesheet" type="text/css" href="/assets/themes/'.$extension.'/assets/css/'.trim($asset,'/').'">' . PHP_EOL;
+                            $html .= '<link rel="stylesheet" type="text/css" href="/assets/plugins/'.$extension.'/assets/css/'.trim($asset,'/').'">' . PHP_EOL;
                         }
                     }
                 }
             }
         }
 
-        // Load Plugins Assets CSS
-        $path = $this->Config->root() . '/lib/plugins';
+        // Load Themes Assets CSS
+        $path = $this->Config->root() . '/lib/themes';
         if(is_dir($path)){
-            $plugins = array_diff(scandir($path), array('..', '.','.DS_Store'));
-            foreach($plugins as $extension){
+            $themes = array_diff(scandir($path), array('..', '.','.DS_Store'));
+            foreach($themes as $extension){
                 $assetsPath = $path . DIRECTORY_SEPARATOR . $extension . DIRECTORY_SEPARATOR . 'assets' . DIRECTORY_SEPARATOR . 'css';
                 if(is_file($assetsPath.'.cfg')){
                     if(is_dir($assetsPath)){
@@ -237,20 +237,6 @@ class Builder {
             }
         }
 
-        // Load Theme CSS
-        $path = $this->Config->root() . '/webroot/assets/themes';
-        if(is_dir($path)){
-            $themes = array_diff(scandir($path), array('..', '.','.DS_Store'));
-            foreach($themes as $file){
-                $filePath = $file . '/styles.css';
-                if(is_file($path.'/'.$filePath)){
-                    if($this->Config->get('application','theme') == $file){
-                        $html .= '<link rel="stylesheet" type="text/css" href="/assets/themes/'.trim($filePath,'/').'" data-theme="'.$file.'">' . PHP_EOL;
-                    }
-                }
-            }
-        }
-
         // Load Plugins CSS
         $path = $this->Config->root() . '/webroot/assets/plugins';
         if(is_dir($path)){
@@ -265,6 +251,20 @@ class Builder {
 
         // Load Less CSS
         $html .= '<link rel="stylesheet" href="/css">' . PHP_EOL;
+
+        // Load Theme CSS
+        $path = $this->Config->root() . '/webroot/assets/themes';
+        if(is_dir($path)){
+            $themes = array_diff(scandir($path), array('..', '.','.DS_Store'));
+            foreach($themes as $file){
+                $filePath = $file . '/styles.css';
+                if(is_file($path.'/'.$filePath)){
+                    if($this->Config->get('application','theme') == $file){
+                        $html .= '<link rel="stylesheet" type="text/css" href="/assets/themes/'.trim($filePath,'/').'" data-theme="'.$file.'">' . PHP_EOL;
+                    }
+                }
+            }
+        }
 
         // Return the HTML
         return $html;
@@ -283,6 +283,7 @@ class Builder {
         $html .= '    // Global Variables' . PHP_EOL;
         $html .= '    const CSRF_KEY = "' . $this->CSRF->key() . '"' . PHP_EOL;
         $html .= '    var CSRF_TOKEN = "' . $this->CSRF->token() . '"' . PHP_EOL;
+        $html .= '    const LOGO = "' . $this->logo() . '"' . PHP_EOL;
         $html .= '    const PUBLIC = ' . ($this->Config->get('application','public') ? 'true' : 'false') . ';' . PHP_EOL;
         $html .= '    const AUTHENTICATED = ' . ($this->Auth->isAuthenticated() ? 'true' : 'false') . ';' . PHP_EOL;
         $html .= '    const USER_ID = ' . ($this->Auth->isAuthenticated() ? $this->Auth->user()->id : null) . ';' . PHP_EOL;
@@ -293,6 +294,28 @@ class Builder {
         $html .= '    const DEV_MODE = ' . ($this->Auth->isAuthorized('Developer', 1) ? 'true' : 'false') . ';' . PHP_EOL;
         $html .= '    const ADMIN_MODE = ' . ($this->Auth->isAuthorized('Administrator', 1) ? 'true' : 'false') . ';' . PHP_EOL;
         $html .= '</script>' . PHP_EOL;
+
+        // Load Themes JS
+        $path = $this->Config->root() . '/lib/themes';
+        if(is_dir($path)){
+            $themes = array_diff(scandir($path), array('..', '.','.DS_Store'));
+            foreach($themes as $file){
+                $filePath = $file . '/library.js';
+                if(is_file($path.'/'.$filePath)){
+                    if($this->Config->get('application','theme') == $file){
+                        $html .= '<script src="/assets/themes/'.trim($filePath,'/').'"></script>' . PHP_EOL;
+                    }
+                }
+            }
+            foreach($themes as $file){
+                $filePath = $file . '/script.js';
+                if(is_file($path.'/'.$filePath)){
+                    if($this->Config->get('application','theme') == $file){
+                        $html .= '<script src="/assets/themes/'.trim($filePath,'/').'"></script>' . PHP_EOL;
+                    }
+                }
+            }
+        }
 
         // Load Core JS
         $path = $this->Config->root() . '/vendor/laswitchtech/core/assets/js';
@@ -362,28 +385,6 @@ class Builder {
                     $html .= '<script type="module" src="/assets/js/'.trim($file,'/').'"></script>' . PHP_EOL;
                 } else {
                     $html .= '<script src="/assets/js/'.trim($file,'/').'"></script>' . PHP_EOL;
-                }
-            }
-        }
-
-        // Load Themes JS
-        $path = $this->Config->root() . '/lib/themes';
-        if(is_dir($path)){
-            $themes = array_diff(scandir($path), array('..', '.','.DS_Store'));
-            foreach($themes as $file){
-                $filePath = $file . '/library.js';
-                if(is_file($path.'/'.$filePath)){
-                    if($this->Config->get('application','theme') == $file){
-                        $html .= '<script src="/assets/themes/'.trim($filePath,'/').'"></script>' . PHP_EOL;
-                    }
-                }
-            }
-            foreach($themes as $file){
-                $filePath = $file . '/script.js';
-                if(is_file($path.'/'.$filePath)){
-                    if($this->Config->get('application','theme') == $file){
-                        $html .= '<script src="/assets/themes/'.trim($filePath,'/').'"></script>' . PHP_EOL;
-                    }
                 }
             }
         }
