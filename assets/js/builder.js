@@ -15,13 +15,6 @@ if (typeof $ !== 'undefined') {
     alert("jQuery is not loaded");
 }
 
-// Configure Select2
-if(typeof $.fn.select2 !== 'undefined'){
-    $.fn.select2.defaults.set("theme", "bootstrap-5");
-    $.fn.select2.defaults.set("width", "100%");
-    $.fn.select2.defaults.set("allowClear", true);
-}
-
 // Open IndexedDB
 let __dbPromise = null;
 function openIDB() {
