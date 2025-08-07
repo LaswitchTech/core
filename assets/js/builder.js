@@ -307,6 +307,263 @@ class Builder {
         }
     }
 
+    InputClass = class extends this.ComponentClass {
+
+        constructor(builder, param1 = null, param2 = null, param3 = null){
+
+            // Call Parent
+            super(builder, param1, param2, param3);
+        }
+
+        _init(){
+            this._properties = {
+                name: null,
+                label: null,
+                color: null,
+                icon: null,
+                value: null,
+                placeholder: null,
+                parent: null,
+                required: false,
+                style: 'group', // 'group' or 'floating'
+                // target: null,
+                // step: null,
+                // min: 0,
+                // max: 100,
+                class: {
+                    component: null,
+                    input: null,
+                    label: null,
+                },
+                callback: {
+                    onChange: null,
+                    condition: null,
+                    format: null,
+                }
+            };
+        }
+
+        _extend(){}
+
+        _timeout(){
+
+            // Set Search
+            this._builder.Search.set(this._component);
+        }
+
+        _input(){
+
+            // Create Input
+            return $(document.createElement('input')).attr({
+                'class': 'form-control',
+                'autocomplete': 'off',
+                'type': 'text',
+                'value': this._properties.value,
+            });
+        }
+
+        _create(){
+
+            // Set Self
+            const self = this;
+
+            // Set ID
+            let id = this._builder.count();
+
+            // Create Component
+            this._component = $(document.createElement('div')).attr({
+                'id': this._properties.name+'-' + id,
+            });
+
+            // Set Component ID
+            this._component.id = this._component.attr('id');
+
+            // Set Component Class
+            if(this._properties.class.component){
+                this._component.addClass(this._properties.class.component);
+            }
+
+            // Create Label
+            this._component.label = $(document.createElement('label')).attr({
+                // 'class': 'input-group-text',
+                'for': this._component.id + '-input',
+            }).text(this._properties.label).appendTo(this._component);
+
+            // Set Label Class
+            if(this._properties.class.label){
+                this._properties.label.addClass(this._properties.class.label);
+            }
+
+            // Create Icon
+            if(this._properties.icon !== null){
+                this._component.label.icon = $(document.createElement('i')).addClass('bi bi-' + this._properties.icon).prependTo(this._component.label);
+
+                // Add Margin if Label is not Empty
+                if(this._properties.label){
+                    this._component.label.icon.addClass('me-1');
+                }
+            }
+
+            // Create Labels for Valid, Invalid, and Feedback
+            this._component.valid = $(document.createElement('div')).attr({
+                'class': 'valid-tooltip',
+            });
+            this._component.invalid = $(document.createElement('div')).attr({
+                'class': 'invalid-tooltip',
+            });
+            this._component.help = $(document.createElement('div')).attr({
+                'class': 'form-text',
+            });
+
+            // Create Input
+            this._component.input = this._input();
+            this._component.input.attr({
+                'id': this._component.id + '-input',
+                'name': this._properties.name,
+                'placeholder': this._properties.placeholder,
+            }).appendTo(this._component);
+
+            // Set Input Required
+            if(this._properties.required){
+                this._component.input.attr('required', 'required');
+            }
+
+            // Set Input Class
+            if(typeof this._component.input !== "undefined" && this._properties.class.input){
+                this._component.input.addClass(this._properties.class.input);
+            }
+
+            // Check Style
+            switch(this._properties.style){
+                case'floating':
+                    // Create Floating Input
+                    this._component.addClass('form-floating');
+                    this._component.input.insertBefore(this._component.label);
+                    break;
+                case'group':
+                    // Create Group Input
+                    this._component.addClass('input-group');
+                    this._component.label.addClass('input-group-text');
+                    break;
+                default:
+                    // Create Default Input
+                    this._component.addClass('form-control');
+                    break;
+            }
+
+            // Check if we should remove the label
+            if((this._properties.label === null || this._properties.label === '') && (this._properties.icon === null || this._properties.icon === '')){
+                // Remove Label
+                this._component.label.remove();
+            }
+
+            // Extend Component
+            this._extend();
+
+            // Set Event Listeners
+            this._component.input.on('input change keyup',function(){
+                self.onChange();
+            });
+
+            // Clear & Reset Input
+            this.clear().reset();
+        }
+
+        name(){
+            return this._properties.name;
+        }
+
+        help(string = null){
+
+            // Set Help Text
+            if(string !== null){
+                this._component.help.html(string).appendTo(this._component);
+            } else {
+                this._component.help.html('').remove();
+            }
+        }
+
+        invalid(string = null){
+
+            // Set Invalid Feedback
+            if(string !== null){
+                this.valid(null);
+                this._component.addClass('has-validation');
+                this._component.input.addClass('is-invalid');
+                this._component.invalid.html(string).appendTo(this._component);
+            } else {
+                this._component.removeClass('has-validation');
+                this._component.input.removeClass('is-invalid');
+                this._component.invalid.html('').remove();
+            }
+        }
+
+        valid(string = null){
+
+            // Set Valid Feedback
+            if(string !== null){
+                this.invalid(null);
+                this._component.addClass('has-validation');
+                this._component.input.addClass('is-valid');
+                this._component.valid.html(string).appendTo(this._component);
+            } else {
+                this._component.removeClass('has-validation');
+                this._component.input.removeClass('is-valid');
+                this._component.valid.html('').remove();
+            }
+        }
+
+        val(value = null){
+
+            // Set Value
+            if(value !== null){
+
+                // Set Value
+                this._component.input.val(value).trigger('change');
+            }
+
+            // Return Value
+            return this._component.input.val();
+        }
+
+        onChange(){
+            // Test Condition
+            this.condition();
+
+            // Execute Callback
+            if(typeof this._properties.callback.onChange === 'function'){
+                this._properties.callback.onChange(this, this._component);
+            }
+        }
+
+        condition(){
+            if(typeof this._properties.callback.condition === 'function'){
+                if(!this._properties.callback.condition(this, this._component)){
+                    this._component.addClass('d-none');
+                } else {
+                    this._component.removeClass('d-none');
+                }
+                return this._properties.callback.condition(this, this._component);
+            }
+            return typeof this._properties.callback.condition !== 'function';
+        }
+
+        focus(){
+            // Focus Input
+            this._component.input.focus();
+        }
+
+        clear(){
+            this._component.input.val('');
+            return this;
+        }
+
+        reset(){
+            this.val(this._properties.value);
+            return this;
+        }
+    }
+
     add(type, name, object){
         const self = this;
         if(typeof type !== 'string' || typeof name !== 'string' || !self.Helper.isClass(object)){
@@ -336,11 +593,12 @@ class Builder {
                 this.#components[name] = object;
                 break;
             case'forms':
-                if(typeof this.#forms[name] !== 'undefined'){
+            case'inputs':
+                if(typeof this.#inputs[name] !== 'undefined'){
                     console.log('Form Already Exist');
                     return false;
                 }
-                this.#forms[name] = object;
+                this.#inputs[name] = object;
                 break;
             case'widgets':
                 if(typeof this.#widgets[name] !== 'undefined'){
@@ -382,17 +640,17 @@ class Builder {
         return new this.#components[name](self, param1, param2, param3);
     }
 
-    Form(name, param1 = null, param2 = null, param3 = null){
+    Input(name, param1 = null, param2 = null, param3 = null){
         const self = this;
         if(typeof name !== 'string'){
             console.log('Builder.Form(String)');
             return false;
         }
-        if(typeof this.#forms[name] === 'undefined'){
+        if(typeof this.#inputs[name] === 'undefined'){
             console.log('Unknown Form');
             return false;
         }
-        return new this.#forms[name](self, param1, param2, param3);
+        return new this.#inputs[name](self, param1, param2, param3);
     }
 
     Widget(name, param1 = null, param2 = null, param3 = null){
@@ -3308,6 +3566,984 @@ class Builder {
                 return this;
             }
         },
+        form: class extends this.ComponentClass {
+
+            _inputs = {};
+
+            _init(){
+                this._properties = {
+                    class:{
+                        component: null,
+                    },
+                    callback:{
+                        submit: function(form){},
+                        val: function(values){ return values; },
+                        init: function(form){},
+                        onChange: function(form){},
+                        reset: function(form){},
+                        clear: function(form){},
+                    },
+                };
+            }
+
+            _timeout(){
+
+                // Set Search
+                this._builder.Search.set(this._component);
+            }
+
+            _create(){
+
+                // Set Self
+                const self = this;
+
+                // Create Component
+                this._component = $(document.createElement('form')).attr({
+                    'id': 'form' + this._id,
+                    'class': '',
+                    'method': 'post',
+                    'autocomplete': 'off',
+                    'enctype': 'multipart/form-data',
+                });
+                this._component.id = this._component.attr('id');
+
+                // Reset Event
+                this._component.on('reset', function(e){
+                    self.reset();
+                });
+
+                // Submit Event
+                this._component.on('submit', function(e){
+                    e.preventDefault();
+                    self.submit();
+                });
+
+                // Set Component Class
+                if(this._properties.class.component){
+                    this._component.addClass(this._properties.class.component);
+                }
+            }
+
+            submit(){
+
+                // Set Self
+                const self = this;
+
+                // Callback
+                if(typeof this._properties.callback.submit === 'function'){
+                    this._properties.callback.submit(this);
+                }
+
+                // Return
+                return this;
+            };
+
+            reset(){
+
+                // Set Self
+                const self = this;
+
+                // Reset Values
+                for(const [key, input] of Object.entries(self._inputs)){
+                    input.reset();
+                }
+
+                // Callback
+                if(typeof self._properties.callback.reset === 'function'){
+                    self._properties.callback.reset(self);
+                }
+
+                // Return
+                return this;
+            };
+
+            focus(){
+
+                // Set Self
+                const self = this;
+
+                // Set focus on form
+                self._component.focus();
+
+                // Return
+                return this;
+            }
+
+            init(){
+
+                // Set Self
+                const self = this;
+
+                // Reset Values
+                for(const [key, input] of Object.entries(self._inputs)){
+                    if(typeof input.init === 'function'){
+                        input.init();
+                    }
+                }
+
+                // Callback
+                if(typeof self._properties.callback.init === 'function'){
+                    self._properties.callback.init(self);
+                }
+
+                // Return
+                return this;
+            }
+
+            clear(){
+
+                // Set Self
+                const self = this;
+
+                // Reset Values
+                for(const [key, input] of Object.entries(self._inputs)){
+                    input.clear();
+                }
+
+                // Callback
+                if(typeof self._properties.callback.clear === 'function'){
+                    self._properties.callback.clear(self);
+                }
+
+                // Return
+                return this;
+            };
+
+            onChange(){
+
+                // Set Self
+                const self = this;
+
+                // Callback
+                if(typeof self._properties.callback.onChange === 'function'){
+                    self._properties.callback.onChange(self);
+                }
+
+                // Return
+                return this;
+            }
+
+            val(values = null){
+
+                // Set Self
+                const self = this;
+
+                // Set Values
+                if(typeof values === 'object'){
+                    if(values !== null){
+                        for(const [key, value] of Object.entries(values)){
+                            if(typeof self._inputs[key] !== 'undefined'){
+                                self._inputs[key].val(value);
+                            }
+                        }
+                    }
+                } else {
+
+                    // Check if values is a string and matches a key
+                    if(typeof values === 'string' && typeof self._inputs[values] !== 'undefined'){
+                        return self._inputs[values].val();
+                    }
+                }
+
+                // Retrieve Values
+                let object = {};
+                for(const [key, input] of Object.entries(self._inputs)){
+                    object[key] = input.val();
+                }
+
+                // Callback
+                if(typeof self._properties.callback.val === 'function'){
+                    object = self._properties.callback.val(object);
+                }
+
+                // Return
+                return object;
+            };
+
+            add(type, param1 = null, param2 = null){
+
+                // Set Self
+                const self = this;
+
+                // Set Properties
+                let options = {
+                    parent: this._component,
+                };
+                let callback = null;
+
+                // Set selector, options, and callback
+                [param1, param2].forEach(param => {
+                    if(param !== null){
+                        if (typeof param === 'object') {
+                            options = param;
+                        } else if (typeof param === 'function') {
+                            callback = param;
+                        }
+                    }
+                });
+
+                // Create Input
+                const input = this._builder.Input(type, this._component, options, callback);
+
+                // Store Input
+                if(input){
+                    this._inputs[input.name()] = input;
+                }
+
+                // return Input
+                return input;
+
+                // Create Input
+                switch(properties.type){
+                    case 'clear':
+                        field.input = $(document.createElement('button')).attr({
+                            'id': field.id + 'clear',
+                            'class': 'flex-grow-1 btn btn-' + properties.color,
+                            'name': properties.name,
+                            'type': 'button',
+                            'value': properties.value,
+                        }).html(field.label.html()).appendTo(field.group);
+                        field.label.remove();
+                        if(this._properties.class.label){
+                            field.input.addClass(this._properties.class.label);
+                        }
+                        if(properties.class.label){
+                            field.input.addClass(properties.class.label);
+                        }
+                        field.input.click(function(){
+                            self.clear();
+                        });
+                        break;
+                    case 'reset':
+                        field.input = $(document.createElement('button')).attr({
+                            'id': field.id + 'reset',
+                            'class': 'flex-grow-1 btn btn-' + properties.color,
+                            'name': properties.name,
+                            'type': properties.type,
+                            'value': properties.value,
+                        }).html(field.label.html()).appendTo(field.group);
+                        field.label.remove();
+                        if(this._properties.class.label){
+                            field.input.addClass(this._properties.class.label);
+                        }
+                        if(properties.class.label){
+                            field.input.addClass(properties.class.label);
+                        }
+                        break;
+                    case 'submit':
+                        field.input = $(document.createElement('button')).attr({
+                            'id': field.id + 'submit',
+                            'class': 'flex-grow-1 btn btn-' + properties.color,
+                            'name': properties.name,
+                            'type': properties.type,
+                            'value': properties.value,
+                        }).html(field.label.html()).appendTo(field.group);
+                        field.label.remove();
+                        if(this._properties.class.label){
+                            field.input.addClass(this._properties.class.label);
+                        }
+                        if(properties.class.label){
+                            field.input.addClass(properties.class.label);
+                        }
+                        break;
+                    case 'color':
+                        field.input = $(document.createElement('input')).attr({
+                            'id': field.id + 'input',
+                            'class': 'form-control form-control-color flex-grow-1',
+                            'type': 'color',
+                            'name': properties.name,
+                        }).val(properties.value).appendTo(field.group);
+                        // Execute onChange
+                        field.input.on('input change keyup',function(){
+                            self.onChange();
+                        });
+                        break;
+                    case 'ide':
+                        field.input = $(document.createElement('div')).addClass('ide form-control p-0 flex-grow-1').appendTo(field.group);
+                        field.input.lines = $(document.createElement('div')).addClass('ide-lines px-0').appendTo(field.input);
+                        field.input.editor = $(document.createElement('textarea')).attr({
+                            'id': field.id + 'input',
+                            'class': 'ide-input',
+                            'name': properties.name,
+                            'autocomplete': 'off',
+                        }).text(properties.value).appendTo(field.input);
+                        field.input.val = function(value = null){
+                            if(value !== null){
+                                field.input.editor.val(value);
+                                field.input.editor.trigger('propertychange');
+                            }
+                            return field.input.editor.val();
+                        };
+                        field.input.editor
+                            .keydown(function(e) {
+                                if(e.keyCode === 9) {
+                                    e.preventDefault();
+
+                                    var start = this.selectionStart;
+                                    var end = this.selectionEnd;
+
+                                    this.value = this.value.substring(0, start) + "\t" + this.value.substring(end);
+                                    this.selectionStart = this.selectionEnd = start + 1;
+                                }
+                            })
+                            .on('input propertychange', function() {
+                                var lines = $(this).val().split('\n').length;
+                                field.input.lines.empty();
+                                for (var i = 1; i <= lines; i++) {
+                                    field.input.lines.append(`<div class="p-0 px-2">${i}</div>`);
+                                }
+                            })
+                            .trigger('propertychange')
+                        field.del = function(startLine, endLine = startLine) {
+
+                            // Get current lines from textarea
+                            let lines = field.input.editor.val().split('\n');
+
+                            // Ensure the specified lines are within the bounds of the current text
+                            if (startLine < 1 || endLine > lines.length || startLine > endLine) {
+                                console.warn('Invalid line range');
+                                return;
+                            }
+
+                            // Remove the specified lines
+                            lines.splice(startLine - 1, endLine - startLine + 1);
+
+                            // Update the textarea with the modified text
+                            field.input.editor.val(lines.join('\n'));
+                            field.input.editor.trigger('propertychange'); // Update line numbers and other listeners
+                        }
+                        field.highlight = function(...args) {
+
+                            if (args.length === 0) {
+
+                                // If no arguments are provided, highlight all lines
+                                field.input.lines.children().each(function () {
+                                    $(this).addClass('text-bg-pink');
+                                });
+                            } else {
+
+                                // Loop through each argument
+                                args.forEach(arg => {
+                                    if (Array.isArray(arg)) {
+
+                                        // If the argument is an array, treat it as a range [start, end]
+                                        let [startLine, endLine] = arg;
+                                        for (let i = startLine; i <= endLine; i++) {
+                                            if (i > 0 && i <= field.input.lines.children().length) {
+                                                let lineElement = field.input.lines.children().eq(i - 1);
+                                                if (!lineElement.hasClass('text-bg-pink')) {
+                                                    lineElement.addClass('text-bg-pink');
+                                                }
+                                            }
+                                        }
+                                    } else {
+
+                                        // If the argument is a single line number
+                                        let line = arg;
+                                        if (line > 0 && line <= field.input.lines.children().length) {
+                                            let lineElement = field.input.lines.children().eq(line - 1);
+                                            if (!lineElement.hasClass('text-bg-pink')) {
+                                                lineElement.addClass('text-bg-pink');
+                                            }
+                                        }
+                                    }
+                                });
+                            }
+                        }
+                        field.unhighlight = function (...args) {
+
+                            if (args.length === 0) {
+
+                                // If no arguments are provided, unhighlight all lines
+                                field.input.lines.children().removeClass('text-bg-pink');
+                            } else {
+
+                                // Loop through each argument
+                                args.forEach(arg => {
+                                    if (Array.isArray(arg)) {
+
+                                        // If the argument is an array, treat it as a range [start, end]
+                                        let [startLine, endLine] = arg;
+                                        for (let i = startLine; i <= endLine; i++) {
+                                            if (i > 0 && i <= field.input.lines.children().length) {
+                                                let lineElement = field.input.lines.children().eq(i - 1);
+                                                if (lineElement.hasClass('text-bg-pink')) {
+                                                    lineElement.removeClass('text-bg-pink');
+                                                }
+                                            }
+                                        }
+                                    } else {
+
+                                        // If the argument is a single line number
+                                        let line = arg;
+                                        if (line > 0 && line <= field.input.lines.children().length) {
+                                            let lineElement = field.input.lines.children().eq(line - 1);
+                                            if (lineElement.hasClass('text-bg-pink')) {
+                                                lineElement.removeClass('text-bg-pink');
+                                            }
+                                        }
+                                    }
+                                });
+                            }
+                        }
+                        field.highlighted = function (...args) {
+
+                            let isHighlighted = false;
+
+                            // Loop through each argument
+                            args.forEach(arg => {
+                                if (Array.isArray(arg)) {
+                                    // If the argument is an array, treat it as a range [start, end]
+                                    let [startLine, endLine] = arg;
+                                    for (let i = startLine; i <= endLine; i++) {
+                                        if (i > 0 && i <= field.input.lines.children().length) {
+                                            let lineElement = field.input.lines.children().eq(i - 1);
+                                            if (lineElement.hasClass('text-bg-pink')) {
+                                                isHighlighted = true;
+                                                return; // Exit as soon as any highlighted line is found
+                                            }
+                                        }
+                                    }
+                                } else {
+                                    // If the argument is a single line number
+                                    let line = arg;
+                                    if (line > 0 && line <= field.input.lines.children().length) {
+                                        let lineElement = field.input.lines.children().eq(line - 1);
+                                        if (lineElement.hasClass('text-bg-pink')) {
+                                            isHighlighted = true;
+                                            return; // Exit as soon as any highlighted line is found
+                                        }
+                                    }
+                                }
+                            });
+
+                            return isHighlighted;
+                        }
+                        // Execute onChange
+                        field.input.editor.on('input change keyup',function(){
+                            self.onChange();
+                        });
+                        break;
+                    case 'textarea':
+                        field.input = $(document.createElement('textarea')).attr({
+                            'id': field.id + 'input',
+                            'class': 'form-control flex-grow-1',
+                            'name': properties.name,
+                            'autocomplete': 'off',
+                        }).text(properties.value).appendTo(field.group);
+                        // Execute onChange
+                        field.input.on('input change keyup',function(){
+                            self.onChange();
+                        });
+                        break;
+                    case 'select':
+                        field.input = {};
+                        field.input.select = $(document.createElement('select')).attr({
+                            'id': field.id + 'input',
+                            'class': 'form-select flex-grow-1',
+                            'name': properties.name,
+                            'autocomplete': 'off',
+                        }).appendTo(field.group);
+                        if(properties.multiple){
+                            field.input.select.attr('multiple',true);
+                            field.input.select.attr('name','[]' + properties.name);
+                        }
+                        field.options = {};
+                        field.delete = function(id = null){
+                            if(id){
+                                if(typeof field.options[id] !== 'undefined'){
+                                    field.options.remove();
+                                    delete field.options[id];
+                                }
+                            } else {
+                                for(const [key, element] of Object.entries(field.options)){
+                                    element.remove();
+                                    delete field.options[key];
+                                }
+                            }
+                        };
+                        field.add = function(id,text){
+                            if(typeof field.options[id] === 'undefined'){
+                                field.options[id] = $(document.createElement('option')).attr('value',id).text(text).appendTo(field.input.select);
+                            }
+                        }
+                        if(properties.options !== null){
+                            for(const [key, option] of Object.entries(properties.options)){
+                                field.add(option.id,option.text);
+                            }
+                        }
+                        field.init = function(){}
+                        field.input.val = function(value = null){
+                            if(value !== null && value !== field.input.select.val()){
+                                field.input.select.val(value).trigger('change');
+                            }
+                            return field.input.select.val();
+                        }
+                        field.init();
+                        field.input.val(properties.value);
+                        // Execute onChange
+                        field.input.select.on('input change keyup',function(){
+                            self.onChange();
+                        });
+                        break;
+                    case 'locale':
+                        field.input = {};
+                        field.input.select = $(document.createElement('select')).attr({
+                            'id': field.id + 'input',
+                            'class': 'form-select flex-grow-1',
+                            'name': properties.name,
+                            'autocomplete': 'off',
+                        }).appendTo(field.group);
+                        if(properties.multiple){
+                            field.input.select.attr('multiple',true);
+                            field.input.select.attr('name','[]' + properties.name);
+                        }
+                        field.options = {};
+                        field.delete = function(id = null){
+                            if(id){
+                                if(typeof field.options[id] !== 'undefined'){
+                                    field.options.remove();
+                                    delete field.options[id];
+                                }
+                            } else {
+                                for(const [key, element] of Object.entries(field.options)){
+                                    element.remove();
+                                    delete field.options[key];
+                                }
+                            }
+                        };
+                        field.add = function(id,text){
+                            if(typeof field.options[id] === 'undefined'){
+                                field.options[id] = $(document.createElement('option')).attr('value',id).text(text).appendTo(field.input.select);
+                            }
+                        }
+                        for(const [key, option] of Object.entries(self._builder.Option.get('locales'))){
+                            field.add(option.id,option.text);
+                        }
+                        field.init = function(){
+                            let defaults = {
+                                theme: "bootstrap-5",
+                                width: 'calc(100% - ' + field.label.outerWidth() + 'px)'
+                            }
+                            if(properties.multiple){
+                                defaults.allowClear = true;
+                            }
+                            if(properties.allowNew){
+                                defaults.tags = true;
+                            }
+                            if(properties.modal !== null){
+                                defaults.dropdownParent = properties.modal;
+                            }
+                            if(typeof properties.callback.format === 'function'){
+                                defaults.templateResult = properties.callback.format;
+                            }
+                            field.select2 = field.input.select.select2(defaults);
+                        }
+                        field.input.val = function(value = null){
+                            if(value !== null && value !== field.input.select.val()){
+                                field.input.select.val(value).trigger('change');
+                            }
+                            return field.input.select.val();
+                        }
+                        field.init();
+                        field.input.val(properties.value);
+                        // Execute onChange
+                        field.input.select.on('input change keyup',function(){
+                            self.onChange();
+                        });
+                        break;
+                    case 'rating':
+                    case 'status':
+                    case 'priority':
+                        properties.callback.format = function(option, component){
+
+                            // Check if the option is a placeholder
+                            if (!option.id) { return option.text; }
+
+                            // Retrieve the rating
+                            let targetData = {
+                                label: 'Unknown',
+                                color: 'secondary',
+                                icon: 'question',
+                            };
+                            switch(properties.type){
+                                case 'rating':
+                                    targetData = self._builder.Rating.get(properties.target,option.id);
+                                    break;
+                                case 'status':
+                                    targetData = self._builder.Status.get(properties.target,option.id);
+                                    break;
+                                case 'priority':
+                                    targetData = self._builder.Priority.get(properties.target,option.id);
+                                    break;
+                            }
+
+                            // Create the option
+                            var $option = $('<div class="px-3 py-2 animate-flicker-hover text-bg-'+targetData.color+'" style="margin: -.375rem -.75rem!important;"><i class="me-1 bi bi-'+targetData.icon+'"></i>'+targetData.label+'</div>');
+
+                            // Return the option
+                            return $option;
+                        };
+                    case 'source':
+                    case 'type':
+                        switch(properties.type){
+                            case 'rating':
+                                properties.targetTable = 'ratings';
+                                break;
+                            case 'status':
+                                properties.targetTable = 'statuses';
+                                break;
+                            case 'priority':
+                                properties.targetTable = 'priorities';
+                                break;
+                            case 'source':
+                                properties.targetTable = 'sources';
+                                break;
+                            case 'type':
+                                properties.targetTable = 'types';
+                                break;
+                        }
+                        field.input = {};
+                        field.input.select = $(document.createElement('select')).attr({
+                            'id': field.id + 'input',
+                            'class': 'form-select flex-grow-1',
+                            'name': properties.name,
+                            'autocomplete': 'off',
+                        }).appendTo(field.group);
+                        if(properties.multiple){
+                            field.input.select.attr('multiple',true);
+                            field.input.select.attr('name','[]' + properties.name);
+                        }
+                        field.options = {};
+                        field.delete = function(id = null){
+                            if(id){
+                                if(typeof field.options[id] !== 'undefined'){
+                                    field.options.remove();
+                                    delete field.options[id];
+                                }
+                            } else {
+                                for(const [key, element] of Object.entries(field.options)){
+                                    element.remove();
+                                    delete field.options[key];
+                                }
+                            }
+                        };
+                        field.add = function(id,text){
+                            if(typeof field.options[id] === 'undefined'){
+                                field.options[id] = $(document.createElement('option')).attr('value',id).text(text).appendTo(field.input.select);
+                            }
+                        }
+                        for(const [key, option] of Object.entries(self._builder.Option.get(properties.targetTable,properties.target))){
+                            field.add(option.id,option.text);
+                        }
+                        field.init = function(){
+                            let defaults = {
+                                theme: "bootstrap-5",
+                                width: 'calc(100% - ' + field.label.outerWidth() + 'px)'
+                            }
+                            if(properties.multiple){
+                                defaults.allowClear = true;
+                            }
+                            if(properties.allowNew){
+                                defaults.tags = true;
+                            }
+                            if(properties.modal !== null){
+                                defaults.dropdownParent = properties.modal;
+                            }
+                            if(typeof properties.callback.format === 'function'){
+                                defaults.templateResult = properties.callback.format;
+                            }
+                            field.select2 = field.input.select.select2(defaults);
+                        }
+                        field.input.val = function(value = null){
+                            if(value !== null && value !== field.input.select.val()){
+                                field.input.select.val(value).trigger('change');
+                            }
+                            return field.input.select.val();
+                        }
+                        field.init();
+                        field.input.val(properties.value);
+                        // Execute onChange
+                        field.input.select.on('input change keyup',function(){
+                            self.onChange();
+                        });
+                        break;
+                    case 'range':
+                        if(properties.value === null){
+                            properties.value = properties.min;
+                        }
+                        field.input = $(document.createElement('div')).addClass('tooltip-range form-control border border-start-0 rounded-end flex-grow-1 px-2 d-flex align-items-center').appendTo(field.group);
+                        field.input.range = $(document.createElement('input')).attr({
+                            'id': field.id + 'input',
+                            'class': 'flex-grow-1 form-range',
+                            'type': properties.type,
+                            'step': properties.step,
+                            'value': properties.value,
+                            'min': properties.min,
+                            'max': properties.max,
+                        }).appendTo(field.input);
+                        field.input.output = $(document.createElement('output')).attr({
+                            'for': field.id + 'input',
+                        }).appendTo(field.input);
+                        if(properties.options !== null && typeof properties.options === "object" && typeof properties.options[properties.value] !== "undefined"){
+                            field.input.output.html(properties.options[properties.value]);
+                        } else {
+                            field.input.output.html(properties.value);
+                        }
+                        field.input.range.on('input',function(){
+                            if(properties.options !== null && typeof properties.options === "object" && typeof properties.options[field.input.range.val()] !== "undefined"){
+                                field.input.output.html(properties.options[field.input.range.val()]);
+                            } else {
+                                field.input.output.html(field.input.range.val());
+                            }
+                        });
+                        field.input.val = function(value = null){
+                            if(value !== null){
+                                field.input.range.val(value);
+                                field.input.range.trigger('input');
+                            }
+
+                            return field.input.range.val();
+                        };
+                        // Execute onChange
+                        field.input.range.on('input change keyup',function(){
+                            self.onChange();
+                        });
+                        break;
+                    case 'excel':
+                        field.input = $(document.createElement('input')).attr({
+                            'id': field.id + 'input',
+                            'class': 'flex-grow-1 form-control',
+                            'name': properties.name,
+                            'autocomplete': 'off',
+                            'type': 'file',
+                            'value': properties.value,
+                        }).appendTo(field.group);
+
+                        // Check if multiple files are allowed
+                        if(properties.multiple){
+                            field.input.attr('multiple',true);
+                            field.input.attr('name','[]' + properties.name);
+                        }
+
+                        // Execute onChange
+                        field.input.on('input change keyup',function(){
+                            self.onChange();
+                        });
+
+                        // Create a Handler for the file input
+                        field.input.val = function(){
+                            return new Promise((resolve, reject) => {
+                                // Initialize Values
+                                let values = [];
+
+                                // Retrieve the files
+                                let files = field.input[0].files;
+
+                                // Check if any file is selected
+                                if (files.length === 0) {
+                                    resolve(values);
+                                    return;
+                                }
+
+                                // Function to read a single file
+                                function readFile(file) {
+                                    return new Promise((resolve, reject) => {
+                                        let reader = new FileReader();
+                                        reader.onload = function(e) {
+
+                                            // e.target.result will be a data URL (Base64-encoded string)
+                                            const dataURL = e.target.result;
+
+                                            // 1) Get the Base64-encoded portion by splitting on the comma
+                                            //    "data:application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;base64,UEsDB..."
+                                            const base64String = dataURL.split(',')[1];
+
+                                            // 2) Decode the Base64 string to get the raw binary data
+                                            const binaryString = atob(base64String);
+
+                                            // 3) Now pass the binary string to XLSX
+                                            const workbook = XLSX.read(binaryString, { type: 'binary', cellDates: true, cellNF: true, cellText: false });
+
+                                            // 4) Get the name of the first worksheet
+                                            const sheetName = workbook.SheetNames[0];
+
+                                            // 5) Get the worksheet contents
+                                            const worksheet = workbook.Sheets[sheetName];
+
+                                            // 6) Convert worksheet to JSON, array, etc.
+                                            const jsonData = XLSX.utils.sheet_to_json(worksheet, { raw: false, defval: null, dateNF: 'yyyy-mm-dd hh:mm:ss' });
+
+                                            // Resolve the promise with the file data
+                                            resolve({
+                                                name: file.name,
+                                                size: file.size,
+                                                type: file.type,
+                                                extension: file.name.split('.').pop().toLowerCase(),
+                                                content: e.target.result,
+                                                json: jsonData,
+                                                icon: getFileIcon(file.name)
+                                            });
+                                        };
+                                        reader.onerror = reject;
+                                        reader.readAsDataURL(file);
+                                    });
+                                }
+
+                                // Function to determine file icon based on extension
+                                function getFileIcon(fileName) {
+                                    let extension = fileName.split('.').pop().toLowerCase();
+                                    switch(extension) {
+                                        case 'pdf': return 'file-earmark-pdf';
+                                        case 'doc':
+                                        case 'docx': return 'file-earmark-word';
+                                        case 'xls':
+                                        case 'xlsx': return 'file-earmark-excel';
+                                        case 'ppt':
+                                        case 'pptx': return 'file-earmark-ppt';
+                                        case 'zip':
+                                        case 'rar': return 'file-earmark-zip';
+                                        case 'jpg':
+                                        case 'jpeg':
+                                        case 'png':
+                                        case 'gif':
+                                        case 'tiff':
+                                        case 'bmp':
+                                        case 'webp': return 'file-earmark-image';
+                                        case 'mp3':
+                                        case 'wav':
+                                        case 'wma':
+                                        case 'ogg':
+                                        case 'm4a': return 'file-earmark-music';
+                                        case 'mp4':
+                                        case 'avi':
+                                        case 'mkv':
+                                        case 'wmv':
+                                        case 'mov': return 'file-earmark-play';
+                                        case 'css':
+                                        case 'less':
+                                        case 'scss':
+                                        case 'sass':
+                                        case 'js':
+                                        case 'json':
+                                        case 'xml':
+                                        case 'html':
+                                        case 'htm':
+                                        case 'php':
+                                        case 'asp':
+                                        case 'aspx':
+                                        case 'jsp':
+                                        case 'cfm': return 'file-earmark-code';
+                                        case 'txt':
+                                        case 'log':
+                                        case 'csv':
+                                        case 'tsv': return 'file-earmark-text';
+                                        case 'msg':
+                                        case 'eml': return 'envelope-at';
+                                        default: return 'file-earmark';
+                                    }
+                                }
+
+                                // Read all files
+                                let promises = [];
+                                for (let i = 0; i < files.length; i++) {
+                                    promises.push(readFile(files[i]));
+                                }
+
+                                // Resolve all promises
+                                Promise.all(promises).then(fileData => {
+                                    resolve(fileData);
+                                }).catch(error => {
+                                    reject(error);
+                                });
+                            });
+                        };
+                        break;
+                    case 'stopwatch':
+                        field.input = $(document.createElement('input')).attr({
+                            'id': field.id + 'input',
+                            'class': 'flex-grow-1 form-control',
+                            'name': properties.name,
+                            'autocomplete': 'off',
+                            'type': 'text',
+                            'value': properties.value,
+                        }).appendTo(field.group);
+                        field.input.inputmask({
+                            mask: ["99:99", "99:99:99"],
+                            placeholder: " ",
+                            greedy: false,
+                            showMaskOnHover: false,
+                            showMaskOnFocus: true
+                        });
+                        field.input.on('input change keyup',function(){
+                            self.onChange();
+                        });
+                        break;
+                    case 'ca-tax':
+                        field.input = $(document.createElement('input')).attr({
+                            'id': field.id + 'input',
+                            'class': 'flex-grow-1 form-control',
+                            'name': properties.name,
+                            'autocomplete': 'off',
+                            'type': 'text',
+                            'value': properties.value,
+                        }).appendTo(field.group);
+                        field.input.inputmask({
+                            mask: ["999999999RT9999"],
+                            placeholder: " ",
+                            greedy: false,
+                            showMaskOnHover: false,
+                            showMaskOnFocus: true
+                        });
+                        field.input.on('input change keyup',function(){
+                            self.onChange();
+                        });
+                        break;
+                    case 'ca-gst':
+                        field.input = $(document.createElement('input')).attr({
+                            'id': field.id + 'input',
+                            'class': 'flex-grow-1 form-control',
+                            'name': properties.name,
+                            'autocomplete': 'off',
+                            'type': 'text',
+                            'value': properties.value,
+                        }).appendTo(field.group);
+                        field.input.inputmask({
+                            mask: ["999999999RT9999"],
+                            placeholder: " ",
+                            greedy: false,
+                            showMaskOnHover: false,
+                            showMaskOnFocus: true
+                        });
+                        field.input.on('input change keyup',function(){
+                            self.onChange();
+                        });
+                        break;
+                    case 'ca-importer':
+                        field.input = $(document.createElement('input')).attr({
+                            'id': field.id + 'input',
+                            'class': 'flex-grow-1 form-control',
+                            'name': properties.name,
+                            'autocomplete': 'off',
+                            'type': 'text',
+                            'value': properties.value,
+                        }).appendTo(field.group);
+                        field.input.inputmask({
+                            mask: ["999999999RM9999"],
+                            placeholder: " ",
+                            greedy: false,
+                            showMaskOnHover: false,
+                            showMaskOnFocus: true
+                        });
+                        field.input.on('input change keyup',function(){
+                            self.onChange();
+                        });
+                        break;
+                    default:
+                        break;
+                }
+            };
+        },
     };
 
     #layouts = {
@@ -5834,6 +7070,11 @@ class Builder {
                     'enctype': 'multipart/form-data',
                 });
                 this._component.id = this._component.attr('id');
+
+                // Add a Deprecated Warning
+                this._component.deprecated = $(document.createElement('div')).addClass('alert alert-warning alert-dismissible fade show m-4').appendTo(this._component);
+                this._component.deprecated.html('<strong>Deprecated:</strong> This component is deprecated and will be removed in a future version. Please use the <code>Form</code> utility instead.');
+                this._component.deprecated.close = $(document.createElement('button')).addClass('btn-close').attr({"type": "button", "data-bs-dismiss": "alert", "aria-label": "Close"}).appendTo(this._component.deprecated);
 
                 // Reset Event
                 this._component.on('reset', function(e){
@@ -9315,7 +10556,486 @@ class Builder {
         },
     }
 
-    #forms = {}
+    #inputs = {
+        text: class extends this.InputClass {
+
+            _init(){
+
+                // Execute Parent Init
+                super._init();
+
+                // Set Additional Properties
+                this._properties.autocomplete = 'off';
+            }
+
+            _input(){
+
+                // Create Input
+                return $(document.createElement('input')).attr({
+                    'id': this._component.id + '-input',
+                    'class': 'form-control',
+                    'name': this._properties.name,
+                    'autocomplete': this._properties.autocomplete,
+                    'type': 'text',
+                });
+            }
+        },
+        number: class extends this.InputClass {
+
+            _init(){
+
+                // Execute Parent Init
+                super._init();
+
+                // Set Additional Properties
+                this._properties.autocomplete = 'off';
+            }
+
+            _input(){
+
+                // Create Input
+                return $(document.createElement('input')).attr({
+                    'id': this._component.id + '-input',
+                    'class': 'form-control',
+                    'name': this._properties.name,
+                    'autocomplete': this._properties.autocomplete,
+                    'type': 'number',
+                });
+            }
+        },
+        email: class extends this.InputClass {
+
+            _init(){
+
+                // Execute Parent Init
+                super._init();
+
+                // Set Additional Properties
+                this._properties.autocomplete = 'off';
+            }
+
+            _input(){
+
+                // Create Input
+                return $(document.createElement('input')).attr({
+                    'id': this._component.id + '-input',
+                    'class': 'form-control',
+                    'name': this._properties.name,
+                    'autocomplete': this._properties.autocomplete,
+                    'type': 'email',
+                });
+            }
+        },
+        password: class extends this.InputClass {
+
+            _init(){
+
+                // Execute Parent Init
+                super._init();
+
+                // Set Additional Properties
+                this._properties.autocomplete = 'off';
+            }
+
+            _input(){
+
+                // Create Input
+                return $(document.createElement('input')).attr({
+                    'id': this._component.id + '-input',
+                    'class': 'form-control',
+                    'name': this._properties.name,
+                    'autocomplete': this._properties.autocomplete,
+                    'type': 'password',
+                });
+            }
+        },
+        file: class extends this.InputClass {
+
+            _init(){
+
+                // Execute Parent Init
+                super._init();
+
+                // Set Additional Properties
+                this._properties.autocomplete = 'off';
+                this._properties.multiple = false;
+            }
+
+            _input(){
+
+                // Create Input
+                return $(document.createElement('input')).attr({
+                    'id': this._component.id + '-input',
+                    'class': 'form-control',
+                    'name': this._properties.name,
+                    'autocomplete': this._properties.autocomplete,
+                    'type': 'file',
+                });
+            }
+
+            _extend(){
+                if (this._properties.multiple) {
+                    this._component.input.attr('multiple', true);
+                    this._component.input.attr('name', this._properties.name + '[]');
+                }
+            }
+
+            icon(fileName) {
+                let extension = fileName.split('.').pop().toLowerCase();
+                switch(extension) {
+                    case 'pdf': return 'file-earmark-pdf';
+                    case 'doc':
+                    case 'docx': return 'file-earmark-word';
+                    case 'xls':
+                    case 'xlsx': return 'file-earmark-excel';
+                    case 'ppt':
+                    case 'pptx': return 'file-earmark-ppt';
+                    case 'zip':
+                    case 'rar': return 'file-earmark-zip';
+                    case 'jpg':
+                    case 'jpeg':
+                    case 'png':
+                    case 'gif':
+                    case 'tiff':
+                    case 'bmp':
+                    case 'webp': return 'file-earmark-image';
+                    case 'mp3':
+                    case 'wav':
+                    case 'wma':
+                    case 'ogg':
+                    case 'm4a': return 'file-earmark-music';
+                    case 'mp4':
+                    case 'avi':
+                    case 'mkv':
+                    case 'wmv':
+                    case 'mov': return 'file-earmark-play';
+                    case 'css':
+                    case 'less':
+                    case 'scss':
+                    case 'sass':
+                    case 'js':
+                    case 'json':
+                    case 'xml':
+                    case 'html':
+                    case 'htm':
+                    case 'php':
+                    case 'asp':
+                    case 'aspx':
+                    case 'jsp':
+                    case 'cfm': return 'file-earmark-code';
+                    case 'txt':
+                    case 'log':
+                    case 'csv':
+                    case 'tsv': return 'file-earmark-text';
+                    case 'msg':
+                    case 'eml': return 'envelope-at';
+                    default: return 'file-earmark';
+                }
+            }
+
+            read(file) {
+
+                // Set Self
+                const self = this;
+
+                // Create File Reader
+                return new Promise((resolve, reject) => {
+                    let reader = new FileReader();
+                    reader.onload = function(e) {
+                        resolve({
+                            name: file.name,
+                            size: file.size,
+                            type: file.type,
+                            extension: file.name.split('.').pop().toLowerCase(),
+                            content: e.target.result,
+                            icon: self.icon(file.name)
+                        });
+                    };
+                    reader.onerror = reject;
+                    reader.readAsDataURL(file);
+                });
+            }
+
+            val(value = null){
+
+                // Set Self
+                const self = this;
+
+                // Create File Readers
+                return new Promise((resolve, reject) => {
+                    // Initialize Values
+                    let values = [];
+
+                    // Retrieve the files
+                    let files = this._component.input[0].files;
+
+                    // Check if any file is selected
+                    if (files.length === 0) {
+                        resolve(values);
+                        return;
+                    }
+
+                    // Read all files
+                    let promises = [];
+                    for (let i = 0; i < files.length; i++) {
+                        promises.push(self.read(files[i]));
+                    }
+
+                    // Resolve all promises
+                    Promise.all(promises).then(fileData => {
+                        resolve(fileData);
+                    }).catch(error => {
+                        reject(error);
+                    });
+                });
+            }
+        },
+        zipcode: class extends this.InputClass {
+
+            _init(){
+
+                // Execute Parent Init
+                super._init();
+
+                // Set Additional Properties
+                this._properties.autocomplete = 'off';
+            }
+
+            _input(){
+
+                // Create Input
+                const input = $(document.createElement('input')).attr({
+                    'id': this._component.id + '-input',
+                    'class': 'form-control',
+                    'name': this._properties.name,
+                    'autocomplete': this._properties.autocomplete,
+                    'type': 'text',
+                });
+
+                // Configure Input Mask
+                input.inputmask({
+                    mask: ["99999", "A9A 9A9"],
+                    placeholder: " ",
+                    greedy: false,
+                    showMaskOnHover: false,
+                    showMaskOnFocus: true
+                });
+
+                // Return Input
+                return input;
+            }
+        },
+        phone: class extends this.InputClass {
+
+            _init(){
+
+                // Execute Parent Init
+                super._init();
+
+                // Set Additional Properties
+                this._properties.autocomplete = 'off';
+            }
+
+            _input(){
+
+                // Create Input
+                const input = $(document.createElement('input')).attr({
+                    'id': this._component.id + '-input',
+                    'class': 'form-control',
+                    'name': this._properties.name,
+                    'autocomplete': this._properties.autocomplete,
+                    'type': 'text',
+                });
+
+                // Configure Input Mask
+                input.inputmask({
+                    mask: ["(999) 999-9999", "+9 (999) 999-9999"],
+                    placeholder: " ",
+                    greedy: false,
+                    showMaskOnHover: false,
+                    showMaskOnFocus: true
+                });
+
+                // Return Input
+                return input;
+            }
+        },
+        phoneExt: class extends this.InputClass {
+
+            _init(){
+
+                // Execute Parent Init
+                super._init();
+
+                // Set Additional Properties
+                this._properties.autocomplete = 'off';
+            }
+
+            _input(){
+
+                // Create Input
+                const input = $(document.createElement('input')).attr({
+                    'id': this._component.id + '-input',
+                    'class': 'form-control',
+                    'name': this._properties.name,
+                    'autocomplete': this._properties.autocomplete,
+                    'type': 'text',
+                });
+
+                // Configure Input Mask
+                input.inputmask({
+                    mask: "(999) 999-9999[ x9{1,8}]",
+                    placeholder: " ",
+                    greedy: false,
+                    showMaskOnHover: false,
+                    showMaskOnFocus: true
+                });
+
+                // Return Input
+                return input;
+            }
+        },
+        phoneInt: class extends this.InputClass {
+
+            _init(){
+
+                // Execute Parent Init
+                super._init();
+
+                // Set Additional Properties
+                this._properties.autocomplete = 'off';
+            }
+
+            _input(){
+
+                // Create Input
+                const input = $(document.createElement('input')).attr({
+                    'id': this._component.id + '-input',
+                    'class': 'form-control',
+                    'name': this._properties.name,
+                    'autocomplete': this._properties.autocomplete,
+                    'type': 'text',
+                });
+
+                // Configure Input Mask
+                input.inputmask({
+                    mask: "+9 (999) 999-9999[ x9{1,8}]",
+                    placeholder: " ",
+                    greedy: false,
+                    showMaskOnHover: false,
+                    showMaskOnFocus: true
+                });
+
+                // Return Input
+                return input;
+            }
+        },
+        businessNumber: class extends this.InputClass {
+
+            _init(){
+
+                // Execute Parent Init
+                super._init();
+
+                // Set Additional Properties
+                this._properties.autocomplete = 'off';
+            }
+
+            _input(){
+
+                // Create Input
+                const input = $(document.createElement('input')).attr({
+                    'id': this._component.id + '-input',
+                    'class': 'form-control',
+                    'name': this._properties.name,
+                    'autocomplete': this._properties.autocomplete,
+                    'type': 'text',
+                });
+
+                // Configure Input Mask
+                input.inputmask({
+                    mask: ["999999999"],
+                    placeholder: " ",
+                    greedy: false,
+                    showMaskOnHover: false,
+                    showMaskOnFocus: true
+                });
+
+                // Return Input
+                return input;
+            }
+        },
+        importerExtension: class extends this.InputClass {
+
+            _init(){
+
+                // Execute Parent Init
+                super._init();
+
+                // Set Additional Properties
+                this._properties.autocomplete = 'off';
+            }
+
+            _input(){
+
+                // Create Input
+                const input = $(document.createElement('input')).attr({
+                    'id': this._component.id + '-input',
+                    'class': 'form-control',
+                    'name': this._properties.name,
+                    'autocomplete': this._properties.autocomplete,
+                    'type': 'text',
+                });
+
+                // Configure Input Mask
+                input.inputmask({
+                    mask: ["RM9999"],
+                    placeholder: " ",
+                    greedy: false,
+                    showMaskOnHover: false,
+                    showMaskOnFocus: true
+                });
+
+                // Return Input
+                return input;
+            }
+        },
+        taxExtension: class extends this.InputClass {
+
+            _init(){
+
+                // Execute Parent Init
+                super._init();
+
+                // Set Additional Properties
+                this._properties.autocomplete = 'off';
+            }
+
+            _input(){
+
+                // Create Input
+                const input = $(document.createElement('input')).attr({
+                    'id': this._component.id + '-input',
+                    'class': 'form-control',
+                    'name': this._properties.name,
+                    'autocomplete': this._properties.autocomplete,
+                    'type': 'text',
+                });
+
+                // Configure Input Mask
+                input.inputmask({
+                    mask: ["RT9999"],
+                    placeholder: " ",
+                    greedy: false,
+                    showMaskOnHover: false,
+                    showMaskOnFocus: true
+                });
+
+                // Return Input
+                return input;
+            }
+        },
+    }
 
     #widgets = {
         template: class extends this.ComponentClass {
