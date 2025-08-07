@@ -104,7 +104,7 @@
                         </section>
                     </main>
 
-                    <footer class="border-top small text-muted py-3 text-center">
+                    <footer class="copyright border-top small text-muted py-3 text-center cursor-pointer">
                         <?= $this->Locale->get('Copyright'); ?> &copy; <?= $this->Config->get('application','copyright') ?>-<?= date("Y") ?> <?= $this->Config->get('application','owner')?> <?= $this->Locale->get('All rights reserved'); ?>.
                     </footer>
                 </div>
