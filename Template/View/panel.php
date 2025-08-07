@@ -83,7 +83,7 @@
                         <nav class="navbar align-items-center border-bottom">
                             <h2 class="m-0 mt-2 me-auto" id="pageTitle">
                                 <i class="bi bi-<?= $this->icon() ?> me-1"></i>
-                                <span class="me-1">
+                                <span>
                                     <?php if(is_null($this->Request->getParams('GET','query'))): ?>
                                         <?= $this->Locale->get($this->label()); ?><?php if(!is_null($this->Request->getParams('GET','name'))): ?>: <?= $this->Request->getParams('GET','name') ?><?php elseif(!is_null($this->Request->getParams('GET','id'))): ?>: <?= $this->Request->getParams('GET','id') ?><?php endif; ?>
                                     <?php else: ?>
