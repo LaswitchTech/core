@@ -11,6 +11,19 @@ if (typeof $ !== 'undefined') {
     jQuery.expr[':'].contains = function(a, i, m){
         return jQuery(a).text().toUpperCase().indexOf(m[3].toUpperCase()) >= 0
     };
+
+    // Extend Timeago
+    if (typeof $.timeago !== 'undefined') {
+
+        // Enable Timeago Future Dates
+        $.timeago.settings.allowFuture = true;
+        $.extend($.timeago.settings.strings, {
+            prefixFromNow: 'in',
+            suffixFromNow: '',
+        });
+    } else {
+        console.warn("jQuery Timeago is not loaded");
+    }
 } else {
     alert("jQuery is not loaded");
 }
@@ -391,7 +404,7 @@ class Builder {
 
             // Set Label Class
             if(this._properties.class.label){
-                this._properties.label.addClass(this._properties.class.label);
+                this._component.label.addClass(this._properties.class.label);
             }
 
             // Create Icon
@@ -686,7 +699,7 @@ class Builder {
             #locale = 'en-ca';
             #default = 'en-ca';
             _callback = function(key, locale){
-                console.log('['+locale+'] Missing String: '+key);
+                // console.log('['+locale+'] Missing String: '+key);
             };
 
             constructor(builder){
@@ -4589,6 +4602,11 @@ class Builder {
                 });
                 this._component.id = this._component.attr('id');
 
+                // Add a Deprecated Warning
+                this._component.deprecated = $(document.createElement('div')).addClass('alert alert-warning alert-dismissible fade show m-4').appendTo(this._component);
+                this._component.deprecated.html('<strong>Deprecated:</strong> This layout is deprecated and will be removed in a future version.');
+                this._component.deprecated.close = $(document.createElement('button')).addClass('btn-close').attr({"type": "button", "data-bs-dismiss": "alert", "aria-label": "Close"}).appendTo(this._component.deprecated);
+
                 // Set Component Class
                 if(this._properties.class.component){
                     this._component.addClass(this._properties.class.component);
@@ -4868,6 +4886,11 @@ class Builder {
                 });
                 this._component.id = this._component.attr('id');
 
+                // Add a Deprecated Warning
+                this._component.deprecated = $(document.createElement('div')).addClass('alert alert-warning alert-dismissible fade show m-4').appendTo(this._component);
+                this._component.deprecated.html('<strong>Deprecated:</strong> This layout is deprecated and will be removed in a future version.');
+                this._component.deprecated.close = $(document.createElement('button')).addClass('btn-close').attr({"type": "button", "data-bs-dismiss": "alert", "aria-label": "Close"}).appendTo(this._component.deprecated);
+
                 // Set Component Class
                 if(this._properties.class.component){
                     this._component.addClass(this._properties.class.component);
@@ -4963,6 +4986,11 @@ class Builder {
                 });
                 this._component.id = this._component.attr('id');
 
+                // Add a Deprecated Warning
+                this._component.deprecated = $(document.createElement('div')).addClass('alert alert-warning alert-dismissible fade show m-4').appendTo(this._component);
+                this._component.deprecated.html('<strong>Deprecated:</strong> This layout is deprecated and will be removed in a future version.');
+                this._component.deprecated.close = $(document.createElement('button')).addClass('btn-close').attr({"type": "button", "data-bs-dismiss": "alert", "aria-label": "Close"}).appendTo(this._component.deprecated);
+
                 // Set Component Class
                 if(this._properties.class.component){
                     this._component.addClass(this._properties.class.component);
@@ -5048,6 +5076,11 @@ class Builder {
                     'class': 'row',
                 });
                 this._component.id = this._component.attr('id');
+
+                // Add a Deprecated Warning
+                this._component.deprecated = $(document.createElement('div')).addClass('alert alert-warning alert-dismissible fade show m-4').appendTo(this._component);
+                this._component.deprecated.html('<strong>Deprecated:</strong> This layout is deprecated and will be removed in a future version.');
+                this._component.deprecated.close = $(document.createElement('button')).addClass('btn-close').attr({"type": "button", "data-bs-dismiss": "alert", "aria-label": "Close"}).appendTo(this._component.deprecated);
 
                 // Set Component Class
                 if(this._properties.class.component){
@@ -5209,6 +5242,11 @@ class Builder {
                     'class': 'row',
                 });
                 this._component.id = this._component.attr('id');
+
+                // Add a Deprecated Warning
+                this._component.deprecated = $(document.createElement('div')).addClass('alert alert-warning alert-dismissible fade show m-4').appendTo(this._component);
+                this._component.deprecated.html('<strong>Deprecated:</strong> This layout is deprecated and will be removed in a future version.');
+                this._component.deprecated.close = $(document.createElement('button')).addClass('btn-close').attr({"type": "button", "data-bs-dismiss": "alert", "aria-label": "Close"}).appendTo(this._component.deprecated);
 
                 // Set Component Class
                 if(this._properties.class.component){
@@ -5599,6 +5637,11 @@ class Builder {
                     'class': 'row',
                 });
                 this._component.id = this._component.attr('id');
+
+                // Add a Deprecated Warning
+                this._component.deprecated = $(document.createElement('div')).addClass('alert alert-warning alert-dismissible fade show m-4').appendTo(this._component);
+                this._component.deprecated.html('<strong>Deprecated:</strong> This layout is deprecated and will be removed in a future version.');
+                this._component.deprecated.close = $(document.createElement('button')).addClass('btn-close').attr({"type": "button", "data-bs-dismiss": "alert", "aria-label": "Close"}).appendTo(this._component.deprecated);
 
                 // Create Title
                 this._component.title = $(document.createElement('h1')).addClass('text-center').text(this._properties.title).appendTo(this._component);
@@ -6008,6 +6051,11 @@ class Builder {
                     'class': 'row',
                 });
                 this._component.id = this._component.attr('id');
+
+                // Add a Deprecated Warning
+                this._component.deprecated = $(document.createElement('div')).addClass('alert alert-warning alert-dismissible fade show m-4').appendTo(this._component);
+                this._component.deprecated.html('<strong>Deprecated:</strong> This layout is deprecated and will be removed in a future version.');
+                this._component.deprecated.close = $(document.createElement('button')).addClass('btn-close').attr({"type": "button", "data-bs-dismiss": "alert", "aria-label": "Close"}).appendTo(this._component.deprecated);
 
                 // Create side menu
                 this._component.menu = $(document.createElement('div')).addClass('col-4 col-lg-3').appendTo(this._component);
@@ -9896,279 +9944,6 @@ class Builder {
                 }
             }
         },
-        stepper: class extends this.ComponentClass {
-
-            #current = 1;
-            #steps = {};
-
-            _init(){
-                this._properties = {
-                    class: {
-                        component: null,
-                        stepper: null,
-                        controls: null,
-                        steps: null,
-                        pagination: null,
-                    },
-                    color: "primary",
-                    callback: {},
-                    properties: {
-                        class: {},
-                        callback: {
-                            hide: null,
-                            hidden: null,
-                            show: null,
-                            shown: null,
-                        },
-                        icon: null,
-                    },
-                };
-            }
-
-            _create(){
-
-                // Set Self
-                const self = this;
-
-                // Create Component
-                this._component = $(document.createElement('div')).attr({
-                    'id': 'stepper' + this._id,
-                    'class': 'stepper',
-                });
-                this._component.id = this._component.attr('id');
-
-                // Create Controls
-                this._component.controls = $(document.createElement('div')).appendTo(this._component);
-                this._component.controls.position = $(document.createElement('div')).addClass('position-relative m-4').attr('id',this._component.id + 'controls').appendTo(this._component.controls);
-                this._component.progress = $(document.createElement('div')).addClass('progress').attr({'role':'progressbar', 'aria-label':'Progress', 'aria-valuemin':'0', 'aria-valuemax':'100'}).css('height','4px').appendTo(this._component.controls.position);
-                this._component.progress.bar = $(document.createElement('div')).addClass('progress-bar progress-bar-striped progress-bar-animated').css({'width':'0%','transition':'all 500ms ease'}).appendTo(this._component.progress);
-                this._component.controls.position.absolute = $(document.createElement('div')).addClass('position-absolute w-100 top-0 start-50 translate-middle').appendTo(this._component.controls.position);
-                this._component.controls.list = $(document.createElement('div')).addClass('d-flex justify-content-between').attr('id',this._component.id + 'controls').appendTo(this._component.controls.position.absolute);
-                this._component.controls.id = this._component.controls.list.attr('id');
-
-                // Create Steps
-                this._component.steps = $(document.createElement('div')).appendTo(this._component);
-                this._component.steps.accordion = $(document.createElement('div')).addClass('accordion').attr('id',this._component.id + 'steps').appendTo(this._component.steps);
-                this._component.steps.id = this._component.steps.accordion.attr('id');
-
-                // Create Pagination
-                this._component.pagination = $(document.createElement('div')).appendTo(this._component);
-                this._component.pagination.list = $(document.createElement('div')).addClass('d-block text-center').attr('id',this._component.id + 'pagination').appendTo(this._component.pagination);
-                this._component.pagination.previous = $(document.createElement('button')).addClass('btn btn-primary float-start').attr({'type':'button', 'data-bs-toggle':'collapse'}).appendTo(this._component.pagination.list);
-                this._component.pagination.previous.icon = $(document.createElement('i')).addClass('bi bi-chevron-left').appendTo(this._component.pagination.previous);
-                this._component.pagination.previous.text = $(document.createElement('span')).addClass('ms-1').text('Previous').appendTo(this._component.pagination.previous);
-                this._component.pagination.next = $(document.createElement('button')).addClass('btn btn-primary float-end').attr({'type':'button', 'data-bs-toggle':'collapse'}).appendTo(this._component.pagination.list);
-                this._component.pagination.next.text = $(document.createElement('span')).addClass('ms-1').text('Next').appendTo(this._component.pagination.next);
-                this._component.pagination.next.icon = $(document.createElement('i')).addClass('bi bi-chevron-right').appendTo(this._component.pagination.next);
-
-                // Set Component Class
-                if(this._properties.class.component){
-                    this._component.addClass(this._properties.class.component);
-                }
-
-                // Set Stepper Class
-                if(this._properties.class.stepper){
-                    this._component.addClass(this._properties.class.stepper);
-                }
-
-                // Set Controls Class
-                if(this._properties.class.controls){
-                    this._component.controls.addClass(this._properties.class.controls);
-                }
-
-                // Set Steps Class
-                if(this._properties.class.steps){
-                    this._component.steps.addClass(this._properties.class.steps);
-                }
-
-                // Set Pagination Class
-                if(this._properties.class.pagination){
-                    this._component.pagination.addClass(this._properties.class.pagination);
-                }
-            }
-
-            add(param1 = null, param2 = null){
-
-                // Set Self
-                const self = this;
-
-                let options = {};
-                let callback = null;
-
-                // Set selector, options, and callback
-                [param1, param2].forEach(param => {
-                    if(param !== null){
-                        if (typeof param === 'object') {
-                            options = param;
-                        } else if (typeof param === 'function') {
-                            callback = param;
-                        }
-                    }
-                });
-
-                let properties = {};
-
-                // Configure Options
-                for(const [key, value] of Object.entries(this._properties.properties)){
-                    if(typeof properties[key] === 'undefined'){
-                        properties[key] = value;
-                    }
-                }
-                for(const [key, value] of Object.entries(options)){
-                    if(typeof properties[key] !== 'undefined'){
-                        switch(key){
-                            case"callback":
-                                if(typeof properties[key] !== 'undefined'){
-                                    for(const [k, v] of Object.entries(value)){
-                                        if(typeof properties[key][k] !== 'undefined'){
-                                            properties[key][k] = v;
-                                        }
-                                    }
-                                }
-                                break;
-                            case"class":
-                                for(const [section, classes] of Object.entries(value)){
-                                    if(properties[key][section] != null){
-                                        properties[key][section] += ' ' + classes;
-                                    } else {
-                                        properties[key][section] = classes;
-                                    }
-                                }
-                                break;
-                            default:
-                                properties[key] = value;
-                                break;
-                        }
-                    }
-                }
-
-                // Set ID
-                let id = this._count();
-
-                // Create Step Control
-                let control = $(document.createElement('button')).attr({
-                    'id':this._component.controls.id + id,
-                    'class':'btn btn-sm btn-secondary rounded-circle align-middle text-center fw-bold',
-                    'type':'button',
-                    'data-bs-toggle':'collapse',
-                    'data-bs-target':'#' + this._component.steps.id + id,
-                    'aria-controls':this._component.steps.id + id,
-                    'aria-expanded':'false',
-                }).text(id).css({'width':'3rem','height':'3rem','transition':'all 500ms ease'}).appendTo(this._component.controls.list);
-                control.id = control.attr('id');
-                control.properties = properties;
-
-                // Create Step Content
-                let content = $(document.createElement('div')).attr({
-                    'id':this._component.steps.id + id,
-                    'class':'fade collapse',
-                    'aria-labelledby':this._component.controls.id + id,
-                    'data-bs-parent':'#' + this._component.steps.id,
-                }).appendTo(this._component.steps.accordion);
-                content.id = content.attr('id');
-                content.properties = properties;
-                content.bootstrap = new bootstrap.Collapse(content,{toggle:false});
-
-                // Set Icon
-                if(properties.icon){
-                    control.icon = $(document.createElement('i')).addClass('fs-3 bi bi-' + properties.icon).appendTo(control);
-                    control.html(control.icon);
-                }
-
-                // Set Step
-                const step = {content:content,control:control,properties:properties,id:id};
-
-                // Save Step
-                this.#steps[id] = step;
-
-                // Set Step Content Events
-                content.on('hide.bs.collapse', function (event) {
-
-                    // Execute Callback
-                    if(typeof properties.callback.hide === 'function'){
-                        properties.callback.hide(event,step,self);
-                    }
-                });
-                content.on('hidden.bs.collapse', function (event) {
-
-                    // Execute Callback
-                    if(typeof properties.callback.hidden === 'function'){
-                        properties.callback.hidden(event,step,self);
-                    }
-                });
-                content.on('show.bs.collapse', function (event) {
-
-                    // Set Current Step
-                    self.#current = step.id;
-
-                    // Check if Step is First
-                    if(step.id === 1){
-                        self._component.pagination.previous.attr('disabled',true).attr('data-bs-target','');
-                    } else {
-                        self._component.pagination.previous.attr('disabled',false).attr('data-bs-target','#' + self._component.steps.id + (step.id - 1));
-                    }
-
-                    // Check if Step is Last
-                    if(step.id === self._counter){
-                        self._component.pagination.next.attr('disabled',true).attr('data-bs-target','');
-                    } else {
-                        self._component.pagination.next.attr('disabled',false).attr('data-bs-target','#' + self._component.steps.id + (step.id + 1));
-                    }
-
-                    // Set Steps
-                    for (let id = 1; id <= self._counter; id++) {
-                        if(id <= step.id){
-                            self.#steps[id].control.removeClass('btn-secondary').addClass('btn-primary');
-                        } else {
-                            self.#steps[id].control.removeClass('btn-primary').addClass('btn-secondary');
-                        }
-                        if(id !== step.id){
-                            self.#steps[id].content.bootstrap.hide();
-                            self.#steps[id].control.attr('aria-expanded',false);
-                        } else {
-                            self.#steps[id].control.attr('aria-expanded',true);
-                        }
-                    }
-
-                    // Set Progress Bar
-                    let width = 0 + '%';
-                    if(self._counter > 1){
-                        width = (((step.id - 1) / (self._counter - 1)) * 100) + '%';
-                    }
-                    self._component.progress.bar.css('width',width);
-
-                    // Execute Callback
-                    if(typeof properties.callback.show === 'function'){
-                        properties.callback.show(event,step,self);
-                    }
-                });
-                content.on('shown.bs.collapse', function (event) {
-
-                    // Execute Callback
-                    if(typeof properties.callback.shown === 'function'){
-                        properties.callback.shown(event,step,self);
-                    }
-                });
-
-                // Check if Step is First
-                if(step.id === 1){
-                    content.bootstrap.show();
-                }
-
-                // Check if Stepper contains a single step
-                if(this._counter > 1 && this._component.pagination.next.attr('disabled') === 'disabled'){
-                    this._component.pagination.next.attr('disabled',false).attr('data-bs-target','#' + self._component.steps.id + '2');
-                }
-
-                // Execute Callback
-                if(typeof callback === 'function'){
-                    callback(step,this);
-                }
-
-                // Return Object
-                return this;
-            }
-        },
         timeline: class extends this.ComponentClass {
 
             _init(){
@@ -11033,6 +10808,173 @@ class Builder {
 
                 // Return Input
                 return input;
+            }
+        },
+        date: class extends this.InputClass {
+
+            _init(){
+
+                // Execute Parent Init
+                super._init();
+
+                // Set Additional Properties
+                this._properties.autocomplete = 'off';
+            }
+
+            _input(){
+
+                // Create Input
+                const input = $(document.createElement('input')).attr({
+                    'id': this._component.id + '-input',
+                    'class': 'form-control',
+                    'name': this._properties.name,
+                    'autocomplete': this._properties.autocomplete,
+                    'type': 'date',
+                });
+
+                // Return Input
+                return input;
+            }
+        },
+        time: class extends this.InputClass {
+
+            _init(){
+
+                // Execute Parent Init
+                super._init();
+
+                // Set Additional Properties
+                this._properties.autocomplete = 'off';
+            }
+
+            _input(){
+
+                // Create Input
+                const input = $(document.createElement('input')).attr({
+                    'id': this._component.id + '-input',
+                    'class': 'form-control',
+                    'name': this._properties.name,
+                    'autocomplete': this._properties.autocomplete,
+                    'type': 'time',
+                });
+
+                // // Configure Input Mask
+                // input.inputmask({
+                //     mask: ["99:99", "99:99:99"],
+                //     placeholder: " ",
+                //     greedy: false,
+                //     showMaskOnHover: false,
+                //     showMaskOnFocus: true
+                // });
+
+                // Return Input
+                return input;
+            }
+        },
+        timer: class extends this.InputClass {
+
+            _init(){
+
+                // Execute Parent Init
+                super._init();
+
+                // Set Additional Properties
+                this._properties.autocomplete = 'off';
+            }
+
+            _input(){
+
+                // Create Input
+                const input = $(document.createElement('input')).attr({
+                    'id': this._component.id + '-input',
+                    'class': 'form-control',
+                    'name': this._properties.name,
+                    'autocomplete': this._properties.autocomplete,
+                    'type': 'time',
+                });
+
+                // Configure Input Mask
+                input.inputmask({
+                    mask: ["99:99", "99:99:99"],
+                    placeholder: " ",
+                    greedy: false,
+                    showMaskOnHover: false,
+                    showMaskOnFocus: true
+                });
+
+                // Return Input
+                return input;
+            }
+        },
+        select: class extends this.InputClass {
+
+            _init(){
+                // Execute Parent Init
+                super._init();
+
+                // Set Additional Properties
+                this._properties.autocomplete = 'off';
+                this._properties.multiple = false;
+                this._properties.options = [];
+            }
+
+            _input(){
+
+                // Initialize options
+                this._component.options = {};
+
+                // Create Select
+                return $(document.createElement('select')).attr({
+                    'id': this._component.id + '-input',
+                    'class': 'form-select',
+                    'name': this._properties.name,
+                    'autocomplete': this._properties.autocomplete,
+                });
+            }
+
+            _extend(){
+                // Runs during _create() and before insertion.
+                // Fix name for multiple after base attributes were set.
+                if (this._properties.multiple) {
+                    this._component.input.attr('multiple', true);
+                    this._component.input.attr('name', this._properties.name + '[]'); // role[]
+                }
+
+                // Add Options
+                if(Array.isArray(this._properties.options)){
+                    for(const [key, option] of Object.entries(this._properties.options)){
+                        this.add(option.id, option.text);
+                    }
+                }
+
+                // Placeholder
+                if(this._properties.placeholder){
+                    this._component.input.prepend($(document.createElement('option')).attr({
+                        'value': '',
+                        'disabled': true,
+                        'selected': true,
+                    }).text(this._properties.placeholder));
+                }
+            }
+
+            delete(id = null){
+                if(id){
+                    if(typeof this._component.options[id] !== 'undefined'){
+                        this._component.options[id].remove();
+                        delete this._component.options[id];
+                    }
+                } else {
+                    for(const [key, element] of Object.entries(this._component.options)){
+                        element.remove();
+                        delete this._component.options[key];
+                    }
+                }
+            }
+
+            add(id,text){
+                if(typeof this._component.options[id] === 'undefined'){
+                    this._component.options[id] = $(document.createElement('option')).attr('value',id).text(text).appendTo(this._component.input);
+                }
             }
         },
     }
