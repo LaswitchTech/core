@@ -1,0 +1,101 @@
+:root {
+    --sidebar-w: 300px;
+    --sidebar-collapsed-w: 0px;
+}
+
+[data-bs-template="panel"] .app { min-height: 100vh; }
+
+[data-bs-template="panel"] .back-to-top { display: none; }
+
+[data-bs-template="panel"] .sidebar {
+    width: var(--sidebar-w);
+    background-color: var(--bs-body-bg);
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow-y: auto;
+    transition: transform .2s ease-in-out, width .2s ease-in-out, flex-basis .2s ease-in-out;
+}
+
+[data-bs-template="panel"] .sidebar .sidebar-brand .logo {
+    width: 100%;
+    height: auto;
+    max-width: 175px;
+}
+
+[data-bs-template="panel"] .app-main { min-width: 0; } /* prevent overflow in flex layouts */
+
+[data-bs-template="panel"] .app-content {
+    min-width: 0;
+}
+
+/* Images/videos never exceed their container */
+[data-bs-template="panel"] .app-content img,
+[data-bs-template="panel"] .app-content video,
+[data-bs-template="panel"] .app-content svg {
+    max-width: 100%;
+    height: auto;
+}
+
+/* Tables don’t force overflow; enable horizontal scroll if needed */
+[data-bs-template="panel"] .app-content .table-responsive {
+    overflow-x: auto;
+}
+
+/* Collapse behavior on desktop (≥ lg) */
+@media (min-width: 992px) {
+    /* Sidebar should not shrink */
+    [data-bs-template="panel"] .sidebar {
+        /* Keep your existing width */
+        width: var(--sidebar-w);
+
+        /* Lock flex basis to that width and prevent shrinking */
+        flex: 0 0 var(--sidebar-w);
+    }
+
+    /* When collapsed, let main take the space; keep basis in sync with your width var */
+    [data-bs-template="panel"] .app.sidebar-collapsed .sidebar {
+        width: var(--sidebar-collapsed-w);
+        flex-basis: var(--sidebar-collapsed-w);
+        transform: translateX(-100%);
+    }
+
+    /* Make sure the main column can shrink instead of forcing overflow */
+    [data-bs-template="panel"] .app-main {
+        flex: 1 1 auto;     /* let it grow and shrink */
+        min-width: 0;       /* already in your file, keep it */
+    }
+}
+
+/* Mobile drawer behavior (< lg) */
+@media (max-width: 991.98px) {
+    [data-bs-template="panel"] .sidebar {
+        position: fixed;
+        left: 0; top: 0; bottom: 0;
+        transform: translateX(-100%);
+        z-index: 1040; /* above navbar but below modal */
+        box-shadow: var(--bs-box-shadow);
+    }
+    [data-bs-template="panel"] .app.sidebar-open .sidebar { transform: translateX(0); }
+
+    [data-bs-template="panel"] .sidebar-backdrop {
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, .3);
+        opacity: 0;
+        visibility: hidden;
+        transition: opacity .2s ease-in-out, visibility .2s;
+        z-index: 1030;
+    }
+    [data-bs-template="panel"] .app.sidebar-open .sidebar-backdrop {
+        opacity: 1;
+        visibility: visible;
+    }
+
+    [data-bs-template="panel"] .app.sidebar-open { overflow: hidden; }
+}
+
+/* Respect reduced motion */
+@media (prefers-reduced-motion: reduce) {
+    [data-bs-template="panel"] .sidebar, .sidebar-backdrop { transition: none; }
+}

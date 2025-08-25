@@ -159,7 +159,13 @@ abstract class BaseEndpoint extends Endpoint {
                     if(!array_key_exists('organization',$record) || $record['organization']['id'] == $this->Auth->user()->organization()->id){
 
                         // Check if the user is authorized to access the record
-                        if(!array_key_exists('assignedTo',$record) || $record['assignedTo']['id'] == $this->Auth->user()->id || $this->Auth->isAuthorized("AccountManager", 1)){
+                        if(
+                            $this->Auth->isAuthorized("AccountManager", 1) ||
+                            (array_key_exists('task',$record) && array_key_exists('assignedTo',$record['task']) && is_null($record['task']['assignedTo'])) ||
+                            (array_key_exists('task',$record) && array_key_exists('assignedTo',$record['task']) && $record['task']['assignedTo'] == $this->Auth->user()->id) ||
+                            (array_key_exists('assignedTo',$record) && is_null($record['assignedTo'])) ||
+                            (array_key_exists('assignedTo',$record) && $record['assignedTo'] == $this->Auth->user()->id)
+                        ){
 
                             // Retrieve the record
                             $message['data']['record'] = $record;

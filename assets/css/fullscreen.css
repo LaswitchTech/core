@@ -1,0 +1,28 @@
+[data-bs-template="fullscreen"] .app { min-height: 100vh; }
+
+[data-bs-template="fullscreen"] .back-to-top { display: none; }
+
+[data-bs-template="fullscreen"] .app-main { min-width: 0; } /* prevent overflow in flex layouts */
+
+[data-bs-template="fullscreen"] .app-main > .navbar .logo {
+    width: auto;
+    height: 100%;
+    max-height: 56px;
+}
+
+[data-bs-template="fullscreen"] .app-content {
+    min-width: 0;
+}
+
+/* Images/videos never exceed their container */
+[data-bs-template="fullscreen"] .app-content img,
+[data-bs-template="fullscreen"] .app-content video,
+[data-bs-template="fullscreen"] .app-content svg {
+    max-width: 100%;
+    height: auto;
+}
+
+/* Tables don’t force overflow; enable horizontal scroll if needed */
+[data-bs-template="fullscreen"] .app-content .table-responsive {
+    overflow-x: auto;
+}

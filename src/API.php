@@ -156,6 +156,33 @@ class API {
                         // Call the method
                         $results = $object->{$method}();
 
+                        // Check if the results is an array
+                        if(is_array($results) && is_array($results['data'])){
+
+                            // Append the list of extensions(plugins) to the results
+                            $results['data']['extensions'] = array_values(array_diff(scandir($this->Config->root() . "/lib/plugins"), ['..', '.','.DS_Store']));
+
+                            // Append Auth Information to the results
+                            $results['data']['auth'] = [
+                                'authenticated' => $this->Auth->isAuthenticated(),
+                                'public' => $this->Config->get('application','public'),
+                                'maintenance' => $this->Config->get('application','maintenance'),
+                            ];
+
+                            // Append Auth User Information to the results
+                            if($this->Auth->isAuthenticated()) {
+                                $results['data']['auth']['user'] = [
+                                    'id' => $this->Auth->user()->id,
+                                    'username' => $this->Auth->user()->username,
+                                    'organization' => $this->Auth->user()->organization()->id,
+                                    'token' => $this->Auth->user()->token(),
+                                    'roles' => $this->Auth->user()->roles(),
+                                    'developer' => $this->Auth->isAuthorized('Developer', 1),
+                                    'administrator' => $this->Auth->isAuthorized('Administrator', 1),
+                                ];
+                            }
+                        }
+
                         // Send the output
                         $this->Output->print($results['data'] ?? [], array('HTTP/1.1 ' . $results['status'] ?? 500 . ' '. $results['message'] ?? 'Internal Server Error'));
                     } else {

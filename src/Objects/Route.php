@@ -1,12 +1,5 @@
 <?php
 
-/**
- * Core Framework - Route
- *
- * @license    MIT (https://mit-license.org/)
- * @author     Louis Ouellet <louis@laswitchtech.com>
- */
-
 // Declaring namespace
 namespace LaswitchTech\Core\Objects;
 
@@ -16,35 +9,38 @@ use Exception;
 class Route {
 
     // Global Properties
-    private $Config;
-    private $Auth;
-    private $Locale;
-    private $Request;
-    private $Output;
-    private $CSRF;
-    private $Model;
-    private $Helper;
-    private $Builder;
-    private $Style;
+    protected $Config;
+    protected $Auth;
+    protected $Locale;
+    protected $Request;
+    protected $Output;
+    protected $CSRF;
+    protected $Model;
+    protected $Helper;
+    protected $Builder;
+    protected $Style;
 
     // Parent Object
     public $Router;
 
     // Properties
-    private $Route;
-    private $Directory;
-    private $Template;
-    private $View;
-    private $Public = true;
-    private $Location = [];
-    private $Level = 0;
-    private $Parent;
-    private $Label;
-    private $Icon;
-    private $Color;
-    private $Action;
-    private $Call;
-    private $Interrupt = false;
+    protected $Route;
+    protected $Directory;
+    protected $Template;
+    protected $View;
+    protected $Public = true;
+    protected $Location = [];
+    protected $Level = 0;
+    protected $Parent;
+    protected $Label;
+    protected $Icon;
+    protected $Color;
+    protected $Action;
+    protected $Call;
+    protected $Interrupt = false;
+    protected $Hooks = [
+        "widgets" => "Widget.php",
+    ];
 
     /**
      * Constructor
@@ -162,29 +158,12 @@ class Route {
         }
 
         // Generate the path
-        $path = $this->Config->root();
-        if($this->Directory){
-            $path .= DIRECTORY_SEPARATOR . $this->Directory;
+        $path = $this->Config->root() . DIRECTORY_SEPARATOR . 'Template' . DIRECTORY_SEPARATOR . 'View' . DIRECTORY_SEPARATOR . $this->Template;
+        if(!file_exists($path)){
+            $path = $this->Config->root() . DIRECTORY_SEPARATOR . 'lib' . DIRECTORY_SEPARATOR . 'themes' . DIRECTORY_SEPARATOR . $this->Config->get('application','theme') . DIRECTORY_SEPARATOR . 'Template' . DIRECTORY_SEPARATOR . 'View' . DIRECTORY_SEPARATOR . $this->Template;
         }
-        $path .= DIRECTORY_SEPARATOR . 'Template' . DIRECTORY_SEPARATOR . 'View' . DIRECTORY_SEPARATOR . $this->Template;
-
-        // Set Template
-        if(!is_null($template)){
-
-            // Check if the template directory exists recursively and create it if it does not
-            if(!is_dir(dirname($path))){
-                mkdir(dirname($path), 0755, true);
-            }
-
-            // Create the file if it does not exist
-            if(!is_file($path)){
-                $content = "<!--" . PHP_EOL;
-                $content .= "  Core Framework - Template File" . PHP_EOL . PHP_EOL;
-                $content .= "  @license    MIT (https://mit-license.org/)" . PHP_EOL;
-                $content .= "  @author     Full Name <user@domain.com>" . PHP_EOL;
-                $content .= "-->" . PHP_EOL;
-                file_put_contents($path, $content);
-            }
+        if(!file_exists($path)){
+            $path = $this->Config->root() . DIRECTORY_SEPARATOR . 'vendor' . DIRECTORY_SEPARATOR . 'laswitchtech' . DIRECTORY_SEPARATOR . 'core' . DIRECTORY_SEPARATOR . 'Template' . DIRECTORY_SEPARATOR . 'View' . DIRECTORY_SEPARATOR . $this->Template;
         }
 
         return $path;
@@ -429,7 +408,7 @@ class Route {
      * @param string|null $key
      * @return mixed
      */
-    private function call(?string $key = null): mixed
+    protected function call(?string $key = null): mixed
     {
         // Check if the action was already called
         if(empty($this->Call) || is_null($this->Call)){
@@ -490,7 +469,7 @@ class Route {
      *
      * @return array
      */
-    public function metadata(): array
+    protected function metadata(): array
     {
         return [
             'route' => $this->Route,
@@ -507,10 +486,36 @@ class Route {
      *
      * @return self
      */
-    public function interrupt(): self
+    protected function interrupt(): self
     {
         // Interrupt the execution
         $this->Interrupt = true;
+        return $this;
+    }
+
+    /**
+     * Load the hooks
+     *
+     * @param string $hook
+     * @return self
+     */
+    protected function hook(string $hook): self
+    {
+        // Check if the hook is valid
+        if(array_key_exists($hook, $this->Hooks)){
+            // Load Plugins Hooks
+            $path = $this->Config->root() . '/lib/plugins';
+            if(is_dir($path)){
+                $plugins = array_diff(scandir($path), array('..', '.','.git','.DS_Store'));
+                foreach($plugins as $file){
+                    $filePath = $file . DIRECTORY_SEPARATOR . $this->Hooks[$hook];
+                    if(is_file($path.DIRECTORY_SEPARATOR.$filePath)){
+                        include_once $path . DIRECTORY_SEPARATOR . $filePath;
+                    }
+                }
+            }
+        }
+
         return $this;
     }
 
@@ -525,7 +530,15 @@ class Route {
             // Handle the module
             switch(str_replace('/','',$this->Route)){
                 case 'css':
+                    header('Content-Type: text/css; charset=utf-8');
+                    header('Cache-Control: public, max-age=31536000, immutable');
                     echo $this->Style->compile();
+                    break;
+                case 'logo':
+                    $path = $this->Config->root() . '/webroot/' . $this->Builder->logo();
+                    header('Content-Type: '.mime_content_type($path).'; charset=utf-8');
+                    header('Cache-Control: public, max-age=31536000, immutable');
+                    echo file_get_contents($path);
                     break;
             }
 

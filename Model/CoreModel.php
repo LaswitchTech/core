@@ -409,4 +409,14 @@ class coreModel extends Model {
 
         return $dictionary;
     }
+
+    /**
+     * Retrieve the list of tables in the database
+     *
+     * @return array
+     */
+    public function tables(): array
+    {
+        return $this->Database->schema()->tables();
+    }
 }

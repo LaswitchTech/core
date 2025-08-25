@@ -76,6 +76,32 @@ class Bootstrap {
                 "CLI"
             ]
         ],
+        // Database
+        "DATABASE" => [
+            "class" => "\\LaswitchTech\\Core\\Database",
+            "scope" => [
+                "ROUTER",
+                "API",
+                "CLI"
+            ]
+        ],
+        // Authentication
+        "AUTH" => [
+            "class" => "\\LaswitchTech\\Core\\Auth",
+            "scope" => [
+                "ROUTER",
+                "API",
+                "CLI"
+            ]
+        ],
+        // Security
+        "CSRF" => [
+            "class" => "\\LaswitchTech\\Core\\CSRF",
+            "scope" => [
+                "ROUTER",
+                "API"
+            ]
+        ],
         // Styles and Scripts
         "STYLE" => [
             "class" => "\\LaswitchTech\\Core\\Style",
@@ -99,24 +125,6 @@ class Bootstrap {
                 "CLI"
             ]
         ],
-        // Database
-        "DATABASE" => [
-            "class" => "\\LaswitchTech\\Core\\Database",
-            "scope" => [
-                "ROUTER",
-                "API",
-                "CLI"
-            ]
-        ],
-        // Authentication
-        "AUTH" => [
-            "class" => "\\LaswitchTech\\Core\\Auth",
-            "scope" => [
-                "ROUTER",
-                "API",
-                "CLI"
-            ]
-        ],
         // Models
         "MODEL" => [
             "class" => "\\LaswitchTech\\Core\\Models",
@@ -124,14 +132,6 @@ class Bootstrap {
                 "ROUTER",
                 "API",
                 "CLI"
-            ]
-        ],
-        // Security
-        "CSRF" => [
-            "class" => "\\LaswitchTech\\Core\\CSRF",
-            "scope" => [
-                "ROUTER",
-                "API"
             ]
         ],
         // Communications

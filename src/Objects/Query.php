@@ -548,8 +548,20 @@ class Query {
             $clauses = [];
             foreach ($where['clauses'] as $i => $condition) {
                 $conjunction = $condition['conjunction'];
-                if($this->type === 'select'){
-                    $col = (strpos($condition['column'], '.') !== false) ? "`".str_replace('.','`.`',$condition['column'])."`" : "t.`{$condition['column']}`";
+                if ($this->type === 'select') {
+                    $spec = $condition['column'];
+                    if (strpos($spec, '.') === false) {
+                        $col = "t.`{$spec}`";
+                    } else {
+                        $parts = explode('.', $spec);
+                        if ($parts[0] === 't' && count($parts) === 2) {
+                            $col = "t.`{$parts[1]}`";
+                        } else {
+                            $column = array_pop($parts);
+                            $alias  = 'j__' . implode('__', $parts);
+                            $col    = "`{$alias}`.`{$column}`";
+                        }
+                    }
                 } else {
                     $col = "`{$condition['column']}`";
                 }
@@ -574,14 +586,18 @@ class Query {
     {
         $clauses = [];
         foreach ($this->order as $order) {
-            // Check if the column is a joined column
-            if(strpos($order['column'], '.') !== false){
-                $parts = explode('.', $order['column']);
-                $joint = $parts[0];
-                $column = $parts[1];
-                $clauses[] = "`j__{$joint}`.`{$column}` {$order['direction']}";
+            $spec = $order['column'];
+            if (strpos($spec, '.') === false) {
+                $clauses[] = "t.`{$spec}` {$order['direction']}";
             } else {
-                $clauses[] = "t.`{$order['column']}` {$order['direction']}";
+                $parts = explode('.', $spec);
+                if ($parts[0] === 't' && count($parts) === 2) {
+                    $clauses[] = "t.`{$parts[1]}` {$order['direction']}";
+                } else {
+                    $column = array_pop($parts);
+                    $alias  = 'j__' . implode('__', $parts);
+                    $clauses[] = "`{$alias}`.`{$column}` {$order['direction']}";
+                }
             }
         }
         return implode(', ', $clauses);
