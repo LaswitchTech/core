@@ -9356,6 +9356,30 @@ class Builder {
                 }
             }
         },
+        submit: class extends this.InputClass {
+
+            _init(){
+
+                // Execute Parent Init
+                super._init();
+
+                // Set Additional Properties
+                this._properties.autocomplete = 'off';
+            }
+
+            _input(){
+
+                // Create Input
+                return $(document.createElement('input')).attr({
+                    'id': this._component.id + '-input',
+                    'class': 'btn btn-primary',
+                    'name': this._properties.name,
+                    'autocomplete': this._properties.autocomplete,
+                    'type': 'submit',
+                    'value': this._properties.value || 'Submit',
+                });
+            }
+        },
     }
 
     #widgets = {
