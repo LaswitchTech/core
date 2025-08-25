@@ -612,6 +612,13 @@ class Builder {
                 }
                 this.#inputs[name] = object;
                 break;
+            case'renderers':
+                if(typeof this.#renderers[name] !== 'undefined'){
+                    console.log('Renderer Already Exist');
+                    return false;
+                }
+                this.#renderers[name] = object;
+                break;
             case'widgets':
                 if(typeof this.#widgets[name] !== 'undefined'){
                     console.log('Widget Already Exist');
@@ -689,6 +696,16 @@ class Builder {
             return false;
         }
         return new this.#layouts[name](self, param1, param2, param3);
+    }
+
+    Render(name, value, data){
+
+        // Check if the renderer exists
+        if (typeof this.#renderers[name] === 'undefined') {
+            return '<div>'+value+'</div>';
+        }
+
+        return this.#renderers[name](value, data);
     }
 
     #utilities = {
@@ -4557,6 +4574,8 @@ class Builder {
             };
         },
     };
+
+    #renderers = {}
 
     #layouts = {
         quiz: class extends this.ComponentClass {
