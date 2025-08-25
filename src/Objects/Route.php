@@ -534,6 +534,12 @@ class Route {
                     header('Cache-Control: public, max-age=31536000, immutable');
                     echo $this->Style->compile();
                     break;
+                case 'logo':
+                    $path = $this->Config->root() . '/webroot/' . $this->Builder->logo();
+                    header('Content-Type: '.mime_content_type($path).'; charset=utf-8');
+                    header('Cache-Control: public, max-age=31536000, immutable');
+                    echo file_get_contents($path);
+                    break;
             }
 
             return $this;

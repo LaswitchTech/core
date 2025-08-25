@@ -35,7 +35,7 @@
 
                     <!-- Branding -->
                     <a class="sidebar-brand d-flex flex-column justify-content-center align-items-center py-4 fs-4 text-decoration-none" href="/">
-                        <img class="logo" src="<?= $this->Builder->logo(); ?>" alt="Logo">
+                        <img class="logo" src="/logo" alt="Logo">
                         <h4 class="brand m-0 mt-2 fs-2"><?= $this->Config->get('application','name') ?></h4>
                     </a>
 

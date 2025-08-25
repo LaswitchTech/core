@@ -35,7 +35,7 @@
                         <div class="container-fluid">
                             <!-- Branding -->
                             <a class="brand d-flex justify-content-start align-items-center text-decoration-none" href="/">
-                                <img class="logo me-1" src="<?= $this->Builder->logo(); ?>" alt="Logo">
+                                <img class="logo me-1" src="/logo" alt="Logo">
                                 <h4 class="brand m-0 ms-2 fs-2"><?= $this->Config->get('application','name') ?></h4>
                             </a>
 

@@ -10,9 +10,10 @@ use Exception;
 class Router {
 
     // Constants
-    const Modules = ["css"];
+    const Modules = ["css","logo"];
     const ModulesLabels = [
-        "css" => "CSS", // CSS Module
+        "css" => "CSS",
+        "logo" => "Logo",
     ];
     const HttpCodes = [400,401,403,404,405,422,423,427,428,429,430,432,500,501,503];
     const HttpCustomCodes = [427,430,432];
