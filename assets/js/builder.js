@@ -579,7 +579,7 @@ class Builder {
 
     add(type, name, object){
         const self = this;
-        if(typeof type !== 'string' || typeof name !== 'string' || !self.Helper.isClass(object)){
+        if(typeof type !== 'string' || typeof name !== 'string' || (!self.Helper.isClass(object) && typeof object !== 'function')){
             console.log('Builder.add(String, String, Class)');
             return false;
         }
