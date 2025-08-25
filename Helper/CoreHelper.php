@@ -658,6 +658,101 @@ class CoreHelper extends Helper {
     }
 
     /**
+     * Convert bytes to a human-readable filesize string
+     *
+     * @param int $bytes Number of bytes
+     * @param int $decimals Number of decimal places to include
+     * @return string Human-readable filesize (e.g., "1.23 MB")
+     */
+    public function readable(int $bytes, int $decimals = 2): string
+    {
+        if ($bytes < 1024) {
+            return $bytes . ' B';
+        }
+
+        $units = ['B','KB','MB','GB','TB','PB','EB','ZB','YB'];
+        $factor = floor(log($bytes, 1024)); // which power of 1024 to use
+
+        // Cap the factor index if it exceeds our array range
+        $factor = min($factor, count($units) - 1);
+
+        $size = $bytes / pow(1024, $factor);
+
+        return sprintf("%.{$decimals}f", $size) . ' ' . $units[$factor];
+    }
+
+    /**
+     * Copy directory recursively
+     *
+     * @param string $source Source directory
+     * @param string $destination Destination directory
+     * @param array $exclude List of exclusions
+     * @return bool true on success, false on failure
+     */
+    public function copy(string $source, string $destination, array $exclude = []): bool
+    {
+        // Set the log file
+        $this->Log->set('backup');
+
+        // The source directory must exist
+        if (!is_dir($source)) {
+            $this->Log->error("Source directory does not exist: $source");
+            return false;
+        }
+
+        // Attempt to create the destination directory if it doesn't exist
+        // The check for is_dir($destination) after mkdir() handles the case
+        // where multiple processes might try to create it in parallel
+        if (!is_dir($destination) && !mkdir($destination, 0755, true) && !is_dir($destination)) {
+            $this->Log->error("Failed to create destination directory: $destination");
+            return false;
+        }
+
+        // Open the source directory to read files
+        $dirHandle = opendir($source);
+        if (!$dirHandle) {
+            $this->Log->error("Failed to open source directory: $source");
+            return false;
+        }
+
+        // Iterate through each file/folder in the source
+        while (false !== ($item = readdir($dirHandle))) {
+            // Skip pointers
+            if ($item === '.' || $item === '..') {
+                continue;
+            }
+
+            $srcPath = $source . DIRECTORY_SEPARATOR . $item;
+            $dstPath = $destination . DIRECTORY_SEPARATOR . $item;
+
+            // If this folder is excluded, just skip it
+            if (is_dir($srcPath) && in_array($item, $exclude, true)) {
+                continue;
+            }
+
+            // Directory – recurse
+            if (is_dir($srcPath)) {
+                if (!$this->copy($srcPath, $dstPath, $exclude)) {
+                    closedir($dirHandle);
+                    $this->Log->error("Failed to copy directory: $srcPath to $dstPath");
+                    return false;
+                }
+            } else {
+                // File – just copy
+                if (!copy($srcPath, $dstPath)) {
+                    closedir($dirHandle);
+                    $this->Log->error("Failed to copy file: $srcPath to $dstPath");
+                    return false;
+                }
+            }
+        }
+
+        closedir($dirHandle);
+        $this->Log->success("Backup completed successfully from $source to $destination");
+        return true;
+    }
+
+    /**
      * Load the extensions urls from the configuration file
      *
      * @return array
