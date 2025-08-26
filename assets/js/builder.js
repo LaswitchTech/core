@@ -698,14 +698,14 @@ class Builder {
         return new this.#layouts[name](self, param1, param2, param3);
     }
 
-    Render(name, value, data){
+    Render(name, value, data = {}, type = null){
 
         // Check if the renderer exists
         if (typeof this.#renderers[name] === 'undefined') {
             return '<div>'+value+'</div>';
         }
 
-        return this.#renderers[name](value, data);
+        return this.#renderers[name](value, data, type);
     }
 
     #utilities = {
