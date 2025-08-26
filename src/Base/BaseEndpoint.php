@@ -292,7 +292,7 @@ abstract class BaseEndpoint extends Endpoint {
                     // Retrieve the record
                     $message['data']['record'] = $this->Model->{$this->name}->fetch($record['id']);
                 } else {
-                    $message = ["status" => 500, "message" => "Internal Server Error", "data" => "An error occurred while updating the ".$this->name."."];
+                    $message = ["status" => 200, "message" => "OK", "data" => ["record" => $record, "info" => "No changes were made to the ".$this->name."." ]];
                 }
             } else {
                 $message = ["status" => 405, "message" => "Method Not Allowed", "data" => "The method is not allowed for the requested URL."];
