@@ -226,6 +226,11 @@ abstract class BaseEndpoint extends Endpoint {
 
                         // Retrieve the record
                         $message['data']['record'] = $this->Model->{$this->name}->fetch($id);
+
+                        // Check if the record was created
+                        if(empty($message['data']['record'])){
+                            $message = ["status" => 500, "message" => "Internal Server Error", "data" => "An error occurred while retrieving the created ".$this->name."."];
+                        }
                     } else {
                         $message = ["status" => 500, "message" => "Internal Server Error", "data" => "An error occurred while creating the ".$this->name."."];
                     }
