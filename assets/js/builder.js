@@ -698,14 +698,14 @@ class Builder {
         return new this.#layouts[name](self, param1, param2, param3);
     }
 
-    Render(name, value, data){
+    Render(name, value, data = {}, type = null){
 
         // Check if the renderer exists
         if (typeof this.#renderers[name] === 'undefined') {
             return '<div>'+value+'</div>';
         }
 
-        return this.#renderers[name](value, data);
+        return this.#renderers[name](value, data, type);
     }
 
     #utilities = {
@@ -857,6 +857,11 @@ class Builder {
 
                 // Set Self
                 const self = this;
+
+                // Check if String
+                if(typeof string !== 'string'){
+                    return string;
+                }
 
                 // 0) Replace various patterns in a string with HTML elements.
                 //    The following patterns are supported:
@@ -3750,6 +3755,13 @@ class Builder {
 
                 // Return
                 return this;
+            }
+
+            input(name){
+                if(typeof this._inputs[name] !== 'undefined'){
+                    return this._inputs[name];
+                }
+                return null;
             }
 
             val(values = null){
