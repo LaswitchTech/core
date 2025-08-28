@@ -858,6 +858,11 @@ class Builder {
                 // Set Self
                 const self = this;
 
+                // Check if String
+                if(typeof string !== 'string'){
+                    return string;
+                }
+
                 // 0) Replace various patterns in a string with HTML elements.
                 //    The following patterns are supported:
                 //     - %today% => current date (YYYY-MM-DD)
