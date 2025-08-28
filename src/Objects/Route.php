@@ -469,7 +469,7 @@ class Route {
      *
      * @return array
      */
-    protected function metadata(): array
+    public function metadata(): array
     {
         return [
             'route' => $this->Route,
