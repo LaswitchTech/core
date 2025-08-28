@@ -3757,6 +3757,13 @@ class Builder {
                 return this;
             }
 
+            input(name){
+                if(typeof this._inputs[name] !== 'undefined'){
+                    return this._inputs[name];
+                }
+                return null;
+            }
+
             val(values = null){
 
                 // Set Self
