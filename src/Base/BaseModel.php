@@ -14,6 +14,7 @@ abstract class BaseModel extends Model {
 
     // Properties
     protected $table;
+    protected $tables = [];
     protected $primary;
     protected $schema;
     protected $definition;
@@ -77,12 +78,72 @@ abstract class BaseModel extends Model {
         // Set the primary key
         $this->primary = $primary;
 
+        // Retrieve the tables list
+        $this->tables = $this->Database->schema()->tables();
+
         // Initialize the Model
         $this->schema = $this->Database->schema()->define($this->table);
 
         // Describe the table
         foreach($this->schema->describe() as $column){
             $this->definition[$column['Field']] = $column;
+
+            // Exclude fields
+            if(in_array(strtolower($column['Field']), ['id', 'created', 'modified', 'isarchived', 'iscompleted', 'targettable', 'targetid'])) continue;
+
+            // Set the table
+            $table = in_array($column['Field'],['owner', 'assignedTo']) ? 'users' : $column['Field'] . 's';
+
+            // Check if the field is linked to a table
+            if(in_array($table, $this->tables)){
+
+                // Initialize the Schema
+                $schema = $this->Database->schema()->define($table);
+
+                // Describe the table
+                foreach($schema->describe() as $col){
+
+                    // Add the col to the definition
+                    $this->definition[$column['Field'].'.'.$col['Field']] = $col;
+                }
+            };
+        }
+
+        // Loop through the additional tables to join
+        foreach($this->definition as $field => $col){
+
+            // // Exclude fields
+            // if(in_array(strtolower($field), ['id', 'created', 'modified', 'isarchived', 'iscompleted', 'targettable', 'targetid'])) continue;
+
+            // // Set the fieldTable
+            // $fieldTable = in_array($field,['owner', 'assignedTo']) ? 'users' : $field . 's';
+
+            // Initialize the Schema
+            $schema = $this->Database->schema()->define($fieldTable);
+
+            // Describe the table
+            foreach($schema->describe() as $column){
+
+                // // Add the column to the definition
+                // $this->definition[$field.'.'.$column['Field']] = $column;
+
+                // // Set the fieldTable
+                // $nestedTable = in_array($field,['owner', 'assignedTo']) ? 'users' : $field . 's';
+
+                // Check if the field is a complex field
+                if(in_array($nestedTable, $tables)){
+
+                    // Initialize the Schema
+                    $nestedSchema = $this->Database->schema()->define($nestedTable);
+
+                    // Describe the table
+                    foreach($nestedSchema->describe() as $nestedColumn){
+
+                        // Add the nestedColumn to the definition
+                        $this->definition[$field.'.'.$column['Field'].'.'.$nestedColumn['Field']] = $nestedColumn;
+                    }
+                };
+            }
         }
     }
 
