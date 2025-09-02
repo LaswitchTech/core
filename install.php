@@ -436,6 +436,7 @@ function installExtensions(): bool
 
     // Check if the config file exists
     if (!file_exists($configPath)) {
+        echo "Configuration file not found: $configPath\n";
         return false;
     }
 
