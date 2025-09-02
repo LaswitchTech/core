@@ -444,6 +444,7 @@ function installExtensions(): bool
 
     // Check if the config is valid
     if (json_last_error() !== JSON_ERROR_NONE) {
+        echo "Error parsing the configuration file: " . json_last_error_msg() . "\n";
         return false;
     }
 
@@ -455,6 +456,7 @@ function installExtensions(): bool
 
         // Execute the command to install the extension
         if(!executeCMD(escapeshellarg(php_bin()) . ' cli core extension install modules ' . escapeshellarg($extension))){
+            echo "Failed to install module: $extension" . PHP_EOL;
             return false;
         }
     }
@@ -467,6 +469,7 @@ function installExtensions(): bool
 
         // Execute the command to install the extension
         if(!executeCMD(escapeshellarg(php_bin()) . ' cli core extension install plugins ' . escapeshellarg($extension))){
+            echo "Failed to install plugin: $extension" . PHP_EOL;
             return false;
         }
     }
@@ -479,6 +482,7 @@ function installExtensions(): bool
 
         // Execute the command to install the extension
         if(!executeCMD(escapeshellarg(php_bin()) . ' cli core extension install themes ' . escapeshellarg($extension))){
+            echo "Failed to install theme: $extension" . PHP_EOL;
             return false;
         }
     }
