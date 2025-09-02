@@ -286,7 +286,7 @@ class Builder {
         $html .= '    const LOGO = "' . $this->logo() . '"' . PHP_EOL;
         $html .= '    const PUBLIC = ' . ($this->Config->get('application','public') ? 'true' : 'false') . ';' . PHP_EOL;
         $html .= '    const AUTHENTICATED = ' . ($this->Auth->isAuthenticated() ? 'true' : 'false') . ';' . PHP_EOL;
-        $html .= '    const USER_ID = ' . ($this->Auth->isAuthenticated() ? $this->Auth->user()->id : null) . ';' . PHP_EOL;
+        $html .= '    const USER_ID = ' . ($this->Auth->isAuthenticated() ? $this->Auth->user()->id : 0) . ';' . PHP_EOL;
         $html .= '    const USER_USERNAME = "' . ($this->Auth->isAuthenticated() ? $this->Auth->user()->username : '') . '";' . PHP_EOL;
         $html .= '    const USER_ORGANIZATION = ' . ($this->Auth->isAuthenticated() ? $this->Auth->user()->organization()->id : 'null') . ';' . PHP_EOL;
         $html .= '    const USER_TOKEN = "' . ($this->Auth->isAuthenticated() ? $this->Auth->user()->token() : '') . '";' . PHP_EOL;
