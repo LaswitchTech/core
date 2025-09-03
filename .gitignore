@@ -16,6 +16,10 @@ TOKEN
 /Definition/
 /lib/
 
+# Exclude extension development files
+!/lib/*.sh
+!/lib/skeleton/
+
 # Filetypes
 *.cfg
 *.log
