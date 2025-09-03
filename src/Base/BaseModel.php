@@ -112,8 +112,6 @@ abstract class BaseModel extends Model {
                     }
                 };
             }
-        } else {
-            throw new Exception("Table '$table' does not exist.");
         }
     }
 
