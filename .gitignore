@@ -16,7 +16,8 @@ TOKEN
 /Definition/
 
 # lib: exclude only .sh in lib root and the skeleton dir
-/lib/**                # ignore everything in /lib
+/lib/                  # ignore everything in /lib
+/lib/**                #  ...and everything inside it
 !/lib/*.sh             # keep .sh files directly in /lib
 !/lib/skeleton/        # keep the skeleton dir
 !/lib/skeleton/**      # ...and everything inside it
