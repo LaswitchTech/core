@@ -1,12 +1,5 @@
 <?php
 
-/**
- * Core Framework - MySQL
- *
- * @license    MIT (https://mit-license.org/)
- * @author     Louis Ouellet <louis@laswitchtech.com>
- */
-
 // Declaring namespace
 namespace LaswitchTech\Core\Connectors;
 
@@ -34,20 +27,24 @@ class MySQL extends Connector {
      */
     public function connect()
     {
-        // In a real-world scenario, retrieve these from $this->Config
-        // e.g. $dbConfig = $this->Config->get('database');
-        // For demonstration, we’ll just hardcode or assume values are set in $dbConfig.
-        $dbConfig = $this->Config->get('database') ?? [];
+        $db = $this->Config->get('database') ?? [];
+        $host = $db['host'] ?? 'localhost';
+        $user = $db['username'] ?? 'root';
+        $pass = $db['password'] ?? '';
+        $name = $db['database'] ?? 'demo';
+        $port = (int)($db['port'] ?? 3306);
+        $socket = $db['socket'] ?? null;
 
-        $host = $dbConfig['host'] ?? 'localhost';
-        $user = $dbConfig['username'] ?? 'root';
-        $pass = $dbConfig['password'] ?? '';
-        $name = $dbConfig['database'] ?? 'demo';
+        // Force TCP when 'localhost' is used (avoids socket issues on macOS)
+        if ($host === 'localhost' && empty($socket)) {
+            $host = '127.0.0.1';
+        }
 
-        $this->mysqli = new mysqli($host, $user, $pass, $name);
-
-        if ($this->mysqli->connect_error) {
-            throw new Exception('MySQL Connection Error: ' . $this->mysqli->connect_error);
+        try {
+            $this->mysqli = new \mysqli($host, $user, $pass, $name, $port, $socket);
+        } catch (\mysqli_sql_exception $e) {
+            // Wrap it in your framework’s exception style
+            throw new \Exception('MySQL Connection Error: ' . $e->getMessage(), previous: $e);
         }
     }
 
