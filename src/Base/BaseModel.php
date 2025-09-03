@@ -72,41 +72,48 @@ abstract class BaseModel extends Model {
      */
     protected function init(string $table, ?string $primary = 'id'): void
     {
-        // Set the table name
-        $this->table = $table;
-
-        // Set the primary key
-        $this->primary = $primary;
 
         // Retrieve the tables list
         $this->tables = $this->Database->schema()->tables();
 
-        // Initialize the Model
-        $this->schema = $this->Database->schema()->define($this->table);
+        // Check if the table exists
+        if(in_array($table, $this->tables)){
 
-        // Describe the table
-        foreach($this->schema->describe() as $column){
-            $this->definition[$column['Field']] = $column;
+            // Set the table name
+            $this->table = $table;
 
-            // Exclude fields
-            if(in_array(strtolower($column['Field']), ['id', 'created', 'modified', 'isarchived', 'iscompleted', 'targettable', 'targetid'])) continue;
+            // Set the primary key
+            $this->primary = $primary;
 
-            // Set the table
-            $table = in_array($column['Field'],['owner', 'assignedTo']) ? 'users' : $column['Field'] . 's';
+            // Initialize the Model
+            $this->schema = $this->Database->schema()->define($this->table);
 
-            // Check if the field is linked to a table
-            if(in_array($table, $this->tables)){
+            // Describe the table
+            foreach($this->schema->describe() as $column){
+                $this->definition[$column['Field']] = $column;
 
-                // Initialize the Schema
-                $schema = $this->Database->schema()->define($table);
+                // Exclude fields
+                if(in_array(strtolower($column['Field']), ['id', 'created', 'modified', 'isarchived', 'iscompleted', 'targettable', 'targetid'])) continue;
 
-                // Describe the table
-                foreach($schema->describe() as $col){
+                // Set the table
+                $table = in_array($column['Field'],['owner', 'assignedTo']) ? 'users' : $column['Field'] . 's';
 
-                    // Add the col to the definition
-                    $this->definition[$column['Field'].'.'.$col['Field']] = $col;
-                }
-            };
+                // Check if the field is linked to a table
+                if(in_array($table, $this->tables)){
+
+                    // Initialize the Schema
+                    $schema = $this->Database->schema()->define($table);
+
+                    // Describe the table
+                    foreach($schema->describe() as $col){
+
+                        // Add the col to the definition
+                        $this->definition[$column['Field'].'.'.$col['Field']] = $col;
+                    }
+                };
+            }
+        } else {
+            throw new Exception("Table '$table' does not exist.");
         }
     }
 
