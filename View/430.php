@@ -21,7 +21,7 @@
                         <div class="app-content">
                             <section class="app-430">
                                 <div class="container">
-                                    <div class="row g-0 shadow card flex-row overflow-hidden" style="max-width: 960px; margin-inline: auto;">
+                                    <div class="row g-0 shadow card flex-row overflow-hidden">
                                         <div class="col-lg-6 p-5" style="background: var(--bs-body-bg);">
                                             <div class="mb-4">
                                                 <h2 class="h4 mb-1"><?= $this->Locale->get('Sign in') ?></h2>
