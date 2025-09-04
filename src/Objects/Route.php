@@ -187,27 +187,44 @@ class Route {
 
         // Generate the path
         $path = $this->Config->root();
+        $defaultPath = $this->Config->root() . DIRECTORY_SEPARATOR . 'vendor' . DIRECTORY_SEPARATOR . 'laswitchtech' . DIRECTORY_SEPARATOR . 'core';
         if($this->Directory){
             $path .= DIRECTORY_SEPARATOR . $this->Directory;
+            $defaultPath .= DIRECTORY_SEPARATOR . $this->Directory;
         }
         $path .= DIRECTORY_SEPARATOR . 'View' . DIRECTORY_SEPARATOR . $this->View;
+        $defaultPath .= DIRECTORY_SEPARATOR . 'View' . DIRECTORY_SEPARATOR . $this->View;
 
         // Set View
-        if(!is_null($view)){
+        if(!is_null($this->View)){
 
-            // Check if the view directory exists recursively and create it if it does not
-            if(!is_dir(dirname($path))){
-                mkdir(dirname($path), 0755, true);
-            }
-
-            // Create the file if it does not exist
+            // Check if the file exists
             if(!is_file($path)){
-                $content = "<!--" . PHP_EOL;
-                $content .= "  Core Framework - View File" . PHP_EOL . PHP_EOL;
-                $content .= "  @license    MIT (https://mit-license.org/)" . PHP_EOL;
-                $content .= "  @author     Full Name <user@domain.com>" . PHP_EOL;
-                $content .= "-->" . PHP_EOL;
-                file_put_contents($path, $content);
+
+                // Use the default path if the file does not exist
+                if(is_file($defaultPath)){
+                    $path = $defaultPath;
+                } else {
+
+                    // Check if development mode is enabled
+                    if($this->Config->get('application','development') && $this->Auth->isAuthenticated() && $this->Auth->isAuthorized('Developer', 1)){
+
+                        // Check if the view directory exists recursively and create it if it does not
+                        if(!is_dir(dirname($path))){
+                            mkdir(dirname($path), 0755, true);
+                        }
+
+                        // Create the file if it does not exist
+                        if(!is_file($path)){
+                            $content = "<!--" . PHP_EOL;
+                            $content .= "  Core Framework - View File" . PHP_EOL . PHP_EOL;
+                            $content .= "  @license    MIT (https://mit-license.org/)" . PHP_EOL;
+                            $content .= "  @author     Full Name <user@domain.com>" . PHP_EOL;
+                            $content .= "-->" . PHP_EOL;
+                            file_put_contents($path, $content);
+                        }
+                    }
+                }
             }
         }
 
