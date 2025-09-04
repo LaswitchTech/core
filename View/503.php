@@ -19,7 +19,7 @@
                     <!-- Page Content -->
                     <div class="app-content">
                         <section class="app-503">
-                            <div class="container" style="max-width: 760px;">
+                            <div class="container">
                                 <div class="card shadow">
                                     <div class="card-body p-5">
                                         <div class="d-flex align-items-center gap-2">
@@ -31,7 +31,7 @@
                                             <p class="opacity-50 mb-4"><?= $this->Locale->get('Please try again in a few minutes. Thanks for your patience!') ?></p>
                                         </div>
                                         <div class="d-flex justify-content-end mb-4">
-                                            <svg xmlns="http://www.w3.org/2000/svg" class="border-0" viewBox="0 0 465 285" role="img" aria-labelledby="title" style="max-width: 380px;">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="border-0" viewBox="0 0 465 285" role="img" aria-labelledby="title">
                                                 <title id="title">A code panel with a traffic cone.</title>
                                                 <defs>
                                                     <filter id="drop" x="-20%" y="-20%" width="140%" height="140%">
