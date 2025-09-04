@@ -291,6 +291,7 @@ class Builder {
         $html .= '    const USER_ORGANIZATION = ' . ($this->Auth->isAuthenticated() ? $this->Auth->user()->organization()->id : 'null') . ';' . PHP_EOL;
         $html .= '    const USER_TOKEN = "' . ($this->Auth->isAuthenticated() ? $this->Auth->user()->token() : '') . '";' . PHP_EOL;
         $html .= '    const USER_ROLES = ' . json_encode($this->Auth->isAuthenticated() ? $this->Auth->user()->roles() : null) . ';' . PHP_EOL;
+        $html .= '    const MAINTENANCE_MODE = ' . ($this->Config->get('application','maintenance') ? 'true' : 'false') . ';' . PHP_EOL;
         $html .= '    const DEV_MODE = ' . ($this->Auth->isAuthorized('Developer', 1) ? 'true' : 'false') . ';' . PHP_EOL;
         $html .= '    const ADMIN_MODE = ' . ($this->Auth->isAuthorized('Administrator', 1) ? 'true' : 'false') . ';' . PHP_EOL;
         $html .= '</script>' . PHP_EOL;
