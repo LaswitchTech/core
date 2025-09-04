@@ -1,11 +1,5 @@
 <?php
 
-/**
- * Core Framework - Auth
- *
- * @author     Louis Ouellet <louis@laswitchtech.com>
- */
-
 // Declaring namespace
 namespace LaswitchTech\Core;
 
