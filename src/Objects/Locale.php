@@ -49,8 +49,12 @@ class Locale {
      */
     public function __destruct()
     {
-        // Save Locale
-        $this->save();
+        // Check if the application is in development mode
+        if($this->Config->get('application','development')){
+
+            // Save Locale
+            $this->save();
+        }
     }
 
     /**
