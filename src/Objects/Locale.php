@@ -1,12 +1,5 @@
 <?php
 
-/**
- * Core Framework - Locale
- *
- * @license    MIT (https://mit-license.org/)
- * @author     Louis Ouellet <louis@laswitchtech.com>
- */
-
 // Declaring namespace
 namespace LaswitchTech\Core\Objects;
 
@@ -56,8 +49,12 @@ class Locale {
      */
     public function __destruct()
     {
-        // Save Locale
-        $this->save();
+        // Check if the application is in development mode
+        if($this->Config->get('application','development')){
+
+            // Save Locale
+            $this->save();
+        }
     }
 
     /**

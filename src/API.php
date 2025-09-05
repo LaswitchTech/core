@@ -1,12 +1,5 @@
 <?php
 
-/**
- * Core Framework - API
- *
- * @license    MIT (https://mit-license.org/)
- * @author     Louis Ouellet <louis@laswitchtech.com>
- */
-
 // Declaring namespace
 namespace LaswitchTech\Core;
 
@@ -167,6 +160,7 @@ class API {
                                 'authenticated' => $this->Auth->isAuthenticated(),
                                 'public' => $this->Config->get('application','public'),
                                 'maintenance' => $this->Config->get('application','maintenance'),
+                                'development' => $this->Config->get('application','development'),
                             ];
 
                             // Append Auth User Information to the results
