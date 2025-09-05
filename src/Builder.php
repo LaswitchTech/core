@@ -420,31 +420,31 @@ class Builder {
     public function logo()
     {
         $src = '/assets/img/logo.svg';
-        if(!is_file($this->Config->root() . '/webroot/' . $src)){
+        if(!is_file($this->Config->root() . '/webroot' . $src)){
             $src = '/assets/img/logo.jpg';
         }
-        if(!is_file($this->Config->root() . '/webroot/' . $src)){
+        if(!is_file($this->Config->root() . '/webroot' . $src)){
             $src = '/assets/img/logo.gif';
         }
-        if(!is_file($this->Config->root() . '/webroot/' . $src)){
+        if(!is_file($this->Config->root() . '/webroot' . $src)){
             $src = '/assets/img/logo.webp';
         }
-        if(!is_file($this->Config->root() . '/webroot/' . $src)){
+        if(!is_file($this->Config->root() . '/webroot' . $src)){
             $src = '/assets/img/logo.png';
         }
-        if(!is_file($this->Config->root() . '/webroot/' . $src)){
+        if(!is_file($this->Config->root() . '/webroot' . $src)){
             $src = '/assets/core/img/logo.svg';
         }
-        if(!is_file($this->Config->root() . '/webroot/' . $src)){
+        if(!is_file($this->Config->root() . '/webroot' . $src)){
             $src = '/assets/core/img/logo.jpg';
         }
-        if(!is_file($this->Config->root() . '/webroot/' . $src)){
+        if(!is_file($this->Config->root() . '/webroot' . $src)){
             $src = '/assets/core/img/logo.gif';
         }
-        if(!is_file($this->Config->root() . '/webroot/' . $src)){
+        if(!is_file($this->Config->root() . '/webroot' . $src)){
             $src = '/assets/core/img/logo.webp';
         }
-        if(!is_file($this->Config->root() . '/webroot/' . $src)){
+        if(!is_file($this->Config->root() . '/webroot' . $src)){
             $src = '/assets/core/img/logo.png';
         }
         return $src;
