@@ -106,7 +106,8 @@ class Bootstrap {
         "BUILDER" => [
             "class" => "\\LaswitchTech\\Core\\Builder",
             "scope" => [
-                "ROUTER"
+                "ROUTER",
+                "API"
             ]
         ],
         // Helpers
