@@ -702,6 +702,9 @@ class Builder {
 
         // Check if the renderer exists
         if (typeof this.#renderers[name] === 'undefined') {
+            if(value === null || typeof value === 'undefined'){
+                return '';
+            }
             return '<div>'+value+'</div>';
         }
 
