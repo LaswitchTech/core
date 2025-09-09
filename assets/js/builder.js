@@ -539,6 +539,20 @@ class Builder {
             return this._component.input.val();
         }
 
+        label(string = null){
+            // Set Label
+            if(string !== null){
+                this._component.label.text(string);
+                if(this._properties.icon !== null){
+                    this._component.label.icon = $(document.createElement('i')).addClass('bi bi-' + this._properties.icon).prependTo(this._component.label);
+                    this._component.label.icon.addClass('me-1');
+                }
+            }
+
+            // Return Label
+            return this._component.label.text();
+        }
+
         onChange(){
             // Test Condition
             this.condition();
