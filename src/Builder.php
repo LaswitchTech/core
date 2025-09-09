@@ -304,7 +304,7 @@ class Builder {
             foreach($themes as $file){
                 $filePath = $file . '/library.js';
                 if(is_file($path.'/'.$filePath)){
-                    if($this->Config->get('application','theme') == $file){
+                    if(($this->Config->get('application','theme') ?? $this->Config->get('installer','theme')) == $file){
                         $html .= '<script src="/assets/themes/'.trim($filePath,'/').'"></script>' . PHP_EOL;
                     }
                 }
@@ -312,7 +312,7 @@ class Builder {
             foreach($themes as $file){
                 $filePath = $file . '/script.js';
                 if(is_file($path.'/'.$filePath)){
-                    if($this->Config->get('application','theme') == $file){
+                    if(($this->Config->get('application','theme') ?? $this->Config->get('installer','theme')) == $file){
                         $html .= '<script src="/assets/themes/'.trim($filePath,'/').'"></script>' . PHP_EOL;
                     }
                 }
@@ -341,6 +341,7 @@ class Builder {
         if(is_dir($path)){
             $themes = array_diff(scandir($path), array('..', '.','.DS_Store'));
             foreach($themes as $extension){
+                if(($this->Config->get('application','theme') ?? $this->Config->get('installer','theme')) !== $extension) continue;
                 $assetsPath = $path . DIRECTORY_SEPARATOR . $extension . DIRECTORY_SEPARATOR . 'assets' . DIRECTORY_SEPARATOR . 'js';
                 if(is_file($assetsPath.'.cfg')){
                     if(is_dir($assetsPath)){
