@@ -60,11 +60,13 @@ class Installer {
         $status = [];
 
         // Check if the config includes all the required fields
-        if(isset($config['owner'],$config['name'],$config['copyright'])){
+        if(isset($config['owner'],$config['name'],$config['slogan'],$config['tagline'],$config['copyright'])){
 
             // Save the settings
             $this->Config->set('application', 'owner', $config['owner']);
             $this->Config->set('application', 'name', $config['name']);
+            $this->Config->set('application', 'slogan', $config['slogan']);
+            $this->Config->set('application', 'tagline', $config['tagline']);
             $this->Config->set('application', 'copyright', intval($config['copyright']));
             $this->Config->set('application', 'theme', $this->Config->get('installer', 'theme'));
 

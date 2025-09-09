@@ -215,6 +215,7 @@ class Builder {
         if(is_dir($path)){
             $themes = array_diff(scandir($path), array('..', '.','.DS_Store'));
             foreach($themes as $extension){
+                if(($this->Config->get('application','theme') ?? $this->Config->get('installer','theme')) !== $extension) continue;
                 $assetsPath = $path . DIRECTORY_SEPARATOR . $extension . DIRECTORY_SEPARATOR . 'assets' . DIRECTORY_SEPARATOR . 'css';
                 if(is_file($assetsPath.'.cfg')){
                     if(is_dir($assetsPath)){
@@ -259,7 +260,7 @@ class Builder {
             foreach($themes as $file){
                 $filePath = $file . '/styles.css';
                 if(is_file($path.'/'.$filePath)){
-                    if($this->Config->get('application','theme') == $file){
+                    if(($this->Config->get('application','theme') ?? $this->Config->get('installer','theme')) == $file){
                         $html .= '<link rel="stylesheet" type="text/css" href="/assets/themes/'.trim($filePath,'/').'" data-theme="'.$file.'">' . PHP_EOL;
                     }
                 }
