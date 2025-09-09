@@ -1,6 +1,6 @@
 <?php if(!$this->Config->get('application','maintenance') || $this->Auth->isAuthorized('Administrator',1)): ?>
     <!doctype html>
-    <html lang="en" class="h-100 w-100" data-bs-theme="auto" data-bs-template="fullscreen">
+    <html lang="en" class="h-100 w-100" data-bs-theme="auto" data-bs-template="index">
         <head>
             <meta charset="utf-8">
             <meta name="viewport" content="width=device-width, initial-scale=1">
