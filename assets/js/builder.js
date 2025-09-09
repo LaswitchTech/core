@@ -676,11 +676,11 @@ class Builder {
     Input(name, param1 = null, param2 = null, param3 = null){
         const self = this;
         if(typeof name !== 'string'){
-            console.log('Builder.Form(String)');
+            console.log('Builder.Input(String)');
             return false;
         }
         if(typeof this.#inputs[name] === 'undefined'){
-            console.log('Unknown Form');
+            console.log('Unknown Input');
             return false;
         }
         return new this.#inputs[name](self, param1, param2, param3);
