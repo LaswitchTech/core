@@ -264,7 +264,7 @@ class Router {
         $HELPER->Core->init();
 
         // Render the route
-        if($this->Config->get('application','installed')){
+        if($this->Config->get('application','installed') || $this->Request->getNamespace() == '/css'){
             $this->render($this->Request->getNamespace());
         } else {
             $this->render('/install');
