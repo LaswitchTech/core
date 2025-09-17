@@ -9,118 +9,94 @@ use Exception;
 class Models {
 
     // Properties
-    private $Path = null;
-    private array $Models = []; // store them here
+    private array $Models = [];
 
-    public function __construct() {
-
+    /**
+     * Constructor
+     */
+    public function __construct()
+    {
         // Import Global Variables
         global $CONFIG;
 
-        // Set Path
-        $this->Path = $CONFIG->root() . "/vendor/laswitchtech/core/Model";
+        // Scan the Core Model directory
+        $this->scan($CONFIG->root() . "/vendor/laswitchtech/core/Model");
 
-        // Check if the Model directory exists
-        if(is_dir($this->Path)){
+        // Scan the App Model directory
+        $this->scan($CONFIG->root() . "/Model");
 
-            // Loop through all the files in the directory
-            foreach(scandir($this->Path) as $model){
-
-                // Check if the file is a Model
-                if (!preg_match('/(.+)Model\.php$/i', $model, $matches)) {
-                    continue;
-                }
-
-                // Include the Model
-                require_once $this->Path . "/" . $model;
-
-                // Get the Model Base Name and Class Name
-                $baseName = $matches[1];
-                $className      = $baseName . 'Model';
-
-                // Check if the class exists
-                if (class_exists($className)) {
-
-                    // Create the Model
-                    $this->Models[$baseName] = new $className();
-                }
-            }
-        }
-
-        // Set Path
-        $this->Path = $CONFIG->root() . "/Model";
-
-        // Check if the Model directory exists
-        if(is_dir($this->Path)){
-
-            // Loop through all the files in the directory
-            foreach(scandir($this->Path) as $model){
-
-                // Check if the file is a Model
-                if (!preg_match('/(.+)Model\.php$/i', $model, $matches)) {
-                    continue;
-                }
-
-                // Include the Model
-                require_once $this->Path . "/" . $model;
-
-                // Get the Model Base Name and Class Name
-                $baseName = $matches[1];
-                $className      = $baseName . 'Model';
-
-                // Check if the class exists
-                if (class_exists($className)) {
-
-                    // Create the Model
-                    $this->Models[$baseName] = new $className();
-                }
-            }
-        }
-
-        // Set Path
-        $this->Path = $CONFIG->root() . "/lib/plugins";
-
-        // Check if the plugins directory exists
-        if(is_dir($this->Path)){
-
-            // Loop through all the files in the directory
-            foreach(array_diff(scandir($this->Path), array('..', '.')) as $plugin){
-
-                // Check if a Model already exist
-                if(!isset($this->Models[ucfirst($plugin)])){
-
-                    // Set Plugin path
-                    $path = $this->Path . "/" . $plugin . "/Model.php";
-
-                    // Check if the plugin includes a Model
-                    if(is_file($path)){
-
-                        // Include the Model
-                        require_once $path;
-
-                        // Get the Model Base Name and Class Name
-                        $baseName = ucfirst($plugin);
-                        $className = $baseName . 'Model';
-
-                        // Check if the class exists
-                        if (class_exists($className)) {
-
-                            // Create the Model
-                            $this->Models[$baseName] = new $className();
-                        }
-                    }
-                }
-            }
-        }
+        // Scan the Plugin's Model(s) directory
+        $this->scan($CONFIG->root() . "/lib/plugins", true);
     }
 
     // Magic getter to retrieve a Model
-    public function __get($name) {
+    public function __get($name): ?object
+    {
         return $this->Models[$name] ?? null;
     }
 
-    // Magic setter to add a Model
-    public function __set($name, $value) {
-        $this->Models[$name] = $value;
+    // Magic isset to check if a Model exists
+    public function __isset($name): bool
+    {
+        return isset($this->Models[$name]);
+    }
+
+    /*
+     * Scan a directory for Models
+     *
+     * @param string $path The full path to the directory
+     * @return void
+     */
+    protected function scan(string $path, bool $recursive = false): void
+    {
+        // Check if the path is a directory
+        if(!is_dir($path)) return;
+
+        // Loop through all the files in the directory
+        foreach(array_diff(scandir($path) ?: [], array('..', '.', '.DS_Store')) as $model){
+
+            // Create the model if possible
+            $this->create($model, $path . "/" . $model);
+
+            // Check if recursive is enabled and if the path is a directory
+            if($recursive && is_dir($path . "/" . $model)){
+                $this->scan($path . "/" . $model . "/Model");
+            }
+        }
+    }
+
+    /*
+     * Create a Model dynamically
+     *
+     * @param string $base The base name of the Model (without 'Model' suffix)
+     * @param string $path The full path to the Model file
+     * @return void
+     */
+    protected function create(string $base, string $path): void
+    {
+        // Check if the path is a directory
+        if(is_dir($path)) $path .= "/Model.php";
+
+        // Only process *Model.php files
+        if(!preg_match('/Model\.php$/i', $path)) return;
+
+        // Check if the path is a file
+        if(!is_file($path)) return;
+
+        // Get the Model Base Name and Class Name
+        $baseName = ucfirst(trim(str_replace(['Model','.php','-','_'],'',$base)));
+        $className = $baseName . 'Model';
+
+        // Check if a Model already exist
+        if(isset($this->Models[$baseName])) return;
+
+        // Load the path
+        require_once $path;
+
+        // Check if the class exists
+        if(!class_exists($className, false)) return;
+
+        // Create the Model
+        $this->Models[$baseName] = new $className();
     }
 }
