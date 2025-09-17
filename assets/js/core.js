@@ -398,8 +398,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 );
             });
         }
-        if(document.querySelector('[data-bs-template="panel"],[data-bs-template="fullscreen"]')){
-        }
+
+        // if(document.querySelector('[data-bs-template="panel"],[data-bs-template="fullscreen"]')){
+        // }
 
         // Diagnostic
         if(false){
@@ -539,12 +540,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     })();
 });
-
-// // Configure Toast
-// $(document).ready(function(){
-//     builder.Toast.prependTo('body');
-//     builder.Toast.position('bottom-end');
-// });
 
 // // Set Locale's callback
 // builder.Locale._callback = function(key, locale){

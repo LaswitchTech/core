@@ -69,16 +69,11 @@ class Builder {
         // Create Utilities
         this.Locale = this.Utility('locale');
         this.Parser = this.Utility('parser');
-        this.Avatar = this.Utility('avatar');
-        this.Status = this.Utility('status');
-        this.Rating = this.Utility('rating');
-        this.Priority = this.Utility('priority');
-        this.Option = this.Utility('option');
         this.Search = this.Utility('search');
         this.Helper = this.Utility('helper');
         this.Toast = this.Utility('toast');
-        this.Message = this.Utility('message');
-        this.Notification = this.Utility('notification');
+        // this.Message = this.Utility('message');
+        // this.Notification = this.Utility('notification');
         this.Storage = this.Utility('storage');
     }
 
@@ -1044,764 +1039,8 @@ class Builder {
                     string = self._builder.Locale.parse(string,locale);
                 }
 
-                // Parse through status
-                if(typeof string === 'string'){
-                    string = self._builder.Status.parse(string,locale);
-                }
-
-                // Parse through rating
-                if(typeof string === 'string'){
-                    string = self._builder.Rating.parse(string,locale);
-                }
-
-                // Parse through priority
-                if(typeof string === 'string'){
-                    string = self._builder.Priority.parse(string,locale);
-                }
-
-                // Parse through avatar
-                if(typeof string === 'string'){
-                    string = self._builder.Avatar.parse(string,locale);
-                }
-
                 // Return
                 return string;
-            }
-        },
-        avatar: class extends this.UtilityClass {
-
-            constructor(builder){
-
-                // Call Parent
-                super(builder);
-
-                // Set Self
-                const self = this;
-            }
-
-            avatar(email){
-
-                // Set Self
-                const self = this;
-
-                // Create avatar
-                var avatar = $(document.createElement('span'))
-                    .attr({
-                        'class': 'cursor-help align-middle avatar',
-                    });
-
-                // Set Label
-                avatar.text(email);
-
-                // Prepend Icon
-                avatar.prepend($(document.createElement('img')).attr({
-                    'class': 'me-1 rounded-circle',
-                    'width': '48',
-                    'height': '48',
-                    'src': self._builder.Helper.gravatar(email),
-                }));
-
-                avatar.attr({
-                    'data-bs-toggle': 'tooltip',
-                    'data-bs-placement': 'top',
-                    'title': status.email,
-                    'data-bs-title': status.email,
-                });
-
-                // Enable Tooltip
-                var tooltip = new bootstrap.Tooltip(avatar[0]);
-
-                // Return avatar
-                return avatar;
-            }
-
-            parse(string, locale = null){
-
-                // Set Self
-                const self = this;
-
-                // Set Matches [[utility:type:level]]
-                let matches = string.match(/\[\[(.*?)\]\]/g);
-
-                // Check if Matches
-                if(matches){
-
-                    // Loop through Matches
-                    for(const match of matches){
-
-                        // Set Key
-                        let key = match.replace('[[','').replace(']]','');
-                        let parts = key.split(':');
-                        let utility = parts[0];
-                        let email = parts[1];
-
-                        if(utility === 'avatar'){
-
-                            // Get avatar
-                            let avatar = self.avatar(email);
-
-                            // Get html
-                            let html = avatar[0].outerHTML;
-
-                            // Replace Match
-                            string = string.replace(match,html);
-                        }
-                    }
-                }
-
-                // Return
-                return string;
-            }
-        },
-        status: class extends this.UtilityClass {
-
-            #statuses = {};
-            _callback = function(targetTable, level){
-                console.log('Missing Status: '+targetTable+' ['+level+']');
-            };
-
-            constructor(builder){
-
-                // Call Parent
-                super(builder);
-
-                // Set Self
-                const self = this;
-            }
-
-            save(status){
-
-                // Set Self
-                const self = this;
-
-                // Loop through each required field
-                for(const [key, value] of Object.entries(['targetTable','label','description','icon','color','level'])){
-
-                    // Check if field is set
-                    if(typeof status[value] === 'undefined'){
-                        console.log('Missing Field: '+value);
-                        return;
-                    }
-                }
-
-                // Check if targetTable is set
-                if(typeof self.#statuses[status.targetTable] === 'undefined'){
-                    self.#statuses[status.targetTable] = {};
-                }
-
-                // Set Value
-                self.#statuses[status.targetTable][status.level] = {
-                    'targetTable': status.targetTable,
-                    'label': status.label,
-                    'description': status.description,
-                    'icon': status.icon,
-                    'color': status.color,
-                    'level': status.level,
-                };
-            }
-
-            get(targetTable, level){
-
-                // Set Self
-                const self = this;
-
-                // Check if targetTable and level are set
-                if(typeof self.#statuses[targetTable] === 'undefined' || typeof self.#statuses[targetTable][level] === 'undefined'){
-
-                    // Check if callback is set
-                    if(typeof self._callback === 'function'){
-                        self._callback(targetTable, level);
-                    }
-
-                    // Return Empty Status
-                    return {
-                        'targetTable': null,
-                        'label': null,
-                        'description': null,
-                        'icon': null,
-                        'color': null,
-                        'level': null,
-                    };
-                } else {
-
-                    // Return Status
-                    return self.#statuses[targetTable][level];
-                }
-            }
-
-            badge(targetTable, level){
-
-                // Set Self
-                const self = this;
-
-                // Get Status
-                const status = self.get(targetTable, level);
-
-                // Create Badge
-                var badge = $(document.createElement('span'))
-                    .attr({
-                        'class': 'cursor-help badge',
-                    });
-
-                // Check if label is set
-                if(status.label !== null){
-
-                    // Set Label
-                    badge.text(self._builder.Locale.get(status.label));
-                }
-
-                // Check if color is set
-                if(status.color !== null){
-
-                    // Set Color
-                    badge.addClass('text-bg-'+status.color);
-                }
-
-                // Check if icon is set
-                if(status.icon !== null){
-
-                    // Prepend Icon
-                    badge.prepend($(document.createElement('i')).addClass('me-1 bi bi-'+status.icon));
-                }
-
-                // Check if description is set
-                if(status.description !== null){
-                    badge.attr({
-                        'data-bs-toggle': 'tooltip',
-                        'data-bs-placement': 'top',
-                        'title': status.description,
-                        'data-bs-title': status.description,
-                    });
-
-                    // Enable Tooltip
-                    var tooltip = new bootstrap.Tooltip(badge[0]);
-                }
-
-                // Check if targetTable is set
-                if(status.targetTable !== null){
-
-                    // Set targetTable
-                    badge.attr('data-targetTable', status.targetTable);
-                }
-
-                // Check if Level is set
-                if(status.level !== null){
-
-                    // Set Level
-                    badge.attr('data-level', status.level);
-                }
-
-                // Return Badge
-                return badge;
-            }
-
-            parse(string){
-
-                // Set Self
-                const self = this;
-
-                // Set Matches [[utility:targetTable:level]]
-                let matches = string.match(/\[\[(.*?)\]\]/g);
-
-                // Check if Matches
-                if(matches){
-
-                    // Loop through Matches
-                    for(const match of matches){
-
-                        // Set Key
-                        let key = match.replace('[[','').replace(']]','');
-                        let parts = key.split(':');
-                        let utility = parts[0];
-                        let targetTable = parts[1];
-                        let level = parts[2];
-
-                        if(utility === 'status'){
-
-                            // Get Status
-                            let status = self.badge(targetTable, level);
-
-                            // Get html
-                            let html = status[0].outerHTML;
-
-                            // Replace Match
-                            string = string.replace(match,html);
-                        }
-                    }
-                }
-
-                // Return
-                return string;
-            }
-        },
-        rating: class extends this.ComponentClass {
-
-            #ratings = {};
-            _callback = function(targetTable, level){
-                console.log('Missing Rating: '+targetTable+' ['+level+']');
-            };
-
-            constructor(builder){
-
-                // Call Parent
-                super(builder);
-
-                // Set Self
-                const self = this;
-            }
-
-            save(rating){
-
-                // Set Self
-                const self = this;
-
-                // Loop through each required field
-                for(const [key, value] of Object.entries(['targetTable','label','description','icon','color','level'])){
-
-                    // Check if field is set
-                    if(typeof rating[value] === 'undefined'){
-                        console.log('Missing Field: '+value);
-                        return;
-                    }
-                }
-
-                // Check if targetTable is set
-                if(typeof self.#ratings[rating.targetTable] === 'undefined'){
-                    self.#ratings[rating.targetTable] = {};
-                }
-
-                // Set Value
-                self.#ratings[rating.targetTable][rating.level] = {
-                    'targetTable': rating.targetTable,
-                    'label': rating.label,
-                    'description': rating.description,
-                    'icon': rating.icon,
-                    'color': rating.color,
-                    'level': rating.level,
-                };
-            }
-
-            get(targetTable, level = null){
-
-                // Set Self
-                const self = this;
-
-                // Check if level is null
-                if(level === null){
-
-                    // Check if targetTable and level are set
-                    if(typeof self.#ratings[targetTable] === 'undefined'){
-
-                        // Return Empty Array
-                        return [];
-                    } else {
-
-                        // Return Rating
-                        return self.#ratings[targetTable];
-                    }
-                } else {
-
-                    // Check if targetTable and level are set
-                    if(typeof self.#ratings[targetTable] === 'undefined' || typeof self.#ratings[targetTable][level] === 'undefined'){
-
-                        // Check if callback is set
-                        if(typeof self._callback === 'function'){
-                            self._callback(targetTable, level);
-                        }
-
-                        // Return Empty Rating
-                        return {
-                            'targetTable': null,
-                            'label': null,
-                            'description': null,
-                            'icon': null,
-                            'color': null,
-                            'level': null,
-                        };
-                    } else {
-
-                        // Return Rating
-                        return self.#ratings[targetTable][level];
-                    }
-                }
-            }
-
-            badge(targetTable, level){
-
-                // Set Self
-                const self = this;
-
-                // Get Rating
-                const rating = self.get(targetTable, level);
-
-                // Create Badge
-                var badge = $(document.createElement('span'))
-                    .attr({
-                        'class': 'cursor-help badge',
-                    });
-
-                // Check if label is set
-                if(rating.label !== null){
-
-                    // Set Label
-                    badge.text(self._builder.Locale.get(rating.label));
-                }
-
-                // Check if color is set
-                if(rating.color !== null){
-
-                    // Set Color
-                    badge.addClass('text-bg-'+rating.color);
-                }
-
-                // Check if icon is set
-                if(rating.icon !== null){
-
-                    // Prepend Icon
-                    badge.prepend($(document.createElement('i')).addClass('me-1 bi bi-'+rating.icon));
-                }
-
-                // Check if description is set
-                if(rating.description !== null){
-                    badge.attr({
-                        'data-bs-toggle': 'tooltip',
-                        'data-bs-placement': 'top',
-                        'title': rating.description,
-                        'data-bs-title': rating.description,
-                    });
-
-                    // Enable Tooltip
-                    var tooltip = new bootstrap.Tooltip(badge[0]);
-                }
-
-                // Check if targetTable is set
-                if(rating.targetTable !== null){
-
-                    // Set targetTable
-                    badge.attr('data-targetTable', rating.targetTable);
-                }
-
-                // Check if Level is set
-                if(rating.level !== null){
-
-                    // Set Level
-                    badge.attr('data-level', rating.level);
-                }
-
-                // Return Badge
-                return badge;
-            }
-
-            parse(string){
-
-                // Set Self
-                const self = this;
-
-                // Set Matches [[utility:targetTable:level]]
-                let matches = string.match(/\[\[(.*?)\]\]/g);
-
-                // Check if Matches
-                if(matches){
-
-                    // Loop through Matches
-                    for(const match of matches){
-
-                        // Set Key
-                        let key = match.replace('[[','').replace(']]','');
-                        let parts = key.split(':');
-                        let utility = parts[0];
-                        let targetTable = parts[1];
-                        let level = parts[2];
-
-                        if(utility === 'rating'){
-
-                            // Get rating
-                            let rating = self.badge(targetTable, level);
-
-                            // Get html
-                            let html = rating[0].outerHTML;
-
-                            // Replace Match
-                            string = string.replace(match,html);
-                        }
-                    }
-                }
-
-                // Return
-                return string;
-            }
-        },
-        priority: class extends this.ComponentClass {
-
-            #priorities = {};
-            _callback = function(targetTable, level){
-                console.log('Missing Priority: '+targetTable+' ['+level+']');
-            };
-
-            constructor(builder){
-
-                // Call Parent
-                super(builder);
-
-                // Set Self
-                const self = this;
-            }
-
-            save(priority){
-
-                // Set Self
-                const self = this;
-
-                // Loop through each required field
-                for(const [key, value] of Object.entries(['targetTable','label','description','icon','color','level'])){
-
-                    // Check if field is set
-                    if(typeof priority[value] === 'undefined'){
-                        console.log('Missing Field: '+value);
-                        return;
-                    }
-                }
-
-                // Check if targetTable is set
-                if(typeof self.#priorities[priority.targetTable] === 'undefined'){
-                    self.#priorities[priority.targetTable] = {};
-                }
-
-                // Set Value
-                self.#priorities[priority.targetTable][priority.level] = {
-                    'targetTable': priority.targetTable,
-                    'label': priority.label,
-                    'description': priority.description,
-                    'icon': priority.icon,
-                    'color': priority.color,
-                    'level': priority.level,
-                };
-            }
-
-            get(targetTable, level){
-
-                // Set Self
-                const self = this;
-
-                // Check if targetTable and level are set
-                if(typeof self.#priorities[targetTable] === 'undefined' || typeof self.#priorities[targetTable][level] === 'undefined'){
-
-                    // Check if callback is set
-                    if(typeof self._callback === 'function'){
-                        self._callback(targetTable, level);
-                    }
-
-                    // Return Empty Priority
-                    return {
-                        'targetTable': null,
-                        'label': null,
-                        'description': null,
-                        'icon': null,
-                        'color': null,
-                        'level': null,
-                    };
-                } else {
-
-                    // Return Priority
-                    return self.#priorities[targetTable][level];
-                }
-            }
-
-            badge(targetTable, level){
-
-                // Set Self
-                const self = this;
-
-                // Get Priority
-                const Priority = self.get(targetTable, level);
-
-                // Create Badge
-                var badge = $(document.createElement('span'))
-                    .attr({
-                        'class': 'cursor-help badge',
-                    });
-
-                // Check if label is set
-                if(priority.label !== null){
-
-                    // Set Label
-                    badge.text(self._builder.Locale.get(priority.label));
-                }
-
-                // Check if color is set
-                if(priority.color !== null){
-
-                    // Set Color
-                    badge.addClass('text-bg-'+priority.color);
-                }
-
-                // Check if icon is set
-                if(priority.icon !== null){
-
-                    // Prepend Icon
-                    badge.prepend($(document.createElement('i')).addClass('me-1 bi bi-'+priority.icon));
-                }
-
-                // Check if description is set
-                if(priority.description !== null){
-                    badge.attr({
-                        'data-bs-toggle': 'tooltip',
-                        'data-bs-placement': 'top',
-                        'title': priority.description,
-                        'data-bs-title': priority.description,
-                    });
-
-                    // Enable Tooltip
-                    var tooltip = new bootstrap.Tooltip(badge[0]);
-                }
-
-                // Check if targetTable is set
-                if(priority.targetTable !== null){
-
-                    // Set targetTable
-                    badge.attr('data-targetTable', priority.targetTable);
-                }
-
-                // Check if Level is set
-                if(priority.level !== null){
-
-                    // Set Level
-                    badge.attr('data-level', priority.level);
-                }
-
-                // Return Badge
-                return badge;
-            }
-
-            parse(string){
-
-                // Set Self
-                const self = this;
-
-                // Set Matches [[utility:targetTable:level]]
-                let matches = string.match(/\[\[(.*?)\]\]/g);
-
-                // Check if Matches
-                if(matches){
-
-                    // Loop through Matches
-                    for(const match of matches){
-
-                        // Set Key
-                        let key = match.replace('[[','').replace(']]','');
-                        let parts = key.split(':');
-                        let utility = parts[0];
-                        let targetTable = parts[1];
-                        let level = parts[2];
-
-                        if(utility === 'priority'){
-
-                            // Get priority
-                            let priority = self.badge(targetTable, level);
-
-                            // Get html
-                            let html = priority[0].outerHTML;
-
-                            // Replace Match
-                            string = string.replace(match,html);
-                        }
-                    }
-                }
-
-                // Return
-                return string;
-            }
-        },
-        option: class extends this.ComponentClass {
-
-            #options = {};
-            _callback = function(targetTable, target = null){
-                if(target === null){
-                    console.log('Missing Options: '+targetTable);
-                } else {
-                    console.log('Missing Options: '+targetTable+' ['+target+']');
-                }
-            };
-
-            constructor(builder){
-
-                // Call Parent
-                super(builder);
-
-                // Set Self
-                const self = this;
-            }
-
-            save(targetTable, options, target = null){
-
-                // Set Self
-                const self = this;
-
-                // Check if options array exists for targetTable
-                if(typeof self.#options[targetTable] === 'undefined'){
-                    self.#options[targetTable] = [];
-                }
-
-                // Check if options array exists for targetTable
-                if(target !== null && typeof self.#options[targetTable][target] === 'undefined'){
-                    self.#options[targetTable][target] = [];
-                }
-
-                // Loop through each options
-                for(const [key, option] of Object.entries(options)){
-
-                    // Check if option is an object and contains the required fields
-                    if(typeof option === 'object' && (option.id || option.id === 0 || option.id === false) && (option.text || option.text === 0 || option.text === false)){
-                        if(target !== null){
-                            self.#options[targetTable][target].push(option);
-                        } else {
-                            self.#options[targetTable].push(option);
-                        }
-                    } else {
-                        console.log('Missing Field: id or text',option);
-                    }
-                }
-            }
-
-            get(targetTable, target = null){
-
-                // Set Self
-                const self = this;
-
-                // Check if targetTable and level are set
-                if(typeof self.#options[targetTable] === 'undefined'){
-
-                    // Check if callback is set
-                    if(typeof self._callback === 'function'){
-                        self._callback(targetTable, target);
-                    }
-
-                    // Return Empty array
-                    return [];
-                }
-
-                // Check if target is null
-                if(target === null){
-
-                    // Return Options
-                    return self.#options[targetTable];
-                } else {
-
-                    // Check if targetTable and level are set
-                    if(typeof self.#options[targetTable][target] === 'undefined'){
-
-                        // Check if callback is set
-                        if(typeof self._callback === 'function'){
-                            self._callback(targetTable, target);
-                        }
-
-                        // Return Empty array
-                        return [];
-                    }
-
-                    // Return Options
-                    return self.#options[targetTable][target];
-                }
             }
         },
         search: class extends this.UtilityClass {
@@ -1897,657 +1136,657 @@ class Builder {
                 }
             }
         },
-        notification: class extends this.ComponentClass {
-
-            _init(){
-                this._properties = {
-                    class: {
-                        component: null,
-                    },
-                    callback: {
-                        click: null,
-                        readAll: null,
-                        onRead: null,
-                        format: null,
-                    },
-                    icon: "bell",
-                    color: "danger",
-                    onReadDelay: 500,
-                    properties: {
-                        class: {
-                            item: null,
-                        },
-                        click: null,
-                        onRead: null,
-                        icon: "bell",
-                        color: "primary",
-                        datetime: null,
-                        label: null,
-                        isRead: false,
-                    },
-                };
-            }
-
-            _create(){
-
-                // Set Self
-                const self = this;
-
-                // Create Component
-                this._component = $(document.createElement('div')).attr({
-                    'id': 'notifications' + this._id,
-                    'class': 'dropdown notificationArea',
-                });
-                this._component.id = this._component.attr('id');
-
-                // Set Component Class
-                if(this._properties.class.component){
-                    this._component.addClass(this._properties.class.component);
-                }
-
-                // Create Button
-                this._component.btn = $(document.createElement('button')).attr({
-                    'class': 'nav-link text-decoration-none py-2 animate-slide-hover-top-20',
-                    'type': 'button',
-                    'data-bs-toggle': 'dropdown',
-                    'aria-expanded': 'false',
-                }).appendTo(this._component);
-                this._component.btn.icon = $(document.createElement('i')).attr({
-                    'class': 'fs-4 bi bi-' + this._properties.icon,
-                    'style': 'height: 2.25rem !important;width: 1.5rem !important',
-                }).appendTo(this._component.btn);
-                this._component.btn.badge = $(document.createElement('span')).attr({
-                    'class': 'position-absolute top-25 start-75 translate-middle border border-light rounded-circle d-none',
-                    'style': 'padding: 8px;',
-                }).appendTo(this._component.btn);
-
-                // Create Menu
-                this._component.menu = $(document.createElement('ul')).attr({
-                    'class': 'dropdown-menu dropdown-list dropdown-menu-end pb-0',
-                    'style': 'min-width: 400px; max-width: 500px;',
-                }).appendTo(this._component);
-
-                // Create Header
-                this._component.menu.header = $(document.createElement('li')).appendTo(this._component.menu);
-                this._component.menu.header.title = $(document.createElement('h5')).addClass('py-2 px-3 m-0 cursor-default d-flex justify-content-center align-items-center').appendTo(this._component.menu.header);
-                this._component.menu.header.title.label = $(document.createElement('span')).text('Notifications').appendTo(this._component.menu.header.title);
-                this._component.menu.header.title.count = $(document.createElement('span')).addClass('badge rounded-pill ms-2 d-none').appendTo(this._component.menu.header.title);
-
-                // Create Seperators
-                this._component.menu.seperator = {};
-                this._component.menu.seperator = $(document.createElement('li')).appendTo(this._component.menu);
-                this._component.menu.seperator.hr = $(document.createElement('hr')).addClass('dropdown-divider m-0').appendTo(this._component.menu.seperator);
-
-                // Create Items List
-                this._component.menu.list = $(document.createElement('div')).attr({
-                    'class': 'overflow-auto',
-                    'style': 'max-height: 500px;',
-                }).appendTo(this._component.menu);
-
-                // Create Footer
-                this._component.menu.footer = $(document.createElement('li')).appendTo(this._component.menu);
-                this._component.menu.footer.btn = $(document.createElement('button')).attr({
-                    'class': 'dropdown-item text-center py-2 rounded-bottom btn btn-link',
-                    'type': 'button',
-                }).appendTo(this._component.menu.footer);
-                this._component.menu.footer.btn.label = $(document.createElement('small')).text('Mark All as Read').appendTo(this._component.menu.footer.btn);
-
-                // Set Icon
-                if(this._properties.icon === null){
-                    this._component.btn.icon.remove();
-                }
-
-                // Set Color
-                if(this._properties.color){
-                    this._component.btn.badge.addClass('text-bg-' + this._properties.color);
-                    this._component.menu.header.title.count.addClass('text-bg-' + this._properties.color);
-                }
-
-                // Add Callback
-                self._component.menu.footer.btn.on('click',function(){
-                    self.readAll();
-                });
-            }
-
-            count(){
-
-                // Set Self
-                const self = this;
-
-                // Count the number of new notifications
-                let count = this._component.find('[data-isRead="false"]').length;
-
-                // Set Count
-                this._component.menu.header.title.count.text(count);
-
-                // Show Badge
-                if(count > 0){
-                    this._component.menu.header.title.count.removeClass('d-none');
-                    this._component.btn.badge.removeClass('d-none');
-                    this._component.btn.addClass('animate-wobble');
-                } else {
-                    this._component.menu.header.title.count.addClass('d-none');
-                    this._component.btn.badge.addClass('d-none');
-                    this._component.btn.removeClass('animate-wobble');
-                }
-
-                // Return Count
-                return count;
-            }
-
-            readAll(){
-
-                // Set Self
-                const self = this;
-
-                // Get all unread notifications
-                let items = this._component.find('[data-isRead="false"]');
-
-                // Set all notifications as read
-                items.attr('data-isRead', 'true').removeClass('blink-primary');
-                items.find('span.text-wrap').removeClass('fw-bold');
-
-                // Count the number of new notifications
-                this.count();
-
-                // Execute Callback
-                if(typeof self._properties.callback.readAll === 'function'){
-                    self._properties.callback.readAll(self,self._component);
-                }
-
-                // Return Object
-                return this;
-            }
-
-            add(param1 = null, param2 = null){
-
-                // Set Self
-                const self = this;
-
-                let options = {};
-                let callback = null;
-
-                let properties = {};
-
-                // Set selector, options, and callback
-                [param1, param2].forEach(param => {
-                    if(param !== null){
-                        if (typeof param === 'object') {
-                            options = param;
-                        } else if (typeof param === 'function') {
-                            callback = param;
-                        }
-                    }
-                });
-
-                // Configure Options
-                for(const [key, value] of Object.entries(this._properties.properties)){
-                    if(typeof properties[key] === 'undefined'){
-                        properties[key] = value;
-                    }
-                }
-                for(const [key, value] of Object.entries(options)){
-                    if(typeof properties[key] !== 'undefined'){
-                        switch(key){
-                            case"label":
-                                properties[key] = self._builder.Locale.parse(value);
-                                break;
-                            case"class":
-                                for(const [section, classes] of Object.entries(value)){
-                                    if(properties[key][section] != null){
-                                        properties[key][section] += ' ' + classes;
-                                    } else {
-                                        properties[key][section] = classes;
-                                    }
-                                }
-                                break;
-                            default:
-                                properties[key] = value;
-                                break;
-                        }
-                    }
-                }
-
-                // Set ID
-                let id = this._count();
-
-                // Create Item
-                let item = $(document.createElement('li')).attr({
-                    'id': this._component.id + 'item' + id,
-                }).prependTo(this._component.menu.list);
-
-                // Create Button
-                item.btn = $(document.createElement('button')).attr({
-                    'class': 'dropdown-item d-flex align-items-center py-2',
-                    'type': 'button',
-                }).appendTo(item);
-
-                // Add Icon
-                item.btn.icon = $(document.createElement('div')).addClass('me-3').appendTo(item.btn);
-                item.btn.icon.frame = $(document.createElement('div')).attr({
-                    'class': 'd-flex align-items-center justify-content-center rounded-circle',
-                    'style': 'width: 48px; height: 48px;',
-                }).appendTo(item.btn.icon);
-                item.btn.icon.frame.icon = $(document.createElement('i')).addClass('bi').appendTo(item.btn.icon.frame);
-
-                // Add Label
-                item.btn.label = $(document.createElement('div')).addClass('d-flex flex-column align-items-justify').appendTo(item.btn);
-                item.btn.label.time = $(document.createElement('small')).addClass('text-muted').appendTo(item.btn.label);
-                item.btn.label.time.timeago = $(document.createElement('time')).attr({
-                    'class': 'timeago',
-                    'data-bs-toggle': 'tooltip',
-                }).appendTo(item.btn.label.time);
-                item.btn.label.text = $(document.createElement('span')).addClass('text-wrap').html(properties.label).appendTo(item.btn.label);
-
-                // Add Seperator
-                item.seperator = $(document.createElement('li')).insertAfter(item);
-                item.seperator.hr = $(document.createElement('hr')).addClass('dropdown-divider m-0').appendTo(item.seperator);
-
-                // Configure Color
-                if(properties.color !== null){
-                    item.btn.icon.frame.addClass('text-bg-' + properties.color);
-                } else {
-                    item.btn.icon.frame.addClass('text-bg-primary');
-                }
-
-                // Configure Icon
-                if(properties.icon !== null){
-                    item.btn.icon.frame.icon.addClass('bi-' + properties.icon);
-                } else {
-                    item.btn.icon.frame.icon.addClass('bi-bell');
-                }
-
-                // Configure Date Time
-                let datetime = null;
-                if(properties.datetime !== null){
-                    datetime = new Date(properties.datetime);
-                } else {
-                    datetime = new Date();
-                }
-                item.btn.label.time.timeago.attr({
-                    'title': datetime.toLocaleString(),
-                    'datetime': datetime.toLocaleString(),
-                    'data-bs-title': datetime.toLocaleString(),
-                    'data-bs-toggle': 'tooltip',
-                    'data-bs-placement': 'top',
-                }).text(datetime.toLocaleString());
-                setTimeout(function(){ item.btn.label.time.timeago.timeago(); }, 0);
-                item.btn.label.time.timeago.bootstrap = new bootstrap.Tooltip(item.btn.label.time.timeago);
-
-                // Configure isRead
-                item.attr('data-isRead',properties.isRead);
-                if(!properties.isRead){
-                    item.addClass('blink-primary');
-                    item.btn.label.text.addClass('fw-bold');
-                }
-
-                // Set Item Class
-                if(properties.class.item){
-                    item.addClass(properties.class.item);
-                }
-
-                // Add read function
-                item.read = function(){
-                    item.attr('data-isRead', 'true').removeClass('blink-primary');
-                    item.btn.label.text.removeClass('fw-bold');
-                    self.count();
-                };
-
-                // Add onRead Callback
-                if(!properties.isRead){
-                    item.timer;
-                    item.hover(function() {
-                        item.timer = setTimeout(function() {
-                            item.read();
-                            if(typeof properties.onRead === 'function'){
-                                properties.onRead(item,self,self._component);
-                            }
-                            if(typeof self._properties.callback.onRead === 'function'){
-                                self._properties.callback.onRead(item,self,self._component);
-                            }
-                        }, self._properties.onReadDelay);
-                    }, function() {
-                        clearTimeout(item.timer);
-                    });
-                }
-
-                // Add Callback
-                item.on('click',function(){
-                    if(typeof self._properties.callback.click === 'function'){
-                        self._properties.callback.click(item,self,self._component);
-                    }
-                    if(typeof properties.click === 'function'){
-                        properties.click(item,self,self._component);
-                    }
-                });
-
-                // Execute Callback
-                if(typeof self._properties.callback.format === 'function'){
-                    self._properties.callback.format(item,this);
-                }
-                if(typeof callback === 'function'){
-                    callback(item,this);
-                }
-
-                // Set Count
-                this.count();
-
-                // Return Object
-                return this;
-            }
-        },
-        message: class extends this.ComponentClass {
-
-            _init(){
-                this._properties = {
-                    class: {
-                        component: null,
-                    },
-                    callback: {
-                        click: null,
-                        viewAll: null,
-                        onRead: null,
-                    },
-                    icon: "envelope",
-                    color: "info",
-                    onReadDelay: 500,
-                    properties: {
-                        class: {
-                            item: null,
-                        },
-                        click: null,
-                        onRead: null,
-                        datetime: null,
-                        label: null,
-                        email: null,
-                        name: null,
-                        isRead: false,
-                    },
-                };
-            }
-
-            _create(){
-
-                // Set Self
-                const self = this;
-
-                // Create Component
-                this._component = $(document.createElement('div')).attr({
-                    'id': 'messages' + this._id,
-                    'class': 'dropdown messageArea',
-                });
-                this._component.id = this._component.attr('id');
-
-                // Set Component Class
-                if(this._properties.class.component){
-                    this._component.addClass(this._properties.class.component);
-                }
-
-                // Create Button
-                this._component.btn = $(document.createElement('button')).attr({
-                    'class': 'nav-link text-decoration-none py-2 animate-slide-hover-top-20',
-                    'type': 'button',
-                    'data-bs-toggle': 'dropdown',
-                    'aria-expanded': 'false',
-                }).appendTo(this._component);
-                this._component.btn.icon = $(document.createElement('i')).attr({
-                    'class': 'fs-4 bi bi-' + this._properties.icon,
-                    'style': 'height: 2.25rem !important;width: 1.5rem !important;',
-                }).appendTo(this._component.btn);
-                this._component.btn.badge = $(document.createElement('span')).attr({
-                    'class': 'position-absolute top-25 start-75 translate-middle border border-light rounded-circle d-none',
-                    'style': 'padding: 8px;',
-                }).appendTo(this._component.btn);
-
-                // Create Menu
-                this._component.menu = $(document.createElement('ul')).attr({
-                    'class': 'dropdown-menu dropdown-list dropdown-menu-end pb-0',
-                    'style': 'min-width: 400px;max-width: 500px;',
-                }).appendTo(this._component);
-
-                // Create Header
-                this._component.menu.header = $(document.createElement('li')).appendTo(this._component.menu);
-                this._component.menu.header.title = $(document.createElement('h5')).addClass('py-2 px-3 m-0 cursor-default d-flex justify-content-center align-items-center').appendTo(this._component.menu.header);
-                this._component.menu.header.title.label = $(document.createElement('span')).text('Messages').appendTo(this._component.menu.header.title);
-                this._component.menu.header.title.count = $(document.createElement('span')).addClass('badge rounded-pill ms-2 d-none').appendTo(this._component.menu.header.title);
-
-                // Create Seperators
-                this._component.menu.seperator = {};
-                this._component.menu.seperator = $(document.createElement('li')).appendTo(this._component.menu);
-                this._component.menu.seperator.hr = $(document.createElement('hr')).addClass('dropdown-divider m-0').appendTo(this._component.menu.seperator);
-
-                // Create Items List
-                this._component.menu.list = $(document.createElement('div')).attr({
-                    'class': 'overflow-auto',
-                    'style': 'max-height: 500px;',
-                }).appendTo(this._component.menu);
-
-                // Create Footer
-                this._component.menu.footer = $(document.createElement('li')).appendTo(this._component.menu);
-                this._component.menu.footer.btn = $(document.createElement('button')).attr({
-                    'class': 'dropdown-item text-center py-2 rounded-bottom btn btn-link',
-                    'type': 'button',
-                }).appendTo(this._component.menu.footer);
-                this._component.menu.footer.btn.label = $(document.createElement('small')).text('View All').appendTo(this._component.menu.footer.btn);
-
-                // Set Icon
-                if(this._properties.icon === null){
-                    this._component.btn.icon.remove();
-                }
-
-                // Set Color
-                if(this._properties.color){
-                    this._component.btn.badge.addClass('text-bg-' + this._properties.color);
-                    this._component.menu.header.title.count.addClass('text-bg-' + this._properties.color);
-                }
-
-                // Add Callback
-                self._component.menu.footer.btn.on('click',function(){
-                    if(typeof self._properties.callback.viewAll === 'function'){
-                        self._properties.callback.viewAll();
-                    }
-                });
-            }
-
-            count(){
-
-                // Set Self
-                const self = this;
-
-                // Count the number of new notifications
-                let count = this._component.find('[data-isRead="false"]').length;
-
-                // Set Count
-                this._component.menu.header.title.count.text(count);
-
-                // Show Badge
-                if(count > 0){
-                    this._component.menu.header.title.count.removeClass('d-none');
-                    this._component.btn.badge.removeClass('d-none');
-                    this._component.btn.addClass('animate-bounce');
-                } else {
-                    this._component.menu.header.title.count.addClass('d-none');
-                    this._component.btn.badge.addClass('d-none');
-                    this._component.btn.removeClass('animate-bounce');
-                }
-
-                // Return Count
-                return count;
-            }
-
-            add(param1 = null, param2 = null){
-
-                // Set Self
-                const self = this;
-
-                let options = {};
-                let callback = null;
-
-                let properties = {};
-
-                // Set selector, options, and callback
-                [param1, param2].forEach(param => {
-                    if(param !== null){
-                        if (typeof param === 'object') {
-                            options = param;
-                        } else if (typeof param === 'function') {
-                            callback = param;
-                        }
-                    }
-                });
-
-                // Configure Options
-                for(const [key, value] of Object.entries(this._properties.properties)){
-                    if(typeof properties[key] === 'undefined'){
-                        properties[key] = value;
-                    }
-                }
-                for(const [key, value] of Object.entries(options)){
-                    if(typeof properties[key] !== 'undefined'){
-                        switch(key){
-                            case"class":
-                                for(const [section, classes] of Object.entries(value)){
-                                    if(properties[key][section] != null){
-                                        properties[key][section] += ' ' + classes;
-                                    } else {
-                                        properties[key][section] = classes;
-                                    }
-                                }
-                                break;
-                            default:
-                                properties[key] = value;
-                                break;
-                        }
-                    }
-                }
-
-                // Set ID
-                let id = this._count();
-
-                // Create Item
-                let item = $(document.createElement('li')).attr({
-                    'id': this._component.id + 'item' + id,
-                }).prependTo(this._component.menu.list);
-                item.id = item.attr('id');
-                item.properties = properties;
-
-                // Create Button
-                item.btn = $(document.createElement('button')).attr({}).addClass('dropdown-item d-flex align-items-center py-2').attr('type','button').appendTo(item);
-
-                // Add Icon
-                item.btn.icon = $(document.createElement('div')).addClass('me-3').appendTo(item.btn);
-                item.btn.icon.frame = $(document.createElement('div')).attr({}).addClass('d-flex align-items-center justify-content-center rounded-circle text-bg-primary').css({"width":"48px","height":"48px"}).appendTo(item.btn.icon);
-
-                // Add Label
-                item.btn.label = $(document.createElement('div')).addClass('d-flex flex-column align-items-justify').appendTo(item.btn);
-                item.btn.label.text = $(document.createElement('span')).addClass('text-wrap').text(properties.label).appendTo(item.btn.label);
-                item.btn.label.meta = $(document.createElement('small')).addClass('text-muted').appendTo(item.btn.label);
-                item.btn.label.name = $(document.createElement('span')).text(properties.name).appendTo(item.btn.label.meta);
-                item.btn.label.timeago = $(document.createElement('time')).attr({}).addClass('timeago ms-2').attr('data-bs-toggle','tooltip').appendTo(item.btn.label.meta);
-
-                // Add Seperator
-                item.seperator = $(document.createElement('li')).insertAfter(item);
-                item.seperator.hr = $(document.createElement('hr')).addClass('dropdown-divider m-0').appendTo(item.seperator);
-
-                // Configure Avatar
-                item.btn.icon.frame.avatar = this._builder.Component(
-                    "avatar",
-                    item.btn.icon.frame,
-                    {
-                        class: {
-                            object: "rounded-circle",
-                        },
-                        email: properties.email,
-                        size: "48px",
-                    },
-                    function(avatar,component){},
-                );
-
-                // Configure Date Time
-                let datetime = null;
-                if(properties.datetime !== null){
-                    datetime = new Date(properties.datetime);
-                } else {
-                    datetime = new Date();
-                }
-                item.btn.label.timeago.attr({
-                    'title': datetime.toLocaleString(),
-                    'datetime': datetime.toLocaleString(),
-                    'data-bs-title': datetime.toLocaleString(),
-                    'data-bs-toggle': 'tooltip',
-                    'data-bs-placement': 'top',
-                }).text(datetime.toLocaleString());
-                item.btn.label.timeago.bootstrap = new bootstrap.Tooltip(item.btn.label.timeago);
-                setTimeout(function(){ item.btn.label.timeago.timeago(); }, 0);
-
-                // Configure isRead
-                item.attr('data-isRead',properties.isRead);
-                if(!properties.isRead){
-                    item.addClass('blink-primary');
-                    item.btn.label.text.addClass('fw-bold');
-                }
-
-                // Set Item Class
-                if(properties.class.item){
-                    item.addClass(properties.class.item);
-                }
-
-                // Add a read function
-                item.read = function(callback = null){
-                    if(item.attr('data-isRead') === 'false'){
-                        item.attr('data-isRead', 'true').removeClass('blink-primary');
-                        item.btn.label.text.removeClass('fw-bold');
-                        self.count();
-                        if(typeof self._properties.callback.onRead === 'function'){
-                            self._properties.callback.onRead(item,self,self._component);
-                        }
-                        if(typeof properties.onRead === 'function'){
-                            properties.onRead(item,self,self._component);
-                        }
-                    }
-                    if(typeof callback === 'function'){
-                        callback(item,self,self._component);
-                    }
-                };
-
-                // Add onRead Callback
-                if(!properties.isRead){
-                    item.timer;
-                    item.hover(function() {
-                        item.timer = setTimeout(function() {
-                            item.read();
-                        }, self._properties.onReadDelay);
-                    }, function() {
-                        clearTimeout(item.timer);
-                    });
-                }
-
-                // Add click Callback
-                item.click(function(){
-                    if(typeof properties.click === 'function'){
-                        properties.click(item,self,self._component);
-                    }
-                });
-
-                // Add View All Click Callback
-                this._component.menu.footer.btn.on('click',function(){
-                    if(typeof self._properties.callback.click === 'function'){
-                        self._properties.callback.click(item,self,self._component);
-                    }
-                });
-
-                // Execute Callback
-                if(typeof callback === 'function'){
-                    callback(item,this);
-                }
-
-                // Set Count
-                this.count();
-
-                // Return Object
-                return this;
-            }
-        },
+        // notification: class extends this.ComponentClass {
+
+        //     _init(){
+        //         this._properties = {
+        //             class: {
+        //                 component: null,
+        //             },
+        //             callback: {
+        //                 click: null,
+        //                 readAll: null,
+        //                 onRead: null,
+        //                 format: null,
+        //             },
+        //             icon: "bell",
+        //             color: "danger",
+        //             onReadDelay: 500,
+        //             properties: {
+        //                 class: {
+        //                     item: null,
+        //                 },
+        //                 click: null,
+        //                 onRead: null,
+        //                 icon: "bell",
+        //                 color: "primary",
+        //                 datetime: null,
+        //                 label: null,
+        //                 isRead: false,
+        //             },
+        //         };
+        //     }
+
+        //     _create(){
+
+        //         // Set Self
+        //         const self = this;
+
+        //         // Create Component
+        //         this._component = $(document.createElement('div')).attr({
+        //             'id': 'notifications' + this._id,
+        //             'class': 'dropdown notificationArea',
+        //         });
+        //         this._component.id = this._component.attr('id');
+
+        //         // Set Component Class
+        //         if(this._properties.class.component){
+        //             this._component.addClass(this._properties.class.component);
+        //         }
+
+        //         // Create Button
+        //         this._component.btn = $(document.createElement('button')).attr({
+        //             'class': 'nav-link text-decoration-none py-2 animate-slide-hover-top-20',
+        //             'type': 'button',
+        //             'data-bs-toggle': 'dropdown',
+        //             'aria-expanded': 'false',
+        //         }).appendTo(this._component);
+        //         this._component.btn.icon = $(document.createElement('i')).attr({
+        //             'class': 'fs-4 bi bi-' + this._properties.icon,
+        //             'style': 'height: 2.25rem !important;width: 1.5rem !important',
+        //         }).appendTo(this._component.btn);
+        //         this._component.btn.badge = $(document.createElement('span')).attr({
+        //             'class': 'position-absolute top-25 start-75 translate-middle border border-light rounded-circle d-none',
+        //             'style': 'padding: 8px;',
+        //         }).appendTo(this._component.btn);
+
+        //         // Create Menu
+        //         this._component.menu = $(document.createElement('ul')).attr({
+        //             'class': 'dropdown-menu dropdown-list dropdown-menu-end pb-0',
+        //             'style': 'min-width: 400px; max-width: 500px;',
+        //         }).appendTo(this._component);
+
+        //         // Create Header
+        //         this._component.menu.header = $(document.createElement('li')).appendTo(this._component.menu);
+        //         this._component.menu.header.title = $(document.createElement('h5')).addClass('py-2 px-3 m-0 cursor-default d-flex justify-content-center align-items-center').appendTo(this._component.menu.header);
+        //         this._component.menu.header.title.label = $(document.createElement('span')).text('Notifications').appendTo(this._component.menu.header.title);
+        //         this._component.menu.header.title.count = $(document.createElement('span')).addClass('badge rounded-pill ms-2 d-none').appendTo(this._component.menu.header.title);
+
+        //         // Create Seperators
+        //         this._component.menu.seperator = {};
+        //         this._component.menu.seperator = $(document.createElement('li')).appendTo(this._component.menu);
+        //         this._component.menu.seperator.hr = $(document.createElement('hr')).addClass('dropdown-divider m-0').appendTo(this._component.menu.seperator);
+
+        //         // Create Items List
+        //         this._component.menu.list = $(document.createElement('div')).attr({
+        //             'class': 'overflow-auto',
+        //             'style': 'max-height: 500px;',
+        //         }).appendTo(this._component.menu);
+
+        //         // Create Footer
+        //         this._component.menu.footer = $(document.createElement('li')).appendTo(this._component.menu);
+        //         this._component.menu.footer.btn = $(document.createElement('button')).attr({
+        //             'class': 'dropdown-item text-center py-2 rounded-bottom btn btn-link',
+        //             'type': 'button',
+        //         }).appendTo(this._component.menu.footer);
+        //         this._component.menu.footer.btn.label = $(document.createElement('small')).text('Mark All as Read').appendTo(this._component.menu.footer.btn);
+
+        //         // Set Icon
+        //         if(this._properties.icon === null){
+        //             this._component.btn.icon.remove();
+        //         }
+
+        //         // Set Color
+        //         if(this._properties.color){
+        //             this._component.btn.badge.addClass('text-bg-' + this._properties.color);
+        //             this._component.menu.header.title.count.addClass('text-bg-' + this._properties.color);
+        //         }
+
+        //         // Add Callback
+        //         self._component.menu.footer.btn.on('click',function(){
+        //             self.readAll();
+        //         });
+        //     }
+
+        //     count(){
+
+        //         // Set Self
+        //         const self = this;
+
+        //         // Count the number of new notifications
+        //         let count = this._component.find('[data-isRead="false"]').length;
+
+        //         // Set Count
+        //         this._component.menu.header.title.count.text(count);
+
+        //         // Show Badge
+        //         if(count > 0){
+        //             this._component.menu.header.title.count.removeClass('d-none');
+        //             this._component.btn.badge.removeClass('d-none');
+        //             this._component.btn.addClass('animate-wobble');
+        //         } else {
+        //             this._component.menu.header.title.count.addClass('d-none');
+        //             this._component.btn.badge.addClass('d-none');
+        //             this._component.btn.removeClass('animate-wobble');
+        //         }
+
+        //         // Return Count
+        //         return count;
+        //     }
+
+        //     readAll(){
+
+        //         // Set Self
+        //         const self = this;
+
+        //         // Get all unread notifications
+        //         let items = this._component.find('[data-isRead="false"]');
+
+        //         // Set all notifications as read
+        //         items.attr('data-isRead', 'true').removeClass('blink-primary');
+        //         items.find('span.text-wrap').removeClass('fw-bold');
+
+        //         // Count the number of new notifications
+        //         this.count();
+
+        //         // Execute Callback
+        //         if(typeof self._properties.callback.readAll === 'function'){
+        //             self._properties.callback.readAll(self,self._component);
+        //         }
+
+        //         // Return Object
+        //         return this;
+        //     }
+
+        //     add(param1 = null, param2 = null){
+
+        //         // Set Self
+        //         const self = this;
+
+        //         let options = {};
+        //         let callback = null;
+
+        //         let properties = {};
+
+        //         // Set selector, options, and callback
+        //         [param1, param2].forEach(param => {
+        //             if(param !== null){
+        //                 if (typeof param === 'object') {
+        //                     options = param;
+        //                 } else if (typeof param === 'function') {
+        //                     callback = param;
+        //                 }
+        //             }
+        //         });
+
+        //         // Configure Options
+        //         for(const [key, value] of Object.entries(this._properties.properties)){
+        //             if(typeof properties[key] === 'undefined'){
+        //                 properties[key] = value;
+        //             }
+        //         }
+        //         for(const [key, value] of Object.entries(options)){
+        //             if(typeof properties[key] !== 'undefined'){
+        //                 switch(key){
+        //                     case"label":
+        //                         properties[key] = self._builder.Locale.parse(value);
+        //                         break;
+        //                     case"class":
+        //                         for(const [section, classes] of Object.entries(value)){
+        //                             if(properties[key][section] != null){
+        //                                 properties[key][section] += ' ' + classes;
+        //                             } else {
+        //                                 properties[key][section] = classes;
+        //                             }
+        //                         }
+        //                         break;
+        //                     default:
+        //                         properties[key] = value;
+        //                         break;
+        //                 }
+        //             }
+        //         }
+
+        //         // Set ID
+        //         let id = this._count();
+
+        //         // Create Item
+        //         let item = $(document.createElement('li')).attr({
+        //             'id': this._component.id + 'item' + id,
+        //         }).prependTo(this._component.menu.list);
+
+        //         // Create Button
+        //         item.btn = $(document.createElement('button')).attr({
+        //             'class': 'dropdown-item d-flex align-items-center py-2',
+        //             'type': 'button',
+        //         }).appendTo(item);
+
+        //         // Add Icon
+        //         item.btn.icon = $(document.createElement('div')).addClass('me-3').appendTo(item.btn);
+        //         item.btn.icon.frame = $(document.createElement('div')).attr({
+        //             'class': 'd-flex align-items-center justify-content-center rounded-circle',
+        //             'style': 'width: 48px; height: 48px;',
+        //         }).appendTo(item.btn.icon);
+        //         item.btn.icon.frame.icon = $(document.createElement('i')).addClass('bi').appendTo(item.btn.icon.frame);
+
+        //         // Add Label
+        //         item.btn.label = $(document.createElement('div')).addClass('d-flex flex-column align-items-justify').appendTo(item.btn);
+        //         item.btn.label.time = $(document.createElement('small')).addClass('text-muted').appendTo(item.btn.label);
+        //         item.btn.label.time.timeago = $(document.createElement('time')).attr({
+        //             'class': 'timeago',
+        //             'data-bs-toggle': 'tooltip',
+        //         }).appendTo(item.btn.label.time);
+        //         item.btn.label.text = $(document.createElement('span')).addClass('text-wrap').html(properties.label).appendTo(item.btn.label);
+
+        //         // Add Seperator
+        //         item.seperator = $(document.createElement('li')).insertAfter(item);
+        //         item.seperator.hr = $(document.createElement('hr')).addClass('dropdown-divider m-0').appendTo(item.seperator);
+
+        //         // Configure Color
+        //         if(properties.color !== null){
+        //             item.btn.icon.frame.addClass('text-bg-' + properties.color);
+        //         } else {
+        //             item.btn.icon.frame.addClass('text-bg-primary');
+        //         }
+
+        //         // Configure Icon
+        //         if(properties.icon !== null){
+        //             item.btn.icon.frame.icon.addClass('bi-' + properties.icon);
+        //         } else {
+        //             item.btn.icon.frame.icon.addClass('bi-bell');
+        //         }
+
+        //         // Configure Date Time
+        //         let datetime = null;
+        //         if(properties.datetime !== null){
+        //             datetime = new Date(properties.datetime);
+        //         } else {
+        //             datetime = new Date();
+        //         }
+        //         item.btn.label.time.timeago.attr({
+        //             'title': datetime.toLocaleString(),
+        //             'datetime': datetime.toLocaleString(),
+        //             'data-bs-title': datetime.toLocaleString(),
+        //             'data-bs-toggle': 'tooltip',
+        //             'data-bs-placement': 'top',
+        //         }).text(datetime.toLocaleString());
+        //         setTimeout(function(){ item.btn.label.time.timeago.timeago(); }, 0);
+        //         item.btn.label.time.timeago.bootstrap = new bootstrap.Tooltip(item.btn.label.time.timeago);
+
+        //         // Configure isRead
+        //         item.attr('data-isRead',properties.isRead);
+        //         if(!properties.isRead){
+        //             item.addClass('blink-primary');
+        //             item.btn.label.text.addClass('fw-bold');
+        //         }
+
+        //         // Set Item Class
+        //         if(properties.class.item){
+        //             item.addClass(properties.class.item);
+        //         }
+
+        //         // Add read function
+        //         item.read = function(){
+        //             item.attr('data-isRead', 'true').removeClass('blink-primary');
+        //             item.btn.label.text.removeClass('fw-bold');
+        //             self.count();
+        //         };
+
+        //         // Add onRead Callback
+        //         if(!properties.isRead){
+        //             item.timer;
+        //             item.hover(function() {
+        //                 item.timer = setTimeout(function() {
+        //                     item.read();
+        //                     if(typeof properties.onRead === 'function'){
+        //                         properties.onRead(item,self,self._component);
+        //                     }
+        //                     if(typeof self._properties.callback.onRead === 'function'){
+        //                         self._properties.callback.onRead(item,self,self._component);
+        //                     }
+        //                 }, self._properties.onReadDelay);
+        //             }, function() {
+        //                 clearTimeout(item.timer);
+        //             });
+        //         }
+
+        //         // Add Callback
+        //         item.on('click',function(){
+        //             if(typeof self._properties.callback.click === 'function'){
+        //                 self._properties.callback.click(item,self,self._component);
+        //             }
+        //             if(typeof properties.click === 'function'){
+        //                 properties.click(item,self,self._component);
+        //             }
+        //         });
+
+        //         // Execute Callback
+        //         if(typeof self._properties.callback.format === 'function'){
+        //             self._properties.callback.format(item,this);
+        //         }
+        //         if(typeof callback === 'function'){
+        //             callback(item,this);
+        //         }
+
+        //         // Set Count
+        //         this.count();
+
+        //         // Return Object
+        //         return this;
+        //     }
+        // },
+        // message: class extends this.ComponentClass {
+
+        //     _init(){
+        //         this._properties = {
+        //             class: {
+        //                 component: null,
+        //             },
+        //             callback: {
+        //                 click: null,
+        //                 viewAll: null,
+        //                 onRead: null,
+        //             },
+        //             icon: "envelope",
+        //             color: "info",
+        //             onReadDelay: 500,
+        //             properties: {
+        //                 class: {
+        //                     item: null,
+        //                 },
+        //                 click: null,
+        //                 onRead: null,
+        //                 datetime: null,
+        //                 label: null,
+        //                 email: null,
+        //                 name: null,
+        //                 isRead: false,
+        //             },
+        //         };
+        //     }
+
+        //     _create(){
+
+        //         // Set Self
+        //         const self = this;
+
+        //         // Create Component
+        //         this._component = $(document.createElement('div')).attr({
+        //             'id': 'messages' + this._id,
+        //             'class': 'dropdown messageArea',
+        //         });
+        //         this._component.id = this._component.attr('id');
+
+        //         // Set Component Class
+        //         if(this._properties.class.component){
+        //             this._component.addClass(this._properties.class.component);
+        //         }
+
+        //         // Create Button
+        //         this._component.btn = $(document.createElement('button')).attr({
+        //             'class': 'nav-link text-decoration-none py-2 animate-slide-hover-top-20',
+        //             'type': 'button',
+        //             'data-bs-toggle': 'dropdown',
+        //             'aria-expanded': 'false',
+        //         }).appendTo(this._component);
+        //         this._component.btn.icon = $(document.createElement('i')).attr({
+        //             'class': 'fs-4 bi bi-' + this._properties.icon,
+        //             'style': 'height: 2.25rem !important;width: 1.5rem !important;',
+        //         }).appendTo(this._component.btn);
+        //         this._component.btn.badge = $(document.createElement('span')).attr({
+        //             'class': 'position-absolute top-25 start-75 translate-middle border border-light rounded-circle d-none',
+        //             'style': 'padding: 8px;',
+        //         }).appendTo(this._component.btn);
+
+        //         // Create Menu
+        //         this._component.menu = $(document.createElement('ul')).attr({
+        //             'class': 'dropdown-menu dropdown-list dropdown-menu-end pb-0',
+        //             'style': 'min-width: 400px;max-width: 500px;',
+        //         }).appendTo(this._component);
+
+        //         // Create Header
+        //         this._component.menu.header = $(document.createElement('li')).appendTo(this._component.menu);
+        //         this._component.menu.header.title = $(document.createElement('h5')).addClass('py-2 px-3 m-0 cursor-default d-flex justify-content-center align-items-center').appendTo(this._component.menu.header);
+        //         this._component.menu.header.title.label = $(document.createElement('span')).text('Messages').appendTo(this._component.menu.header.title);
+        //         this._component.menu.header.title.count = $(document.createElement('span')).addClass('badge rounded-pill ms-2 d-none').appendTo(this._component.menu.header.title);
+
+        //         // Create Seperators
+        //         this._component.menu.seperator = {};
+        //         this._component.menu.seperator = $(document.createElement('li')).appendTo(this._component.menu);
+        //         this._component.menu.seperator.hr = $(document.createElement('hr')).addClass('dropdown-divider m-0').appendTo(this._component.menu.seperator);
+
+        //         // Create Items List
+        //         this._component.menu.list = $(document.createElement('div')).attr({
+        //             'class': 'overflow-auto',
+        //             'style': 'max-height: 500px;',
+        //         }).appendTo(this._component.menu);
+
+        //         // Create Footer
+        //         this._component.menu.footer = $(document.createElement('li')).appendTo(this._component.menu);
+        //         this._component.menu.footer.btn = $(document.createElement('button')).attr({
+        //             'class': 'dropdown-item text-center py-2 rounded-bottom btn btn-link',
+        //             'type': 'button',
+        //         }).appendTo(this._component.menu.footer);
+        //         this._component.menu.footer.btn.label = $(document.createElement('small')).text('View All').appendTo(this._component.menu.footer.btn);
+
+        //         // Set Icon
+        //         if(this._properties.icon === null){
+        //             this._component.btn.icon.remove();
+        //         }
+
+        //         // Set Color
+        //         if(this._properties.color){
+        //             this._component.btn.badge.addClass('text-bg-' + this._properties.color);
+        //             this._component.menu.header.title.count.addClass('text-bg-' + this._properties.color);
+        //         }
+
+        //         // Add Callback
+        //         self._component.menu.footer.btn.on('click',function(){
+        //             if(typeof self._properties.callback.viewAll === 'function'){
+        //                 self._properties.callback.viewAll();
+        //             }
+        //         });
+        //     }
+
+        //     count(){
+
+        //         // Set Self
+        //         const self = this;
+
+        //         // Count the number of new notifications
+        //         let count = this._component.find('[data-isRead="false"]').length;
+
+        //         // Set Count
+        //         this._component.menu.header.title.count.text(count);
+
+        //         // Show Badge
+        //         if(count > 0){
+        //             this._component.menu.header.title.count.removeClass('d-none');
+        //             this._component.btn.badge.removeClass('d-none');
+        //             this._component.btn.addClass('animate-bounce');
+        //         } else {
+        //             this._component.menu.header.title.count.addClass('d-none');
+        //             this._component.btn.badge.addClass('d-none');
+        //             this._component.btn.removeClass('animate-bounce');
+        //         }
+
+        //         // Return Count
+        //         return count;
+        //     }
+
+        //     add(param1 = null, param2 = null){
+
+        //         // Set Self
+        //         const self = this;
+
+        //         let options = {};
+        //         let callback = null;
+
+        //         let properties = {};
+
+        //         // Set selector, options, and callback
+        //         [param1, param2].forEach(param => {
+        //             if(param !== null){
+        //                 if (typeof param === 'object') {
+        //                     options = param;
+        //                 } else if (typeof param === 'function') {
+        //                     callback = param;
+        //                 }
+        //             }
+        //         });
+
+        //         // Configure Options
+        //         for(const [key, value] of Object.entries(this._properties.properties)){
+        //             if(typeof properties[key] === 'undefined'){
+        //                 properties[key] = value;
+        //             }
+        //         }
+        //         for(const [key, value] of Object.entries(options)){
+        //             if(typeof properties[key] !== 'undefined'){
+        //                 switch(key){
+        //                     case"class":
+        //                         for(const [section, classes] of Object.entries(value)){
+        //                             if(properties[key][section] != null){
+        //                                 properties[key][section] += ' ' + classes;
+        //                             } else {
+        //                                 properties[key][section] = classes;
+        //                             }
+        //                         }
+        //                         break;
+        //                     default:
+        //                         properties[key] = value;
+        //                         break;
+        //                 }
+        //             }
+        //         }
+
+        //         // Set ID
+        //         let id = this._count();
+
+        //         // Create Item
+        //         let item = $(document.createElement('li')).attr({
+        //             'id': this._component.id + 'item' + id,
+        //         }).prependTo(this._component.menu.list);
+        //         item.id = item.attr('id');
+        //         item.properties = properties;
+
+        //         // Create Button
+        //         item.btn = $(document.createElement('button')).attr({}).addClass('dropdown-item d-flex align-items-center py-2').attr('type','button').appendTo(item);
+
+        //         // Add Icon
+        //         item.btn.icon = $(document.createElement('div')).addClass('me-3').appendTo(item.btn);
+        //         item.btn.icon.frame = $(document.createElement('div')).attr({}).addClass('d-flex align-items-center justify-content-center rounded-circle text-bg-primary').css({"width":"48px","height":"48px"}).appendTo(item.btn.icon);
+
+        //         // Add Label
+        //         item.btn.label = $(document.createElement('div')).addClass('d-flex flex-column align-items-justify').appendTo(item.btn);
+        //         item.btn.label.text = $(document.createElement('span')).addClass('text-wrap').text(properties.label).appendTo(item.btn.label);
+        //         item.btn.label.meta = $(document.createElement('small')).addClass('text-muted').appendTo(item.btn.label);
+        //         item.btn.label.name = $(document.createElement('span')).text(properties.name).appendTo(item.btn.label.meta);
+        //         item.btn.label.timeago = $(document.createElement('time')).attr({}).addClass('timeago ms-2').attr('data-bs-toggle','tooltip').appendTo(item.btn.label.meta);
+
+        //         // Add Seperator
+        //         item.seperator = $(document.createElement('li')).insertAfter(item);
+        //         item.seperator.hr = $(document.createElement('hr')).addClass('dropdown-divider m-0').appendTo(item.seperator);
+
+        //         // Configure Avatar
+        //         item.btn.icon.frame.avatar = this._builder.Component(
+        //             "avatar",
+        //             item.btn.icon.frame,
+        //             {
+        //                 class: {
+        //                     object: "rounded-circle",
+        //                 },
+        //                 email: properties.email,
+        //                 size: "48px",
+        //             },
+        //             function(avatar,component){},
+        //         );
+
+        //         // Configure Date Time
+        //         let datetime = null;
+        //         if(properties.datetime !== null){
+        //             datetime = new Date(properties.datetime);
+        //         } else {
+        //             datetime = new Date();
+        //         }
+        //         item.btn.label.timeago.attr({
+        //             'title': datetime.toLocaleString(),
+        //             'datetime': datetime.toLocaleString(),
+        //             'data-bs-title': datetime.toLocaleString(),
+        //             'data-bs-toggle': 'tooltip',
+        //             'data-bs-placement': 'top',
+        //         }).text(datetime.toLocaleString());
+        //         item.btn.label.timeago.bootstrap = new bootstrap.Tooltip(item.btn.label.timeago);
+        //         setTimeout(function(){ item.btn.label.timeago.timeago(); }, 0);
+
+        //         // Configure isRead
+        //         item.attr('data-isRead',properties.isRead);
+        //         if(!properties.isRead){
+        //             item.addClass('blink-primary');
+        //             item.btn.label.text.addClass('fw-bold');
+        //         }
+
+        //         // Set Item Class
+        //         if(properties.class.item){
+        //             item.addClass(properties.class.item);
+        //         }
+
+        //         // Add a read function
+        //         item.read = function(callback = null){
+        //             if(item.attr('data-isRead') === 'false'){
+        //                 item.attr('data-isRead', 'true').removeClass('blink-primary');
+        //                 item.btn.label.text.removeClass('fw-bold');
+        //                 self.count();
+        //                 if(typeof self._properties.callback.onRead === 'function'){
+        //                     self._properties.callback.onRead(item,self,self._component);
+        //                 }
+        //                 if(typeof properties.onRead === 'function'){
+        //                     properties.onRead(item,self,self._component);
+        //                 }
+        //             }
+        //             if(typeof callback === 'function'){
+        //                 callback(item,self,self._component);
+        //             }
+        //         };
+
+        //         // Add onRead Callback
+        //         if(!properties.isRead){
+        //             item.timer;
+        //             item.hover(function() {
+        //                 item.timer = setTimeout(function() {
+        //                     item.read();
+        //                 }, self._properties.onReadDelay);
+        //             }, function() {
+        //                 clearTimeout(item.timer);
+        //             });
+        //         }
+
+        //         // Add click Callback
+        //         item.click(function(){
+        //             if(typeof properties.click === 'function'){
+        //                 properties.click(item,self,self._component);
+        //             }
+        //         });
+
+        //         // Add View All Click Callback
+        //         this._component.menu.footer.btn.on('click',function(){
+        //             if(typeof self._properties.callback.click === 'function'){
+        //                 self._properties.callback.click(item,self,self._component);
+        //             }
+        //         });
+
+        //         // Execute Callback
+        //         if(typeof callback === 'function'){
+        //             callback(item,this);
+        //         }
+
+        //         // Set Count
+        //         this.count();
+
+        //         // Return Object
+        //         return this;
+        //     }
+        // },
         toast: class extends this.ComponentClass {
 
             _init(){
@@ -2559,23 +1798,6 @@ class Builder {
                         click: null,
                     },
                     position: 'bottom-end',
-                    properties: {
-                        class: {
-                            item: null,
-                        },
-                        callback: {
-                            click: null,
-                        },
-                        color: null,
-                        icon: null,
-                        title: null,
-                        body: null,
-                        datetime: null,
-                        delay: 5000,
-                        autohide: true,
-                        animation: true,
-                        dismissible: true,
-                    },
                 };
             }
 
@@ -2654,32 +1876,9 @@ class Builder {
                 });
 
                 // Configure Options
-                for(const [key, value] of Object.entries(this._properties.properties)){
-                    if(typeof properties[key] === 'undefined'){
-                        properties[key] = value;
-                    }
-                }
                 for(const [key, value] of Object.entries(options)){
                     if(typeof properties[key] !== 'undefined'){
                         switch(key){
-                            case"callback":
-                                if(typeof properties[key] !== 'undefined'){
-                                    for(const [k, v] of Object.entries(value)){
-                                        if(typeof properties[key][k] !== 'undefined'){
-                                            properties[key][k] = v;
-                                        }
-                                    }
-                                }
-                                break;
-                            case"class":
-                                for(const [section, classes] of Object.entries(value)){
-                                    if(properties[key][section] != null){
-                                        properties[key][section] += ' ' + classes;
-                                    } else {
-                                        properties[key][section] = classes;
-                                    }
-                                }
-                                break;
                             default:
                                 properties[key] = value;
                                 break;

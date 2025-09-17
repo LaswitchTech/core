@@ -1,12 +1,5 @@
 <?php
 
-/**
- * Core Framework - Models
- *
- * @license    MIT (https://mit-license.org/)
- * @author     Louis Ouellet <louis@laswitchtech.com>
- */
-
 // Declaring namespace
 namespace LaswitchTech\Core;
 
