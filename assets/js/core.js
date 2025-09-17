@@ -232,6 +232,20 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         })();
 
+        // Configure Toast
+        (() => {
+            builder.Toast.prependTo('body');
+            builder.Toast.position('bottom-end');
+            API.error(function(xhr, status, error){
+                builder.Toast.add({
+                    color: 'danger',
+                    icon: 'exclamation-triangle',
+                    title: builder.Locale.get('Error'),
+                    body: builder.Locale.get('An error occurred while processing your request. Press [F12] to see more details.'),
+                });
+            });
+        })();
+
         // Panel
         if(document.querySelector('[data-bs-template="panel"]')){
             $('footer.copyright').click(function(){

@@ -1809,7 +1809,7 @@ class Builder {
                 // Create Component
                 this._component = $(document.createElement('div')).attr({
                     'id': 'toasts' + self._id,
-                    'class': 'toast-container position-fixed p-3',
+                    'class': 'toast-container position-fixed p-0 pe-4 pb-4',
                 });
                 this._component.id = this._component.attr('id');
 
@@ -1862,7 +1862,19 @@ class Builder {
                 let options = {};
                 let callback = null;
 
-                let properties = {};
+                let properties = {
+                    class: null,
+                    callback: null,
+                    color: null,
+                    icon: null,
+                    title: null,
+                    body: null,
+                    datetime: null,
+                    delay: 5000,
+                    autohide: true,
+                    animation: true,
+                    dismissible: true,
+                };
 
                 // Set selector, options, and callback
                 [param1, param2].forEach(param => {
@@ -1896,9 +1908,18 @@ class Builder {
                     'role': 'alert',
                     'aria-live': 'assertive',
                     'aria-atomic': 'true',
-                }).prependTo(this._component);
+                }).prependTo(this._component).click(function(){
+                    if(typeof properties.callback === 'function'){
+                        properties.callback(toast,self._component);
+                    }
+                });
                 toast.id = toast.attr('id');
                 toast.properties = properties;
+
+                // Set Toast Class
+                if(properties.class){
+                    toast.addClass(properties.class);
+                }
 
                 // Create Toast Header
                 toast.header = $(document.createElement('div')).addClass('toast-header').appendTo(toast);
