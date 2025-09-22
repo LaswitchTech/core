@@ -1,4 +1,4 @@
-<div class="nav nav-pills flex-grow-1 align-items-center justify-content-end">
+<div class="nav nav-pills flex-grow-1 align-items-center justify-content-end widgets">
     <!-- Search Field -->
     <div id="searchField" class="ms-3 <?php if(is_null($this->Request->getParams('GET','query'))){ echo 'd-none'; } ?> nav-item flex-grow-1">
         <form class="d-flex" method="get" autocomplete="on" novalidate>
@@ -65,7 +65,7 @@
                     <img src="/avatar?username=<?= $this->Auth->user()->username ?>" alt="avatar" width="48" height="48" class="rounded-circle">
                 </button>
                 <ul class="dropdown-menu dropdown-menu-end shadow" aria-labelledby="profileMenu" style="min-width:350px;max-width:500px;">
-                    <li class="my-2">
+                    <div class="py-2">
                         <div class="d-flex flex-column justify-content-center align-items-center">
                             <div class="position-relative rounded-circle border border-3 my-2">
                                 <img src="/avatar?username=<?= $this->Auth->user()->username ?>" alt="avatar" class="rounded-circle" style="max-height: 122px; max-width: 122px; height: 122px; width: 122px; object-fit: contain; object-position: center;">
@@ -74,8 +74,7 @@
                                 <h5><?= $this->Auth->user()->vcard['name'] ?></h5>
                             </div>
                         </div>
-                    </li>
-                    <li><hr class="dropdown-divider"></li>
+                    </div>
                     <?php foreach($this->Builder->menu('user') as $route => $nav): ?>
                         <li>
                             <a class="dropdown-item" href="<?= $nav['link'] ?>">
@@ -84,10 +83,7 @@
                             </a>
                         </li>
                     <?php endforeach; ?>
-                    <?php if(count($this->Builder->menu('user')) > 0): ?>
-                        <li><hr class="dropdown-divider"></li>
-                    <?php endif; ?>
-                    <div class="dropstart">
+                    <li class="dropstart">
                         <button class="dropdown-item" type="button" aria-expanded="false" data-bs-toggle="dropdown" aria-label="Toggle theme (auto)">
                             <i class="bi bi-circle-half me-2" aria-hidden="true"></i>
                             <span><?= $this->Locale->get('Dark Mode') ?></span>
@@ -115,8 +111,8 @@
                                 </button>
                             </li>
                         </ul>
-                    </div>
-                    <div class="dropstart">
+                    </li>
+                    <li class="dropstart">
                         <button class="dropdown-item" type="button" aria-expanded="false" data-bs-toggle="dropdown">
                             <i class="bi bi-globe-americas me-2" aria-hidden="true"></i>
                             <span><?= $this->Locale->get('Language') ?></span>
@@ -132,8 +128,8 @@
                                 </li>
                             <?php endforeach; ?>
                         </ul>
-                    </div>
-                    <li><hr class="dropdown-divider"></li>
+                    </li>
+                    <div><hr class="dropdown-divider"></div>
                     <li>
                         <a class="dropdown-item" href="?signout">
                             <i class="bi bi-box-arrow-right me-1"></i>

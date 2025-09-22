@@ -239,7 +239,7 @@ abstract class BaseModel extends Model {
     protected function target(array $record): array
     {
         // Check if the targetTable and targetId are set
-        if(array_key_exists('targetTable', $record) && array_key_exists('targetId', $record)){
+        if(array_key_exists('targetTable', $record) && array_key_exists('targetId', $record) && !empty($record['targetTable']) && !empty($record['targetId'])){
 
             // Retrieve the Target
             $target = $this->read($record['targetTable'], $record['targetId']);

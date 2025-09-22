@@ -232,6 +232,20 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         })();
 
+        // Configure Toast
+        (() => {
+            builder.Toast.prependTo('body');
+            builder.Toast.position('bottom-end');
+            API.error(function(xhr, status, error){
+                builder.Toast.add({
+                    color: 'danger',
+                    icon: 'exclamation-triangle',
+                    title: builder.Locale.get('Error'),
+                    body: builder.Locale.get('An error occurred while processing your request. Press [F12] to see more details.'),
+                });
+            });
+        })();
+
         // Panel
         if(document.querySelector('[data-bs-template="panel"]')){
             $('footer.copyright').click(function(){
@@ -250,93 +264,89 @@ document.addEventListener('DOMContentLoaded', () => {
                             load: function(component, modal){
                                 return new Promise((resolve, reject) => {
                                     try {
-                                        $.ajax({
-                                            url: '/api/core/info',
-                                            type: 'GET',dataType: 'json',
-                                            success: function(response) {
+                                        API.endpoint('/core/info').execute(function(response){
 
-                                                // Update the component with the response
-                                                component.body.container.title.name.text(response.name);
-                                                component.body.container.title.version.text(response.version);
-                                                component.body.container.copyright.owner.html(response.owner + ' ' + builder.Locale.get('All rights reserved') + '.');
-                                                for(const [key, author] of Object.entries(response.authors)){
-                                                    $(document.createElement('a')).attr({
-                                                        "class": "btn btn-link p-0",
-                                                        "href": author.url,
-                                                        "target": "_blank",
-                                                    }).text(author.name).appendTo(component.body.container.developed)
-                                                }
-                                                component.body.container.license.button.text(response.license.type);
-
-                                                // Add click event to the version button
-                                                component.body.container.title.version.click(function(){
-                                                    builder.Component(
-                                                        "modal",
-                                                        {
-                                                            onEnter: true,
-                                                            destroy:true,
-                                                            icon: "file-earmark-diff",
-                                                            title: builder.Locale.get("Changelog"),
-                                                            cancel: false,
-                                                            submit: false,
-                                                            fullscreen: false,
-                                                            size: "lg",
-                                                        },
-                                                        function(modal,component){
-
-                                                            // Styling
-                                                            component.addClass('modal-primary');
-                                                            component.dialog.css({'max-width': '720px'});
-                                                            component.body.addClass('text-bg-dark');
-                                                            component.footer.remove();
-
-                                                            // Add a preformatted text
-                                                            component.body.container = $(document.createElement('div')).attr({
-                                                                "class": "vh-70 overflow-y-auto",
-                                                            }).html(marked.parse(response.changelog)).appendTo(component.body);
-
-                                                            // Show Modal
-                                                            modal.show();
-                                                        }
-                                                    );
-                                                });
-
-                                                // Add click event to the license button
-                                                component.body.container.license.button.click(function(){
-                                                    builder.Component(
-                                                        "modal",
-                                                        {
-                                                            onEnter: true,
-                                                            destroy:true,
-                                                            icon: "key",
-                                                            title: response.license.type,
-                                                            cancel: false,
-                                                            submit: false,
-                                                            fullscreen: false,
-                                                            size: "lg",
-                                                        },
-                                                        function(modal,component){
-
-                                                            // Styling
-                                                            component.addClass('modal-primary');
-                                                            component.dialog.css({'max-width': '720px'});
-                                                            component.body.addClass('text-bg-dark');
-                                                            component.footer.remove();
-
-                                                            // Add a preformatted text
-                                                            component.body.container = $(document.createElement('pre')).attr({
-                                                                "class": "vh-70",
-                                                            }).text(response.license.content).appendTo(component.body);
-
-                                                            // Show Modal
-                                                            modal.show();
-                                                        }
-                                                    );
-                                                });
-
-                                                // Resolve the promise
-                                                resolve();
+                                            // Update the component with the response
+                                            component.body.container.title.name.text(response.name);
+                                            component.body.container.title.version.text(response.version);
+                                            component.body.container.copyright.owner.html(response.owner + ' ' + builder.Locale.get('All rights reserved') + '.');
+                                            for(const [key, author] of Object.entries(response.authors)){
+                                                $(document.createElement('a')).attr({
+                                                    "class": "btn btn-link p-0",
+                                                    "href": author.url,
+                                                    "target": "_blank",
+                                                }).text(author.name).appendTo(component.body.container.developed)
                                             }
+                                            component.body.container.license.button.text(response.license.type);
+
+                                            // Add click event to the version button
+                                            component.body.container.title.version.click(function(){
+                                                builder.Component(
+                                                    "modal",
+                                                    {
+                                                        onEnter: true,
+                                                        destroy:true,
+                                                        icon: "file-earmark-diff",
+                                                        title: builder.Locale.get("Changelog"),
+                                                        cancel: false,
+                                                        submit: false,
+                                                        fullscreen: false,
+                                                        size: "lg",
+                                                    },
+                                                    function(modal,component){
+
+                                                        // Styling
+                                                        component.addClass('modal-primary');
+                                                        component.dialog.css({'max-width': '720px'});
+                                                        component.body.addClass('text-bg-dark');
+                                                        component.footer.remove();
+
+                                                        // Add a preformatted text
+                                                        component.body.container = $(document.createElement('div')).attr({
+                                                            "class": "vh-70 overflow-y-auto",
+                                                        }).html(marked.parse(response.changelog)).appendTo(component.body);
+
+                                                        // Show Modal
+                                                        modal.show();
+                                                    }
+                                                );
+                                            });
+
+                                            // Add click event to the license button
+                                            component.body.container.license.button.click(function(){
+                                                builder.Component(
+                                                    "modal",
+                                                    {
+                                                        onEnter: true,
+                                                        destroy:true,
+                                                        icon: "key",
+                                                        title: response.license.type,
+                                                        cancel: false,
+                                                        submit: false,
+                                                        fullscreen: false,
+                                                        size: "lg",
+                                                    },
+                                                    function(modal,component){
+
+                                                        // Styling
+                                                        component.addClass('modal-primary');
+                                                        component.dialog.css({'max-width': '720px'});
+                                                        component.body.addClass('text-bg-dark');
+                                                        component.footer.remove();
+
+                                                        // Add a preformatted text
+                                                        component.body.container = $(document.createElement('pre')).attr({
+                                                            "class": "vh-70",
+                                                        }).text(response.license.content).appendTo(component.body);
+
+                                                        // Show Modal
+                                                        modal.show();
+                                                    }
+                                                );
+                                            });
+
+                                            // Resolve the promise
+                                            resolve();
                                         });
                                     } catch(e) { reject(e); }
                                 });
@@ -398,8 +408,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 );
             });
         }
-        if(document.querySelector('[data-bs-template="panel"],[data-bs-template="fullscreen"]')){
-        }
+
+        // if(document.querySelector('[data-bs-template="panel"],[data-bs-template="fullscreen"]')){
+        // }
 
         // Diagnostic
         if(false){
@@ -539,12 +550,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     })();
 });
-
-// // Configure Toast
-// $(document).ready(function(){
-//     builder.Toast.prependTo('body');
-//     builder.Toast.position('bottom-end');
-// });
 
 // // Set Locale's callback
 // builder.Locale._callback = function(key, locale){
