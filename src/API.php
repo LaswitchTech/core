@@ -150,7 +150,12 @@ class API {
                         $results = $object->{$method}();
 
                         // Check if the results is an array
-                        if(is_array($results) && is_array($results['data'])){
+                        if(is_array($results) && !empty($results['data'])){
+
+                            // Ensure data is an array
+                            if(!is_array($results['data'])){
+                                $results['data'] = [$results['data']];
+                            }
 
                             // Append the list of extensions(plugins) to the results
                             $results['data']['extensions'] = array_values(array_diff(scandir($this->Config->root() . "/lib/plugins"), ['..', '.','.DS_Store']));
