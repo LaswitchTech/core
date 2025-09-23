@@ -24,32 +24,27 @@
     <!-- App Drawer -->
     <?php if($this->Auth && $this->Auth->isAuthenticated()): ?>
         <?php if(count($this->Builder->menu('apps')) > 0): ?>
-            <div class="nav-item">
-                <div class="dropdown app-drawer">
+            <div class="nav-item app-drawer">
+                <div class="dropdown">
                     <button class="nav-link text-decoration-none py-2 animate-pulse-hover" type="button" data-bs-auto-close="outside" data-bs-toggle="dropdown" aria-expanded="false">
                         <i class="fs-4 bi bi-grid"></i>
                     </button>
-                    <ul class="dropdown-menu dropdown-menu-end shadow pb-0">
-                        <li>
-                            <h5 class="py-2 px-3 m-0 d-flex justify-content-center align-items-center">
+                    <ul class="dropdown-menu dropdown-menu-end">
+                        <div>
+                            <h5 class="py-2 px-3 m-0 cursor-default d-flex justify-content-center align-items-center">
                                 <span><?= $this->Locale->get('Apps') ?></span>
                             </h5>
-                        </li>
-                        <li>
-                            <hr class="dropdown-divider m-0">
-                        </li>
-                        <li class="overflow-auto rounded-bottom p-2">
-                            <div class="row row-cols-3 m-0 p-0">
-                                <?php foreach($this->Builder->menu('apps') as $route => $nav): ?>
-                                    <?php if (strpos($route, '.') !== false) { $url = 'https://'.$nav['link']; } else { $url = $nav['link']; } ?>
-                                    <div class="col p-0 m-0">
-                                        <a class="dropdown-item rounded d-flex flex-column justify-content-center align-items-center p-2" href="<?= $url ?>">
-                                            <i class="bi bi-<?= $nav['icon'] ?> fs-3"></i>
-                                            <span class="text-wrap text-center"><?= $this->Locale->get($nav['label']); ?></span>
-                                        </a>
-                                    </div>
-                                <?php endforeach; ?>
-                            </div>
+                        </div>
+                        <div class="row row-cols-3 m-0 p-2">
+                            <?php foreach($this->Builder->menu('apps') as $route => $nav): ?>
+                                <?php if (strpos($route, '.') !== false) { $url = 'https://'.$nav['link']; } else { $url = $nav['link']; } ?>
+                                <div class="col">
+                                    <a href="<?= $url ?>">
+                                        <i class="bi bi-<?= $nav['icon'] ?> fs-3"></i>
+                                        <span class="text-wrap text-center"><?= $this->Locale->get($nav['label']); ?></span>
+                                    </a>
+                                </div>
+                            <?php endforeach; ?>
                         </li>
                     </ul>
                 </div>
