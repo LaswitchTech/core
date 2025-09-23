@@ -150,7 +150,12 @@ class API {
                         $results = $object->{$method}();
 
                         // Check if the results is an array
-                        if(is_array($results) && is_array($results['data'])){
+                        if(is_array($results) && !empty($results['data'])){
+
+                            // Ensure data is an array
+                            if(!is_array($results['data'])){
+                                $results['data'] = [$results['data']];
+                            }
 
                             // Append the list of extensions(plugins) to the results
                             $results['data']['extensions'] = array_values(array_diff(scandir($this->Config->root() . "/lib/plugins"), ['..', '.','.DS_Store']));
@@ -159,8 +164,13 @@ class API {
                             $results['data']['auth'] = [
                                 'authenticated' => $this->Auth->isAuthenticated(),
                                 'public' => $this->Config->get('application','public'),
+                            ];
+
+                            // Append Auth Information to the results
+                            $results['data']['app'] = [
                                 'maintenance' => $this->Config->get('application','maintenance'),
                                 'development' => $this->Config->get('application','development'),
+                                'logLevel' => $this->Config->get('log','level'),
                             ];
 
                             // Append Auth User Information to the results
