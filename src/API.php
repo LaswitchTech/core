@@ -164,8 +164,13 @@ class API {
                             $results['data']['auth'] = [
                                 'authenticated' => $this->Auth->isAuthenticated(),
                                 'public' => $this->Config->get('application','public'),
+                            ];
+
+                            // Append Auth Information to the results
+                            $results['data']['app'] = [
                                 'maintenance' => $this->Config->get('application','maintenance'),
                                 'development' => $this->Config->get('application','development'),
+                                'logLevel' => $this->Config->get('log','level'),
                             ];
 
                             // Append Auth User Information to the results
