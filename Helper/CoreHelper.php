@@ -25,7 +25,7 @@ class CoreHelper extends Helper {
         // Path to file
         $htaccess = $CONFIG->root() . DIRECTORY_SEPARATOR . ".htaccess";
 
-        // Check if the file exist
+        // Check if the file exist and we want to force the creation
         if($force && is_file($htaccess)) {
 
             // Delete file
@@ -81,6 +81,13 @@ class CoreHelper extends Helper {
 
         // Path to file
         $webroot = $CONFIG->root() . DIRECTORY_SEPARATOR . "webroot";
+
+        // Check if the directory exist and we want to force the creation
+        if($force && is_dir($webroot)) {
+
+            // Delete file
+            $this->delete($webroot);
+        }
 
         // Check if directory exists
         if(!is_dir($webroot) && !is_file($webroot) && !is_link($webroot)) {
