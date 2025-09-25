@@ -165,7 +165,7 @@ class CoreCommand extends Command {
     public function initAction()
     {
         // Initialize the framework
-        $this->Helper->Core->init();
+        $this->Helper->Core->init(true);
     }
 
     /**
