@@ -29,7 +29,7 @@
                     <button class="nav-link text-decoration-none py-2 animate-pulse-hover" type="button" data-bs-auto-close="outside" data-bs-toggle="dropdown" aria-expanded="false">
                         <i class="fs-4 bi bi-grid"></i>
                     </button>
-                    <ul class="dropdown-menu dropdown-menu-end">
+                    <ul class="dropdown-menu dropdown-menu-end shadow">
                         <div>
                             <h5 class="py-2 px-3 m-0 cursor-default d-flex justify-content-center align-items-center">
                                 <span><?= $this->Locale->get('Apps') ?></span>
