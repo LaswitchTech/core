@@ -297,6 +297,23 @@ class Builder {
         $html .= '    const ADMIN_MODE = ' . ($this->Auth->isAuthorized('Administrator', 1) ? 'true' : 'false') . ';' . PHP_EOL;
         $html .= '</script>' . PHP_EOL;
 
+        // Load Core JS
+        $path = $this->Config->root() . '/vendor/laswitchtech/core/assets/js';
+        if(is_file($path.'.cfg')){
+            if(is_dir($path)){
+                $assets = json_decode(file_get_contents($path.'.cfg') ?? '[]',true);
+                foreach($assets as $file){
+                    if(is_file($path.'/'.$file)){
+                        if(str_ends_with($file, '.mjs')){
+                            $html .= '<script type="module" src="/assets/core/js/'.trim($file,'/').'"></script>' . PHP_EOL;
+                        } else {
+                            $html .= '<script src="/assets/core/js/'.trim($file,'/').'"></script>' . PHP_EOL;
+                        }
+                    }
+                }
+            }
+        }
+
         // Load Themes JS
         $path = $this->Config->root() . '/lib/themes';
         if(is_dir($path)){
@@ -314,23 +331,6 @@ class Builder {
                 if(is_file($path.'/'.$filePath)){
                     if(($this->Config->get('application','theme') ?? $this->Config->get('installer','theme')) == $file){
                         $html .= '<script src="/assets/themes/'.trim($filePath,'/').'"></script>' . PHP_EOL;
-                    }
-                }
-            }
-        }
-
-        // Load Core JS
-        $path = $this->Config->root() . '/vendor/laswitchtech/core/assets/js';
-        if(is_file($path.'.cfg')){
-            if(is_dir($path)){
-                $assets = json_decode(file_get_contents($path.'.cfg') ?? '[]',true);
-                foreach($assets as $file){
-                    if(is_file($path.'/'.$file)){
-                        if(str_ends_with($file, '.mjs')){
-                            $html .= '<script type="module" src="/assets/core/js/'.trim($file,'/').'"></script>' . PHP_EOL;
-                        } else {
-                            $html .= '<script src="/assets/core/js/'.trim($file,'/').'"></script>' . PHP_EOL;
-                        }
                     }
                 }
             }
