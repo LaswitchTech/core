@@ -622,13 +622,13 @@ class CoreHelper extends Helper {
     public function delete(string $directory): bool
     {
         // If it doesn't exist, treat it as an error or success depending on your preference
-        if (!file_exists($directory)) {
+        if (!file_exists($directory) && !is_link($directory)) {
             // Option 1: Treat as an error
             return false;
         }
 
         // If it's a file or symlink, just unlink it
-        if (!is_dir($directory)) {
+        if (!is_dir($directory || is_link($directory))) {
             if (!@unlink($directory)) {
                 return false;
             }
