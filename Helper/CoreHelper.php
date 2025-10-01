@@ -641,16 +641,20 @@ class CoreHelper extends Helper {
             return false;
         }
 
+        // Loop through each item in the directory
         foreach ($items as $item) {
+
             // Skip pointers
-            if ($item === '.' || $item === '..') {
+            if (in_array($item,['.','..'])) {
                 continue;
             }
 
+            // Full path to the item
             $path = $directory . DIRECTORY_SEPARATOR . $item;
 
             // Recursively call delete on each item
             if (!$this->delete($path)) {
+
                 // If any item fails to be deleted, return false
                 return false;
             }
