@@ -249,7 +249,7 @@ class CoreHelper extends Helper {
 
         // Path to file
         $favicon = $webroot . DIRECTORY_SEPARATOR . "favicon.ico";
-        $icon = ".." . DIRECTORY_SEPARATOR . "assets" . DIRECTORY_SEPARATOR . "img". DIRECTORY_SEPARATOR . "favicon.ico";
+        $icon = $CONFIG->root() . DIRECTORY_SEPARATOR . "assets" . DIRECTORY_SEPARATOR . "img". DIRECTORY_SEPARATOR . "favicon.ico";
 
         // Check if the file exist
         if($force && is_file($favicon)) {
@@ -270,7 +270,7 @@ class CoreHelper extends Helper {
 
         // Path to directory
         $js = $assets . DIRECTORY_SEPARATOR . "js";
-        $directory = ".." . DIRECTORY_SEPARATOR . ".." . DIRECTORY_SEPARATOR . "assets" . DIRECTORY_SEPARATOR . "js";
+        $directory = $CONFIG->root() . DIRECTORY_SEPARATOR . "assets" . DIRECTORY_SEPARATOR . "js";
 
         // Check if directory exists
         if(!is_dir($js) && !is_file($js) && !is_link($js)) {
@@ -284,7 +284,7 @@ class CoreHelper extends Helper {
 
         // Path to directory
         $core = $assets . DIRECTORY_SEPARATOR . "core";
-        $directory = ".." . DIRECTORY_SEPARATOR . ".." . DIRECTORY_SEPARATOR . "vendor" . DIRECTORY_SEPARATOR . "laswitchtech" . DIRECTORY_SEPARATOR . "core" . DIRECTORY_SEPARATOR . "assets";
+        $directory = $CONFIG->root() . DIRECTORY_SEPARATOR . "vendor" . DIRECTORY_SEPARATOR . "laswitchtech" . DIRECTORY_SEPARATOR . "core" . DIRECTORY_SEPARATOR . "assets";
 
         // Check if directory exists
         if(!is_dir($core) && !is_file($core) && !is_link($core)) {
@@ -298,7 +298,7 @@ class CoreHelper extends Helper {
 
         // Path to directory
         $img = $assets . DIRECTORY_SEPARATOR . "img";
-        $directory = ".." . DIRECTORY_SEPARATOR . ".." . DIRECTORY_SEPARATOR . "assets" . DIRECTORY_SEPARATOR . "img";
+        $directory = $CONFIG->root() . DIRECTORY_SEPARATOR . "assets" . DIRECTORY_SEPARATOR . "img";
 
         // Check if directory exists
         if(!is_dir($img) && !is_file($img) && !is_link($img)) {
@@ -312,7 +312,7 @@ class CoreHelper extends Helper {
 
         // Path to directory
         $plugins = $assets . DIRECTORY_SEPARATOR . "plugins";
-        $lib = ".." . DIRECTORY_SEPARATOR . ".." . DIRECTORY_SEPARATOR . "lib" . DIRECTORY_SEPARATOR . "plugins";
+        $lib = $CONFIG->root() . DIRECTORY_SEPARATOR . "lib" . DIRECTORY_SEPARATOR . "plugins";
 
         // Check if directory exists
         if(!is_dir($plugins) && !is_file($plugins) && !is_link($plugins)) {
@@ -326,7 +326,7 @@ class CoreHelper extends Helper {
 
         // Path to directory
         $themes = $assets . DIRECTORY_SEPARATOR . "themes";
-        $lib = ".." . DIRECTORY_SEPARATOR . ".." . DIRECTORY_SEPARATOR . "lib" . DIRECTORY_SEPARATOR . "themes";
+        $lib = $CONFIG->root() . DIRECTORY_SEPARATOR . "lib" . DIRECTORY_SEPARATOR . "themes";
 
         // Check if directory exists
         if(!is_dir($themes) && !is_file($themes) && !is_link($themes)) {
