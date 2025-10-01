@@ -628,7 +628,7 @@ class CoreHelper extends Helper {
         }
 
         // If it's a file or symlink, just unlink it
-        if (!is_dir($directory || is_link($directory))) {
+        if (!is_dir($directory) || is_link($directory)) {
             if (!@unlink($directory)) {
                 return false;
             }
