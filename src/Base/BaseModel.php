@@ -543,8 +543,12 @@ abstract class BaseModel extends Model {
         $Query = $this->Database->query()
             ->table($this->table)
             ->select($this->primary)
-            ->where('id', 9999, '<>')
-            ->where('organization', $this->Auth->user()->organization()->id);
+            ->where('id', 9999, '<>');
+
+        // Check for ownership
+        if(array_key_exists('organization',$this->definition)){
+            $Query->where('organization', $this->Auth->user()->organization()->id);
+        }
 
         // Add the Conditions
         foreach($conditions as $condition){
