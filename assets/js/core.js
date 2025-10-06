@@ -79,17 +79,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Set active link
         (() => {
-            $('a[href="'+window.location.pathname + window.location.search+'"]').each(function () {
+            $('a[href="'+window.location.pathname + window.location.search+'"],button[data-route="'+window.location.pathname+'"]').each(function () {
                 $(this).addClass('active');
                 $(this).parents('.collapse').addClass('show');
                 $(this).parents('[data-bs-toggle="collapse"]').attr('aria-expanded',true);
-            });
-            $('button').each(function () {
-                if ($(this).attr('data-route') === window.location.pathname) {
-                    $(this).addClass('active');
-                    $(this).parents('.collapse').addClass('show');
-                    $(this).parents('[data-bs-toggle="collapse"]').attr('aria-expanded',true);
-                }
             });
         })();
 
@@ -747,67 +740,6 @@ document.addEventListener('DOMContentLoaded', () => {
 // retrieveMessages();
 // const intervalMessages = setInterval(function(){
 //     retrieveMessages();
-// }, 20000);
-
-// // Configure Task
-// builder.Task._properties.callback.viewAll = function(){
-//     window.location.href = '/tasks';
-// };
-
-// // Handle Tasks
-// var statusTask = true;
-// const disableTask = function(){
-//     statusTask = false;
-// }
-// const enableTask = function(){
-//     statusTask = true;
-// }
-// const toggleTask = function(){
-//     statusTask = !statusTask;
-// }
-// let tasks = {};
-// const retrieveTasks = function(){
-//     if(!AUTHENTICATED) return;
-//     if(!statusTask) return;
-//     api.post('task/get',{}, {
-//         error:function(xhr,status,error){
-//             clearInterval(intervalTasks);
-//         },
-//         success:function(response){
-//             for(const [id, task] of Object.entries(response)){
-//                 if(typeof tasks[id] === 'undefined'){
-//                     if(task.isActive){
-//                         builder.Task.add(
-//                             {
-//                                 label: builder.Parser.parse(task.label),
-//                                 progress: {
-//                                     scale: task.scale,
-//                                     color: task.color,
-//                                 },
-//                                 click: function(item,component){
-//                                     if(task.link){
-//                                         window.location.href = task.link;
-//                                     }
-//                                 },
-//                             },
-//                             function(item){
-//                                 item.set(task.progress);
-//                                 tasks[id] = {item: item, task: task};
-//                             },
-//                         );
-//                     }
-//                 } else {
-//                     const item = tasks[id].item;
-//                     tasks[id] = {item: item, task: task};
-//                     item.set(task.progress);
-//                 }
-//             }
-//         },
-//     });
-// }
-// retrieveTasks();
-// const intervalTasks = setInterval(function(){
-//     retrieveTasks();
 // }, 20000);
 
 // // Add General Button Events

@@ -1099,7 +1099,7 @@ class CoreHelper extends Helper {
         $label = $menu['label'];
         $icon = $menu['icon'];
         $link = $menu['link'];
-        $items = $menu['items'];
+        $items = $menu['items'] ?? [];
 
         if ($level == 1) {
             $html = '<li class="nav-item">';

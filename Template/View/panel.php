@@ -43,18 +43,18 @@
                     <?php if($this->Config->get('application','show_nav_title')): ?>
                         <div class="border border-start-0 border-end-0 p-2 px-3 mb-2"><?= $this->Locale->get('Main Navigation') ?></div>
                     <?php endif; ?>
-                    <?= $this->Helper->Core->menu($this->Builder->menu('sidebar-main')); ?>
+                    <?= $this->Helper->Core->menu($this->Builder->menu('sidebar-main',null,3)); ?>
                     <?php if($this->Auth->isAuthorized("Administration",1)): ?>
                         <?php if($this->Config->get('application','show_nav_title')): ?>
                             <div class="border border-start-0 border-end-0 p-2 px-3 mb-2"><?= $this->Locale->get('Administration') ?></div>
                         <?php endif; ?>
-                        <?= $this->Helper->Core->menu($this->Builder->menu('sidebar-admin')); ?>
+                        <?= $this->Helper->Core->menu($this->Builder->menu('sidebar-admin',null,3)); ?>
                     <?php endif; ?>
                     <?php if($this->Auth->isAuthorized("Development",1)): ?>
                         <?php if($this->Config->get('application','show_nav_title')): ?>
                             <div class="border border-start-0 border-end-0 p-2 px-3 mb-2"><?= $this->Locale->get('Development') ?></div>
                         <?php endif; ?>
-                        <?= $this->Helper->Core->menu($this->Builder->menu('sidebar-dev')); ?>
+                        <?= $this->Helper->Core->menu($this->Builder->menu('sidebar-dev',null,3)); ?>
                     <?php endif; ?>
                 </aside>
 

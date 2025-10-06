@@ -15,6 +15,9 @@ class Builder {
     protected $CSRF;
     protected $Auth;
 
+    // Properties
+    protected $Routes;
+
     /**
      * Constructor
      */
@@ -33,93 +36,185 @@ class Builder {
     }
 
     /**
-     * Get a menu
+     * Get the routes
      *
-     * @param string $location
-     * @param string $parent
      * @return array
      */
-    public function menu($location = 'sidebar', $parent = null)
+    public function routes(): array
     {
-        // Import Global Variables
-        global $AUTH;
-        $menu = [];
-        $routes = $this->Config->get('routes');
+        if ($this->Routes === null) {
+            $this->Routes = $this->Config->get('routes') ?? [];
 
-        // Load Plugins Routes
-        $pluginsPath = $this->Config->root() . DIRECTORY_SEPARATOR . 'lib' . DIRECTORY_SEPARATOR . 'plugins';
-        if(is_dir($pluginsPath)){
-            foreach(array_diff(scandir($pluginsPath), array('..', '.')) as $plugin){
-                $pluginPath = $pluginsPath . DIRECTORY_SEPARATOR . $plugin;
-                if(is_file($pluginPath . DIRECTORY_SEPARATOR . 'routes.cfg')){
-                    foreach(json_decode(file_get_contents($pluginPath . DIRECTORY_SEPARATOR . 'routes.cfg'),true) as $route => $param){
-                        if(!isset($routes[$route])){
-                            $routes[$route] = $param;
+            $pluginsPath = $this->Config->root() . DIRECTORY_SEPARATOR . 'lib' . DIRECTORY_SEPARATOR . 'plugins';
+            if (is_dir($pluginsPath)) {
+                foreach (array_diff(scandir($pluginsPath), ['.', '..', '.DS_Store']) as $plugin) {
+                    $cfg = $pluginsPath . DIRECTORY_SEPARATOR . $plugin . DIRECTORY_SEPARATOR . 'routes.cfg';
+                    if (is_file($cfg)) {
+                        $pluginRoutes = json_decode(file_get_contents($cfg), true) ?: [];
+                        foreach ($pluginRoutes as $r => $p) {
+                            if (!isset($this->Routes[$r])) $this->Routes[$r] = $p;
                         }
                     }
                 }
             }
+
+            ksort($this->Routes, SORT_NATURAL | SORT_FLAG_CASE);
         }
 
-        // Sort the routes
-        ksort($routes);
-
-        foreach($routes as $route => $param) {
-            if(!isset($param['parent']) || is_null($param['parent'])) $param['parent'] = [];
-            if(!is_array($param['parent'])) $param['parent'] = [$param['parent']];
-            if($parent && !in_array($parent,$param['parent'])) continue;
-            if(!isset($param['location'])) continue;
-            if(is_string($param['location']) && $param['location'] !== $location) continue;
-            if(is_array($param['location']) && !in_array($location,$param['location'])) continue;
-            if(!$param['public'] && !$AUTH->isAuthenticated()) continue;
-            if(!$param['public'] && !$AUTH->isAuthorized("Route>" . $route, $param['level'])) continue;
-
-            $parts = array_filter(explode('/', $route));
-            if(empty($parts)) $parts = [""];
-
-            $param['items'] = [];
-            $param['link'] = $route;
-
-            if(!empty($param['parent'])){
-                foreach($param['parent'] as $par){
-                    if(!array_key_exists($par, $menu)){
-                        $menu[$par] = [];
-                    }
-                    if(!array_key_exists('items', $menu[$par])){
-                        $menu[$par]['items'] = [];
-                    }
-                    $menu[$par]['items'][$route] = $param;
-                }
-            } else {
-                if(array_key_exists($route, $menu)){
-                    $menu[$route] = array_merge_recursive($menu[$route], $param);
-                } else {
-                    $menu[$route] = $param;
-                }
-            }
-        }
-
-        foreach($menu as $route => $param) {
-            if((!array_key_exists('link',$param) || is_null($param['link'])) && array_key_exists('items',$param)){
-                foreach($param['items'] as $item => $parameters){
-                    if(!is_null($parameters['link']) && !array_key_exists($parameters['link'],$menu)){
-                        $menu[$parameters['link']] = $parameters;
-                        unset($menu[$route]['items'][$item]);
-                    }
-                }
-            }
-        }
-
-        foreach($menu as $route => $param) {
-            if((!array_key_exists('link',$param) || is_null($param['link'])) && array_key_exists('items',$param)){
-                if(empty($param['items'])){
-                    unset($menu[$route]);
-                }
-            }
-        }
-
-        return $menu;
+        return $this->Routes;
     }
+
+    /**
+     * Build a menu from routes with depth control.
+     *
+     * Behavior:
+     *  - $maxDepth === 1: return a flat list of ALL descendants under the chosen parent(s)
+     *                     (or global roots if $parent is null); no nesting, no wrapper key.
+     *  - $maxDepth >= 2:  return a nested tree up to $maxDepth levels; items deeper than $maxDepth are omitted.
+     *
+     * Output node fields: label, icon, color, items, link
+     *
+     * @param string            $location  e.g. 'sidebar-main'
+     * @param string|array|null $parent    e.g. '/crm'. If null, build from global roots (no eligible parent).
+     * @param int               $maxDepth  depth cap (1 = flat)
+     * @return array
+     */
+    public function menu($location = 'sidebar', $parent = null, int $maxDepth = 2): array
+    {
+        global $AUTH;
+
+        $maxDepth = max(1, (int)$maxDepth);
+
+        // 1) Collect eligible routes
+        $all = $this->routes();
+        if (!$all) return [];
+
+        $eligible = []; // route => ['label','icon','color','link','parents'=>[]]
+        foreach ($all as $route => $p) {
+            // normalize parents
+            $parents = [];
+            if (isset($p['parent']) && $p['parent'] !== null) {
+                $parents = is_array($p['parent']) ? $p['parent'] : [$p['parent']];
+                $parents = array_values(array_filter($parents, fn($x) => is_string($x) && $x !== ''));
+            }
+
+            // location filter
+            if (!isset($p['location'])) continue;
+            if (is_string($p['location'])) {
+                if ($p['location'] !== $location) continue;
+            } elseif (is_array($p['location'])) {
+                if (!in_array($location, $p['location'], true)) continue;
+            } else continue;
+
+            // auth/public filter
+            $isPublic = $p['public'] ?? false;
+            $level    = $p['level']  ?? 0;
+            if (!$isPublic && (!$AUTH || !$AUTH->isAuthenticated())) continue;
+            if (!$isPublic && (!$AUTH || !$AUTH->isAuthorized('Route>' . $route, $level))) continue;
+
+            $eligible[$route] = [
+                'label'   => $p['label'] ?? '',
+                'icon'    => $p['icon']  ?? null,
+                'color'   => $p['color'] ?? null,
+                'link'    => $route,
+                'parents' => $parents,
+            ];
+        }
+        if (!$eligible) return [];
+
+        // 2) Build parent->children map among eligible routes
+        $children = []; // parentRoute => [childRoute...]
+        foreach ($eligible as $r => $_) $children[$r] = [];
+        foreach ($eligible as $child => $node) {
+            foreach ($node['parents'] as $par) {
+                if (isset($eligible[$par])) $children[$par][] = $child;
+            }
+        }
+        $sortKeys = function(array &$arr) { ksort($arr, SORT_NATURAL | SORT_FLAG_CASE); };
+        $sortList = function(array &$list) { sort($list, SORT_NATURAL | SORT_FLAG_CASE); };
+        foreach ($children as &$lst) $sortList($lst);
+        unset($lst);
+
+        // 3) Determine start nodes
+        $starts = [];
+        if ($parent === null) {
+            // global roots = nodes that have no eligible parent
+            foreach ($eligible as $route => $node) {
+                $hasEligibleParent = false;
+                foreach ($node['parents'] as $p) {
+                    if (isset($eligible[$p])) { $hasEligibleParent = true; break; }
+                }
+                if (!$hasEligibleParent) $starts[] = $route;
+            }
+            $sortList($starts);
+        } else {
+            $want = is_array($parent) ? $parent : [$parent];
+            $seen = [];
+            foreach ($want as $p) {
+                if (isset($children[$p])) {
+                    foreach ($children[$p] as $c) { $seen[$c] = true; }
+                } else {
+                    // if parent isn't itself eligible, include any eligible that declares it as parent
+                    foreach ($eligible as $route => $node) {
+                        if (in_array($p, $node['parents'], true)) $seen[$route] = true;
+                    }
+                }
+            }
+            $starts = array_keys($seen);
+            $sortList($starts);
+        }
+
+        // Helpers
+        $makeLeaf = function(string $route) use ($eligible): array {
+            return [
+                'label' => $eligible[$route]['label'],
+                'icon'  => $eligible[$route]['icon'],
+                'color' => $eligible[$route]['color'],
+                'items' => [],
+                'link'  => $eligible[$route]['link'],
+            ];
+        };
+
+        // 4a) Depth = 1: FLAT list of ALL descendants of the start set
+        if ($maxDepth === 1) {
+            $out = [];
+            $queue = $starts;
+            $visited = [];
+            while ($queue) {
+                $cur = array_shift($queue);
+                if (isset($visited[$cur])) continue;
+                $visited[$cur] = true;
+                $out[$cur] = $makeLeaf($cur);
+                // enqueue children (we want *all* descendants in flat mode)
+                foreach ($children[$cur] ?? [] as $ch) $queue[] = $ch;
+            }
+            $sortKeys($out);
+            return $out;
+        }
+
+        // 4b) Depth >= 2: build nested tree up to $maxDepth; deeper nodes are omitted
+        $buildTree = function(string $route, int $depth) use (&$buildTree, $maxDepth, $children, $makeLeaf): array {
+            $node = $makeLeaf($route);
+            if ($depth >= $maxDepth) return $node; // reached cap; omit deeper nodes
+            $items = [];
+            foreach ($children[$route] ?? [] as $ch) {
+                $items[$ch] = $buildTree($ch, $depth + 1);
+            }
+            if ($items) {
+                ksort($items, SORT_NATURAL | SORT_FLAG_CASE);
+                $node['items'] = $items;
+            }
+            return $node;
+        };
+
+        $result = [];
+        foreach ($starts as $s) {
+            $result[$s] = $buildTree($s, 1);
+        }
+        $sortKeys($result);
+        return $result;
+    }
+
 
     /**
      * Create Crumbs
