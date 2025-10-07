@@ -61,7 +61,7 @@
                 <!-- Main Column -->
                 <div class="app-main flex-grow-1 d-flex flex-column">
                     <!-- Navbar with sidebar toggle -->
-                    <nav class="navbar border-bottom sticky-top">
+                    <nav class="navbar border-bottom sticky-top shadow">
                         <div class="container-fluid">
                             <!-- Sidebar Toggle Button -->
                             <button id="sidebarToggle" class="btn btn-link" type="button" aria-controls="sidebar" aria-expanded="true" aria-label="Toggle sidebar"><i class="bi bi-list fs-3"></i></button>
@@ -80,7 +80,7 @@
                     <main class="content p-0 container-fluid">
 
                         <!-- Page Title and Breadcrumbs -->
-                        <nav class="navbar align-items-center border-bottom">
+                        <nav class="navbar align-items-center border-bottom shadow">
                             <h2 class="m-0 mt-2 me-auto" id="pageTitle">
                                 <i class="bi bi-<?= $this->icon() ?> me-1"></i>
                                 <span>
