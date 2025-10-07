@@ -78,6 +78,23 @@ class Bootstrap {
                 "CLI"
             ]
         ],
+        // Communications
+        "SMS" => [
+            "class" => "\\LaswitchTech\\Core\\SMS",
+            "scope" => [
+                "ROUTER",
+                "API",
+                "CLI"
+            ]
+        ],
+        "SMTP" => [
+            "class" => "\\LaswitchTech\\Core\\SMTP",
+            "scope" => [
+                "ROUTER",
+                "API",
+                "CLI"
+            ]
+        ],
         // Authentication
         "AUTH" => [
             "class" => "\\LaswitchTech\\Core\\Auth",
@@ -122,23 +139,6 @@ class Bootstrap {
         // Models
         "MODEL" => [
             "class" => "\\LaswitchTech\\Core\\Models",
-            "scope" => [
-                "ROUTER",
-                "API",
-                "CLI"
-            ]
-        ],
-        // Communications
-        "SMS" => [
-            "class" => "\\LaswitchTech\\Core\\SMS",
-            "scope" => [
-                "ROUTER",
-                "API",
-                "CLI"
-            ]
-        ],
-        "SMTP" => [
-            "class" => "\\LaswitchTech\\Core\\SMTP",
             "scope" => [
                 "ROUTER",
                 "API",

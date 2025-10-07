@@ -31,7 +31,7 @@
                 <!-- Main Column -->
                 <div class="app-main">
                     <!-- Navbar -->
-                    <nav class="navbar border-bottom sticky-top">
+                    <nav class="navbar border-bottom sticky-top shadow">
                         <div class="container-fluid">
                             <!-- Branding -->
                             <a class="brand d-flex justify-content-start align-items-center text-decoration-none" href="/">

@@ -15,9 +15,10 @@ class Router {
         "css" => "CSS",
         "logo" => "Logo",
     ];
-    const HttpCodes = [400,401,403,404,405,422,423,427,428,429,430,432,500,501,503];
-    const HttpCustomCodes = [427,430,432];
+    const HttpCodes = [330,400,401,403,404,405,422,423,427,428,429,430,432,500,501,503];
+    const HttpCustomCodes = [330,427,430,432];
     const HttpLabels = [
+        "330" => "Reset Password", // 330 Custom Document // Reset Password
         "400" => "Bad Request", // 400 Error Document // Bad Request
         "401" => "Unauthorized", // 401 Error Document // Unauthorized
         "403" => "Forbidden", // 403 Error Document // Forbidden
@@ -25,11 +26,11 @@ class Router {
         "405" => "Method Not Allowed", // 405 Error Document // Method Not Allowed
         "422" => "Unprocessable Content", // 422 Error Document // Unprocessable Content
         "423" => "Locked", // 423 Error Document // Locked
-        "427" => "2FA Required", // 427 Error Document // 2FA Required
+        "427" => "2FA Required", // 427 Custom Document // 2FA Required
         "428" => "Verification Required", // 428 Error Document // Verification Required
         "429" => "Too Many Requests", // 429 Error Document // Too Many Requests
-        "430" => "Unauthenticated", // 430 Error Document // Unauthenticated
-        "432" => "Unverified", // 432 Error Document // Unverified
+        "430" => "Unauthenticated", // 430 Custom Document // Unauthenticated
+        "432" => "Unverified", // 432 Custom Document // Unverified
         "500" => "Internal Server Error", // 500 Error Document // Internal Server Error
         "501" => "Not Implemented", // 501 Error Document // Not Implemented
         "503" => "Service Unavailable", // 503 Error Document // Service Unavailable
@@ -73,10 +74,15 @@ class Router {
      */
     private function load(): self
     {
-        // Load Error Routes
+        // Load Http Routes
         foreach(self::HttpCodes as $Code){
             $Code = strval($Code);
-            $this->Routes[$Code] = $this->route($Code, ['label' => self::HttpLabels[$Code], 'view' => $Code . '.php']);
+            if(in_array(intval($Code), self::HttpCustomCodes)){
+                // $this->Routes[$Code] = $this->route($Code, ['label' => self::HttpLabels[$Code], 'view' => $Code . '.php']);
+                $this->Routes[$Code] = $this->route($Code, ['label' => self::HttpLabels[$Code], 'template' => 'custom.php', 'view' => $Code . '.php']);
+            } else {
+                $this->Routes[$Code] = $this->route($Code, ['label' => self::HttpLabels[$Code], 'template' => 'error.php', 'view' => $Code . '.php']);
+            }
         }
 
         // Load Modules Routes
