@@ -1,4 +1,4 @@
-<?php if(!$this->Config->get('application','maintenance') || $this->Route === '503'): ?>
+<?php if(!$this->Config->get('application','maintenance') || $this->Auth->isAuthorized('Administrator',1) || $this->Route === '503'): ?>
     <!doctype html>
     <html lang="en" class="h-100 w-100" data-bs-theme="auto" data-bs-template="fullscreen">
         <head>
