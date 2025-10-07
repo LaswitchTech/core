@@ -1,6 +1,6 @@
 <?php if(!$this->Config->get('application','maintenance') || $this->Auth->isAuthorized('Administrator',1)): ?>
     <!doctype html>
-    <html lang="en" class="h-100 w-100" data-bs-theme="auto" data-bs-template="fullscreen">
+    <html lang="en" class="h-100 w-100" data-bs-theme="auto" data-bs-template="internal">
         <head>
             <meta charset="utf-8">
             <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -25,7 +25,7 @@
                     <main class="content">
                         <!-- Page Content -->
                         <div class="app-content">
-                            <section class="app-430">
+                            <section class="app-internal">
                                 <div class="container">
                                     <div class="card shadow">
                                         <?php if(is_null($this->Request->getParams('GET','forgot'))): ?>
