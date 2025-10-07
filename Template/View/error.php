@@ -1,6 +1,6 @@
 <?php if(!$this->Config->get('application','maintenance') || $this->Auth->isAuthorized('Administrator',1) || $this->Route === '503'): ?>
     <!doctype html>
-    <html lang="en" class="h-100 w-100" data-bs-theme="auto" data-bs-template="fullscreen">
+    <html lang="en" class="h-100 w-100" data-bs-theme="auto" data-bs-template="error">
         <head>
             <meta charset="utf-8">
             <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -19,7 +19,7 @@
                     <main class="content">
                         <!-- Page Content -->
                         <div class="app-content">
-                            <section class="app-503">
+                            <section class="app-error">
                                 <div class="container">
                                     <div class="card shadow"><?php require_once $this->view(); ?></div>
                                 </div>

@@ -79,7 +79,7 @@ class Router {
             $Code = strval($Code);
             if(in_array(intval($Code), self::HttpCustomCodes)){
                 // $this->Routes[$Code] = $this->route($Code, ['label' => self::HttpLabels[$Code], 'view' => $Code . '.php']);
-                $this->Routes[$Code] = $this->route($Code, ['label' => self::HttpLabels[$Code], 'template' => 'custom.php', 'view' => $Code . '.php']);
+                $this->Routes[$Code] = $this->route($Code, ['label' => self::HttpLabels[$Code], 'template' => 'internal.php', 'view' => $Code . '.php']);
             } else {
                 $this->Routes[$Code] = $this->route($Code, ['label' => self::HttpLabels[$Code], 'template' => 'error.php', 'view' => $Code . '.php']);
             }
