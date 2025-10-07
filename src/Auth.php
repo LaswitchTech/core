@@ -17,6 +17,7 @@ class Auth {
     protected $user;
     protected $method;
     protected $status = false;
+    protected $requested = false;
 
     /**
      * Constructor
@@ -91,8 +92,9 @@ class Auth {
             return $this->status;
         }
 
-        if($this->method){
-            $this->status = true;
+        // Check if uer is authenticated
+        if(!$this->status){
+            $this->isResetting();
         }
 
         return $this->status;
@@ -109,6 +111,98 @@ class Auth {
             $this->isAuthenticated();
         }
         return !is_null($this->user);
+    }
+
+    /**
+     * Check if the user is attempting to reset their password
+     */
+    protected function isResetting(): void
+    {
+        // Import Global Variables
+        global $REQUEST;
+
+        if($this->requested){
+            return;
+        }
+
+        // echo 'code: '; var_dump($REQUEST->getParams('REQUEST','code'));
+        // echo 'username: '; var_dump($REQUEST->getParams('REQUEST','username'));
+        // echo 'forgot: '; var_dump($REQUEST->getParams('REQUEST','forgot'));
+        // echo 'reset: '; var_dump($REQUEST->getParams('REQUEST','reset'));
+        // echo 'verify: '; var_dump($REQUEST->getParams('REQUEST','verify'));
+        if(
+            $REQUEST->getParams('REQUEST','code') &&
+            $REQUEST->getParams('REQUEST','username') &&
+            !is_null($REQUEST->getParams('REQUEST','reset')) &&
+            is_null($REQUEST->getParams('REQUEST','forgot')) &&
+            is_null($REQUEST->getParams('REQUEST','verify'))
+        ) {
+            $this->verifyPin($REQUEST->getParams('REQUEST','username'), $REQUEST->getParams('REQUEST','code'));
+        } elseif(
+            $REQUEST->getParams('REQUEST','username') &&
+            !is_null($REQUEST->getParams('REQUEST','forgot')) &&
+            !is_null($REQUEST->getParams('REQUEST','reset'))
+        ) {
+            $this->setPin($REQUEST->getParams('REQUEST','username'));
+        }
+    }
+
+    /**
+     * set a pin for password reset
+     *
+     * @param string $username
+     * @return bool
+     */
+    protected function setPin(string $username): void
+    {
+        // Retrieve User
+        $user = $this->user($username);
+
+        // Check if the user is found
+        if($user->found()){
+
+            // Create a new Pin
+            $Pin = new Objects\Pin();
+
+            // Generate a new pin
+            $pin = $Pin->generate();
+
+            // Save the pin
+            $Pin->save($user->id,$pin);
+
+            // Send the pin to the user email
+            $this->requested = $Pin->notify($user,$pin);
+        }
+    }
+
+    /**
+     * verify the pin for password reset
+     *
+     * @param string $username
+     * @param string $code
+     * @return bool
+     */
+    protected function verifyPin(string $username, string $code): void
+    {
+        // Retrieve User
+        $user = $this->user($username);
+
+        // Check if the user is found
+        if($user->found()){
+
+            // Create a new Pin
+            $Pin = new Objects\Pin($user->pin['id']);
+
+            // Verify the pin
+            if($Pin->verify($code)){
+
+                // Reset the user's password
+                $password = $user->backend()->reset();
+
+                // Notify the user of the new password
+                $this->requested = $user->backend()->notify($user,$password);
+            }
+        }
     }
 
     /**
