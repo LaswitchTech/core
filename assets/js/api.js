@@ -9,6 +9,7 @@ class Endpoint {
     _type = 'GET';
     _dataType = 'json';
     _headers = {};
+    _suppressErrors = false;
 
     constructor(route = null){
 
@@ -76,6 +77,12 @@ class Endpoint {
         this._endpoint = null;
         this._data = null;
         this._type = 'GET';
+        this._suppressErrors = false;
+        return this;
+    }
+
+    suppress(state = true){
+        this._suppressErrors = (state === true);
         return this;
     }
 
@@ -88,6 +95,7 @@ class Endpoint {
         const endpoint = (this._route !== null) ? this._route + this._endpoint : this._endpoint;
         const trace = this.#trace();
         const prefix = `${trace}${endpoint} Response:`;
+        const suppress = this._suppressErrors;
         $.ajax({
             url: endpoint,
             type: this._type,
@@ -95,14 +103,16 @@ class Endpoint {
             headers: this._headers,
             data: (this._data !== null) ? this._data : {},
             error: function(xhr, status, error){
-                if(self._debug) console.error(prefix, xhr, xhr.status, error);
-                if(self.#error.length > 0) for(const callback of self.#error) { callback(xhr, xhr.status, error, self._endpoint); }
-                if(typeof reject === 'function') reject(xhr, xhr.status, error, self._endpoint);
+                if(!suppress) {
+                    if(self._debug) console.error(prefix, xhr, xhr.status, error);
+                    if(self.#error.length > 0) for(const callback of self.#error) { callback(xhr, xhr.status, error, endpoint); }
+                }
+                if(typeof reject === 'function') reject(xhr, xhr.status, error, endpoint);
             },
             success: function(response){
                 if(self._debug) console.log(prefix, response);
-                if(self.#success.length > 0) for(const callback of self.#success) { callback(response, self._endpoint); }
-                if(typeof resolve === 'function') resolve(response, self._endpoint);
+                if(self.#success.length > 0) for(const callback of self.#success) { callback(response, endpoint); }
+                if(typeof resolve === 'function') resolve(response, endpoint);
             }
         });
         this.clear();
