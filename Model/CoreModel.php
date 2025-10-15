@@ -135,6 +135,9 @@ class coreModel extends Model {
                 // Set Data directory
                 $dataDir = $path . DIRECTORY_SEPARATOR . "Data";
 
+                // Set Post directory
+                $postDir = $path . DIRECTORY_SEPARATOR . "Post";
+
                 // Set Migration File
                 $migrationFile = $path . DIRECTORY_SEPARATOR . "migration.cfg";
 
@@ -154,7 +157,7 @@ class coreModel extends Model {
                 if(is_dir($definitionDir)) {
 
                     // Retrive the list of definition files
-                    $definitions = array_diff(scandir($definitionDir), array('..', '.'));
+                    $definitions = array_diff(scandir($definitionDir), array('..', '.','.DS_Store'));
 
                     // Loop through the definition files
                     foreach($definitions as $definition) {
@@ -219,8 +222,6 @@ class coreModel extends Model {
 
                                 // Set Record
                                 $record['owner'] = $CONFIG->get('database','username');
-                                $record['created'] = date('Y-m-d H:i:s');
-                                $record['modified'] = date('Y-m-d H:i:s');
 
                                 // Create the Query
                                 $Query = $this->Database->query()
@@ -235,6 +236,35 @@ class coreModel extends Model {
 
                             // Loop through the dictionary
                             foreach($dictionary[$definition] as $record){
+
+                                // Check if a post-installation/update script exists
+                                if(is_file($postDir . DIRECTORY_SEPARATOR . $definition . ".php")){
+
+                                    // Import the post model class
+                                    require_once $postDir . DIRECTORY_SEPARATOR . $definition . ".php";
+
+                                    // Initialize the post model
+                                    $postClass = ucfirst($definition) . "PostModel";
+
+                                    // Check if the class exists
+                                    if(class_exists($postClass)){
+
+                                        // Initialize the Post Model
+                                        $PostModel = new $postClass($this->Database);
+
+                                        // Check if the post method exists
+                                        if(method_exists($PostModel, 'post')){
+
+                                            // Process the record
+                                            $record = $PostModel->post($record);
+                                        }
+                                    }
+                                }
+
+                                // Check if the record is empty
+                                if(empty($record)){
+                                    continue;
+                                }
 
                                 // Check if the record ID is higher than 9999
                                 if($record['id'] > 9999){
@@ -271,8 +301,6 @@ class coreModel extends Model {
                     }
                 }
             } catch (\Exception $e) {
-                // Log the error
-                var_dump("Failed to update the extension: " . $e->getMessage());
                 return false;
             }
         }
