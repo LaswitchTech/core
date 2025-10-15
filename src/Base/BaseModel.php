@@ -198,6 +198,10 @@ abstract class BaseModel extends Model {
             $Query->join('client', 'clients', 'id');
             $Query->join('client.vcard', 'vcards', 'id');
         }
+        if(array_key_exists('importer', $this->definitions[$table])){
+            $Query->join('importer', 'importers', 'id');
+            $Query->join('importer.vcard', 'vcards', 'id');
+        }
         if(array_key_exists('vcard', $this->definitions[$table])){
             $Query->join('vcard', 'vcards', 'id');
         }
