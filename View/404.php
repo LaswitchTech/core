@@ -13,12 +13,6 @@
                     <feBlend in="SourceGraphic" mode="normal"/>
                 </filter>
             </defs>
-            <style>
-                .bob { animation: bob 2.2s ease-in-out infinite; }
-                .bubble { animation: lookAround 4s ease-in-out infinite alternate; }
-                @keyframes bob { 0%,100%{ transform: translateY(160)} 50%{ transform: translateY(-8px)} }
-                @keyframes lookAround { 0%, 100% { transform: rotate(0deg); } 25% { transform: rotate(-5deg); } 75% { transform: rotate(5deg); } }
-            </style>
             <g transform="translate(232,110)" filter="url(#drop)">
                 <g class="bob">
                     <ellipse cx="0" cy="75" rx="64" ry="16" fill="#000" opacity=".1"/>
@@ -39,7 +33,7 @@
     </div>
     <div class="d-flex flex-column align-items-center justify-content-center">
         <p class="lead mb-1"><?= $this->Locale->get("Bob took a wrong turn!") ?></p>
-        <p class="opacity-50 mb-4"><?= $this->Locale->get("Looks like the page you're looking for isn't here. Bob's still trying to find it…") ?></p>
+        <p class="opacity-50 text-center mb-4"><?= $this->Locale->get("Looks like the page you're looking for isn't here. Bob's still trying to find it...") ?></p>
     </div>
     <div class="d-flex align-items-center justify-content-center mb-4">
         <form method="get" action="/" autocomplete="on" novalidate style="width: 100%; max-width: 400px;">
