@@ -536,37 +536,6 @@ abstract class BaseModel extends Model {
     }
 
     /**
-     * Retrieve the count of records
-     *
-     * @param array $conditions
-     * @return int
-     */
-    public function count(array $conditions = [], string $conjunction = 'AND'): int
-    {
-        // Create the Query
-        $Query = $this->Database->query()
-            ->table($this->table)
-            ->select($this->primary)
-            ->where('id', 9999, '<>');
-
-        // Check for ownership
-        if(array_key_exists('organization',$this->definition)){
-            $Query->where('organization', $this->Auth->user()->organization()->id);
-        }
-
-        // Add the Conditions
-        foreach($conditions as $condition){
-            $Query->where($condition["key"], $condition["value"], $condition["operator"], $conjunction);
-        }
-
-        // Execute the Query
-        $records = $Query->fetch();
-
-        // Return the Count
-        return count($records);
-    }
-
-    /**
      * Retrieve multiple records
      *
      * @param array $conditions
@@ -622,6 +591,17 @@ abstract class BaseModel extends Model {
 
         // Return the Results
         return $records;
+    }
+
+    /**
+     * Retrieve the count of records
+     *
+     * @param array $conditions
+     * @return int
+     */
+    public function count(array $conditions = [], string $conjunction = 'AND'): int
+    {
+        return count($this->fetchAll($conditions, $conjunction));
     }
 
     /**
