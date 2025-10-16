@@ -18,14 +18,6 @@
                     <feBlend in="SourceGraphic" mode="normal"/>
                 </filter>
             </defs>
-            <style>
-                .bob { animation: bob 2.2s ease-in-out infinite; transform-origin: center bottom; }
-                .blink { animation: blink 1.4s ease-in-out infinite; }
-                .bubble { animation: lookAround 4s ease-in-out infinite alternate; }
-                @keyframes bob { 0%,100%{ transform: translateY(160)} 50%{ transform: translateY(-8px)} }
-                @keyframes blink { 0%,100%{ opacity: .25 } 50%{ opacity: 1 } }
-                @keyframes lookAround { 0%, 100% { transform: rotate(0deg); } 25% { transform: rotate(-5deg); } 75% { transform: rotate(5deg); } }
-            </style>
             <g transform="translate(70,0)" filter="url(#drop)">
                 <rect x="0" y="0" rx="16" ry="16" width="380" height="240" fill="var(--bs-dark)"/>
                 <circle cx="22" cy="20" r="6" fill="var(--bs-danger)"/>
@@ -63,7 +55,7 @@
         </svg>
     </div>
     <div class="d-flex gap-3 justify-content-center">
-        <button class="btn btn-outline-orange" type="button" onclick="location.reload()"><i class="bi bi-arrow-clockwise me-1"></i><?= $this->Locale->get('Retry') ?></button>
+        <button class="btn btn-outline-primary" type="button" onclick="location.reload()"><i class="bi bi-arrow-clockwise me-1"></i><?= $this->Locale->get('Retry') ?></button>
         <a class="btn btn-outline-secondary" href="#"><i class="bi bi-activity me-1"></i><?= $this->Locale->get('Status') ?></a>
     </div>
 </div>
