@@ -250,7 +250,7 @@ class coreModel extends Model {
                                     if(class_exists($postClass)){
 
                                         // Initialize the Post Model
-                                        $PostModel = new $postClass($this->Database);
+                                        $PostModel = new $postClass();
 
                                         // Check if the post method exists
                                         if(method_exists($PostModel, 'post')){
@@ -301,6 +301,7 @@ class coreModel extends Model {
                     }
                 }
             } catch (\Exception $e) {
+                error_log($e->getMessage());
                 return false;
             }
         }
