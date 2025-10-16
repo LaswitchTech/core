@@ -252,6 +252,9 @@ class CoreCommand extends Command {
         // Retrieve the list of plugins
         $plugins = array_diff(scandir($path), array('..', '.','.DS_Store'));
 
+        // Clear the Definition directory
+        $this->Helper->Core->delete($this->Config->root() . DIRECTORY_SEPARATOR . "Definition");
+
         // Check if Database is connected
         if($DATABASE->isConnected()){
 
