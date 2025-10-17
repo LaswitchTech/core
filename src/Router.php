@@ -235,7 +235,7 @@ class Router {
      * @param string $route
      * @return self
      */
-    public function render($route = null): self
+    public function render(?string $route = null, bool $full = true): self
     {
         // Set the route
         if($route){
@@ -250,7 +250,7 @@ class Router {
         }
 
         // Render the route
-        $this->Route->render();
+        $this->Route->render((($this->Route->namespace() === $route) ? $full : true));
 
         // Return the instance
         return $this;
