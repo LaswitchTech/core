@@ -538,8 +538,11 @@ class Route {
 
     /**
      * Render the route
+     *
+     * @param bool $full
+     * @return self
      */
-    public function render(): self
+    public function render(bool $full = true): self
     {
         // Check if the route is a module
         if(in_array(str_replace('/','',$this->Route), $this->Router::Modules)){
@@ -563,7 +566,7 @@ class Route {
         }
 
         // Load the template
-        if($this->Template && !$this->Interrupt){
+        if($full && $this->Template && !$this->Interrupt){
 
             // Load the Template
             require_once $this->template();
