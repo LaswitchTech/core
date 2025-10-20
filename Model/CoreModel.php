@@ -262,7 +262,7 @@ class coreModel extends Model {
                                 }
 
                                 // Check if the record is empty
-                                if(empty($record)){
+                                if(empty($record) || count($record) == 0){
                                     continue;
                                 }
 
@@ -288,9 +288,9 @@ class coreModel extends Model {
 
                         // Retrieve the last inserted id
                         $lastId = 0;
-                        $lastRecord = $this->Database->query()->table($definition)->select()->order('id', 'DESC')->limit(1)->execute();
+                        $lastRecord = $this->Database->query()->table($definition)->select('id')->order('id', 'DESC')->limit(1)->execute();
                         if(!empty($lastRecord)){
-                            $lastId = $lastRecord[0]['id'];
+                            $lastId = $lastRecord[array_key_first($lastRecord)]['id'];
                         }
 
                         // Set default auto increment
