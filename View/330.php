@@ -22,7 +22,7 @@
                 <h2 class="h4 mb-1"><?= $this->Locale->get('Enter your verification code') ?></h2>
                 <p class="opacity-50 mb-0"><?= $this->Locale->get('We sent you a code to your email') ?></p>
             </div>
-            <form method="POST" action="<?= $this->Request->getHostAddress() . '/' . $this->Request->getUri() ?>" class="needs-validation" autocomplete="off" novalidate>
+            <form method="POST" action="<?= $this->Request->getHostAddress() . $this->Request->getUri() ?>" class="needs-validation" autocomplete="off" novalidate>
                 <?= $this->CSRF->field(); ?>
                 <input type="email" class="d-none" name="username" id="username" autocomplete="off" value="<?=$this->Request->getParams('POST','username')?>">
                 <div class="mb-3">

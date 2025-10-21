@@ -58,35 +58,35 @@ class Auth {
         }
 
         // Check Bearer Token
-        if ($this->authenticateBearer()) {
+        if ($this->byBearerToken()) {
             $this->method = 'bearer';
             $this->status = true;
             return $this->status;
         }
 
         // Check Basic Authentication
-        if ($this->authenticateBasic()) {
+        if ($this->byBasicAuth()) {
             $this->method = 'basic';
             $this->status = true;
             return $this->status;
         }
 
         // Check Session Authentication
-        if ($this->authenticateSession()) {
+        if ($this->bySession()) {
             $this->method = 'session';
             $this->status = true;
             return $this->status;
         }
 
         // Check Cookie Authentication
-        if ($this->authenticateCookie()) {
+        if ($this->byCookie()) {
             $this->method = 'cookie';
             $this->status = true;
             return $this->status;
         }
 
         // Check Request Authentication
-        if ($this->authenticateRequest()) {
+        if ($this->byRequest()) {
             $this->method = 'request';
             $this->status = true;
             return $this->status;
@@ -125,11 +125,6 @@ class Auth {
             return;
         }
 
-        // echo 'code: '; var_dump($REQUEST->getParams('REQUEST','code'));
-        // echo 'username: '; var_dump($REQUEST->getParams('REQUEST','username'));
-        // echo 'forgot: '; var_dump($REQUEST->getParams('REQUEST','forgot'));
-        // echo 'reset: '; var_dump($REQUEST->getParams('REQUEST','reset'));
-        // echo 'verify: '; var_dump($REQUEST->getParams('REQUEST','verify'));
         if(
             $REQUEST->getParams('REQUEST','code') &&
             $REQUEST->getParams('REQUEST','username') &&
@@ -137,13 +132,43 @@ class Auth {
             is_null($REQUEST->getParams('REQUEST','forgot')) &&
             is_null($REQUEST->getParams('REQUEST','verify'))
         ) {
-            $this->verifyPin($REQUEST->getParams('REQUEST','username'), $REQUEST->getParams('REQUEST','code'));
+            $this->verifyPin($REQUEST->getParams('REQUEST','username'), $REQUEST->getParams('REQUEST','code'),function(object $user){
+
+                // Reset the user's password
+                $password = $user->backend()->reset();
+
+                // Notify the user of the new password
+                $this->requested = $user->backend()->notify($user,$password);
+            });
         } elseif(
             $REQUEST->getParams('REQUEST','username') &&
             !is_null($REQUEST->getParams('REQUEST','forgot')) &&
             !is_null($REQUEST->getParams('REQUEST','reset'))
         ) {
-            $this->setPin($REQUEST->getParams('REQUEST','username'));
+            $this->setPin($REQUEST->getParams('REQUEST','username'), function(object $user, string $pin){
+
+                // Import Global Variables
+                global $SMTP, $REQUEST;
+
+                // Write the email
+                $body = '';
+                $body .= '<p>Did you request a new password?</p>';
+                $body .= '<p>Here is your verification code:</p>';
+                $body .= '<pre style="background-color: #F5F5F5; font-weight: 700; font-size: 28px; text-align: center; letter-spacing: 16px; margin: 20px 20px; padding: 20px 0; font-family: Courier, monospace">'.($pin ?? 'ERROR!').'</pre>';
+                $body .= '<p>Please follow the link below to reset your password.</p>';
+                $body .= '<p style="text-align:center;margin-top: 40px;margin-bottom:40px;">';
+                $body .= '<a href="'.$REQUEST->getHostAddress().'?forgot&verify='.$pin.'&username='.$user->username.'" target="_blank" style="margin-left: 6px; margin-right: 6px; text-decoration:none; background-color: #528fb3;color: #fff;font-size: 24px;padding: 20px 40px;text-align: center;margin: 20px 20px;border-radius: 8px;">Reset</a>';
+                $body .= '</p>';
+                $body .= '<p>If you did not request this code, please contact your system administrator immediately.</p>';
+
+                // Create a new message
+                $eml = $SMTP->message()
+                    ->subject('Reset your password')
+                    ->body($body);
+
+                // Return the message
+                return $eml;
+            });
         }
     }
 
@@ -153,7 +178,7 @@ class Auth {
      * @param string $username
      * @return bool
      */
-    protected function setPin(string $username): void
+    protected function setPin(string $username, callable $fn): void
     {
         // Retrieve User
         $user = $this->user($username);
@@ -171,7 +196,7 @@ class Auth {
             $Pin->save($user->id,$pin);
 
             // Send the pin to the user email
-            $this->requested = $Pin->notify($user,$pin);
+            $this->requested = $Pin->notify($user,$pin,$fn);
         }
     }
 
@@ -182,7 +207,7 @@ class Auth {
      * @param string $code
      * @return bool
      */
-    protected function verifyPin(string $username, string $code): void
+    protected function verifyPin(string $username, string $code, callable $fn): void
     {
         // Retrieve User
         $user = $this->user($username);
@@ -196,11 +221,8 @@ class Auth {
             // Verify the pin
             if($Pin->verify($code)){
 
-                // Reset the user's password
-                $password = $user->backend()->reset();
-
-                // Notify the user of the new password
-                $this->requested = $user->backend()->notify($user,$password);
+                // Execute the callable function
+                $fn($user);
             }
         }
     }
@@ -240,7 +262,7 @@ class Auth {
      *
      * @return bool
      */
-    protected function authenticateBearer(): bool
+    protected function byBearerToken(): bool
     {
         // Import Global Variables
         global $REQUEST;
@@ -303,7 +325,7 @@ class Auth {
      *
      * @return bool
      */
-    protected function authenticateBasic(): bool
+    protected function byBasicAuth(): bool
     {
         // Import Global Variables
         global $REQUEST;
@@ -337,7 +359,7 @@ class Auth {
      *
      * @return bool
      */
-    protected function authenticateCookie(): bool
+    protected function byCookie(): bool
     {
         // Import Global Variables
         global $REQUEST;
@@ -354,7 +376,7 @@ class Auth {
      *
      * @return bool
      */
-    protected function authenticateSession(): bool
+    protected function bySession(): bool
     {
         // Import Global Variables
         global $REQUEST, $UUID;
@@ -387,7 +409,7 @@ class Auth {
      *
      * @return bool
      */
-    protected function authenticateRequest(): bool
+    protected function byRequest(): bool
     {
         // Import Global Variables
         global $REQUEST;
@@ -438,12 +460,6 @@ class Auth {
                     // Check if the user is deleted
                     $status = !$this->user->deleted();
 
-                    // Check if the user is banned
-                    $status = ($status && !$this->user->banned());
-
-                    // Check if the user is verified
-                    $status = ($status && $this->user->verified());
-
                     // Check if the user's organization is active
                     $status = ($status && $this->user->organization['isActive'] > 0);
 
@@ -455,6 +471,65 @@ class Auth {
 
                         // Set Session
                         $this->user->session()->create();
+
+                        // Check if the user is verified
+                        if(!$this->user->verified()){
+
+                            // Check if username is in request params
+                            if(is_null($REQUEST->getParams('REQUEST','username'))){
+
+                                // Redirect to verification page (?username='.$user->username.')
+                                header('Location: ?username='.$user->username);
+                            } else {
+
+                                // Check if we should resend the verification pin
+                                if(is_null($user->pin['id']) || !is_null($REQUEST->getParams('REQUEST','resend'))){
+
+                                    // Set a new pin
+                                    $this->setPin($user->username, function(object $user, string $pin){
+
+                                        // Import Global Variables
+                                        global $SMTP, $REQUEST;
+
+                                        // Write the email
+                                        $body = '';
+                                        $body .= '<p>Here is your verification code:</p>';
+                                        $body .= '<pre style="background-color: #F5F5F5; font-weight: 700; font-size: 28px; text-align: center; letter-spacing: 16px; margin: 20px 20px; padding: 20px 0; font-family: Courier, monospace">'.($pin ?? 'ERROR!').'</pre>';
+                                        $body .= '<p>Please follow the link below to verify your acount.</p>';
+                                        $body .= '<p style="text-align:center;margin-top: 40px;margin-bottom:40px;">';
+                                        $body .= '<a href="'.$REQUEST->getHostAddress().'?username='.$user->username.'&verify='.$pin.'" target="_blank" style="margin-left: 6px; margin-right: 6px; text-decoration:none; background-color: #528fb3;color: #fff;font-size: 24px;padding: 20px 40px;text-align: center;margin: 20px 20px;border-radius: 8px;">Verify</a>';
+                                        $body .= '</p>';
+                                        $body .= '<p>If you did not request this code, please contact your system administrator immediately.</p>';
+
+                                        // Create a new message
+                                        $eml = $SMTP->message()
+                                            ->subject('Account Verification')
+                                            ->body($body);
+
+                                        // Return the message
+                                        return $eml;
+                                    });
+                                } else {
+
+                                    // Check if code is in request params
+                                    if(!is_null($REQUEST->getParams('REQUEST','code'))){
+
+                                        // Verify the pin
+                                        $this->verifyPin($user->username, $REQUEST->getParams('REQUEST','code'),function(object $user){
+
+                                            // Import Global Variables
+                                            global $REQUEST;
+
+                                            // Verify the user
+                                            $user->verify();
+
+                                            // Redirect to original page
+                                            header('Location: '.$REQUEST->getHostAddress() . $REQUEST->getUri());
+                                        });
+                                    }
+                                }
+                            }
+                        }
 
                         return true;
                     }

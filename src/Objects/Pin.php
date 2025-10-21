@@ -143,7 +143,7 @@ class Pin {
      * @param string $pin
      * @return bool
      */
-    public function notify(object $user, string $pin): bool
+    public function notify(object $user, string $pin, callable $fn): bool
     {
         // Import Global Variables
         global $SMTP, $CONFIG, $REQUEST;
@@ -163,23 +163,12 @@ class Pin {
             // Check if the SMTP Server is authenticated
             if($SMTP->isAuthenticated()){
 
-                // Write the email
-                $body = '';
-                $body .= '<p>Did you request a new password?</p>';
-                $body .= '<p>Here is your verification code:</p>';
-                $body .= '<pre style="background-color: #F5F5F5; font-weight: 700; font-size: 28px; text-align: center; letter-spacing: 16px; margin: 20px 20px; padding: 20px 0; font-family: Courier, monospace">'.($pin ?? 'ERROR!').'</pre>';
-                $body .= '<p>Please follow the link below to reset your password.</p>';
-                $body .= '<p style="text-align:center;margin-top: 40px;margin-bottom:40px;">';
-                $body .= '<a href="'.$REQUEST->getHostAddress().'?forgot&verify='.$pin.'&username='.$user->username.'" target="_blank" style="margin-left: 6px; margin-right: 6px; text-decoration:none; background-color: #528fb3;color: #fff;font-size: 24px;padding: 20px 40px;text-align: center;margin: 20px 20px;border-radius: 8px;">Reset</a>';
-                $body .= '</p>';
-                $body .= '<p>If you did not request this code, please contact your system administrator immediately.</p>';
-
                 // Create a new message
-                $eml = $SMTP->message()
-                    ->to($user->username)
+                $eml = $fn($user,$pin);
+
+                // Configure the message
+                $eml->to($user->username)
                     ->from($user->organization()->email ?? $CONFIG->get('smtp','username'))
-                    ->subject('Reset your password')
-                    ->body($body)
                     ->var('logo', 'data:'.mime_content_type($CONFIG->root() . '/webroot' . $this->logo()).';base64,' . base64_encode(file_get_contents($CONFIG->root() . '/webroot' . $this->logo())))
                     ->var('brand', $CONFIG->get('application','name'))
                     ->var('greetings', "Sincerely,<br>".$user->organization()->name."'s Team");

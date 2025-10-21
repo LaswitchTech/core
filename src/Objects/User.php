@@ -333,4 +333,18 @@ class User {
     {
         return $this->token;
     }
+
+    /**
+     * Verify the User
+     *
+     * @return bool
+     */
+    public function verify(): bool
+    {
+        $query = $this->Database->query();
+        $query->table('users')
+            ->update(['isVerified' => 1])
+            ->where('id', $this->user['id']);
+        return $query->execute() > 0;
+    }
 }
