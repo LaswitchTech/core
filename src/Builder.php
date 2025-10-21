@@ -122,14 +122,52 @@ class Builder {
         }
         if (!$eligible) return [];
 
-        // 2) Build parent->children map among eligible routes
+        // --- NEW: helper to promote parents to nearest eligible ancestor(s) ---
+        $resolveParents = function(array $declared) use ($all, $eligible): array {
+            $result = [];
+            $queue  = $declared;
+            $seen   = [];
+            while ($queue) {
+                $cur = array_shift($queue);
+                if (!is_string($cur) || $cur === '' || isset($seen[$cur])) continue;
+                $seen[$cur] = true;
+
+                if (isset($eligible[$cur])) {
+                    // found an eligible ancestor for this branch
+                    $result[$cur] = true;
+                    continue;
+                }
+
+                // climb up if we know about this route in $all
+                if (!isset($all[$cur])) continue;
+                $pp = $all[$cur]['parent'] ?? null;
+                if ($pp === null) continue;
+
+                foreach (is_array($pp) ? $pp : [$pp] as $up) {
+                    if (is_string($up) && $up !== '') $queue[] = $up;
+                }
+            }
+            return array_keys($result);
+        };
+
+        // 2) Build parent->children map among eligible routes (with promotion)
         $children = []; // parentRoute => [childRoute...]
         foreach ($eligible as $r => $_) $children[$r] = [];
+
+        // keep a promoted-parents cache to avoid recomputing
+        $effParentCache = [];
+
         foreach ($eligible as $child => $node) {
-            foreach ($node['parents'] as $par) {
-                if (isset($eligible[$par])) $children[$par][] = $child;
+            $declared = $node['parents'];
+            $eff = $effParentCache[$child] ?? $resolveParents($declared);
+            $effParentCache[$child] = $eff;
+
+            foreach ($eff as $parEff) {
+                // only link to eligible parents
+                if (isset($children[$parEff])) $children[$parEff][] = $child;
             }
         }
+
         $sortKeys = function(array &$arr) { ksort($arr, SORT_NATURAL | SORT_FLAG_CASE); };
         $sortList = function(array &$list) { sort($list, SORT_NATURAL | SORT_FLAG_CASE); };
         foreach ($children as &$lst) $sortList($lst);
@@ -138,28 +176,45 @@ class Builder {
         // 3) Determine start nodes
         $starts = [];
         if ($parent === null) {
-            // global roots = nodes that have no eligible parent
+            // global roots = nodes that have no eligible (promoted) parent
             foreach ($eligible as $route => $node) {
-                $hasEligibleParent = false;
-                foreach ($node['parents'] as $p) {
-                    if (isset($eligible[$p])) { $hasEligibleParent = true; break; }
-                }
-                if (!$hasEligibleParent) $starts[] = $route;
+                $eff = $effParentCache[$route] ?? $resolveParents($node['parents']);
+                if (empty($eff)) $starts[] = $route;
             }
             $sortList($starts);
         } else {
+            // pick descendants under the requested parent, even if that parent itself is not eligible
             $want = is_array($parent) ? $parent : [$parent];
             $seen = [];
+
+            // If the requested parent is eligible, we can directly use $children
             foreach ($want as $p) {
                 if (isset($children[$p])) {
-                    foreach ($children[$p] as $c) { $seen[$c] = true; }
-                } else {
-                    // if parent isn't itself eligible, include any eligible that declares it as parent
-                    foreach ($eligible as $route => $node) {
-                        if (in_array($p, $node['parents'], true)) $seen[$route] = true;
+                    foreach ($children[$p] as $c) $seen[$c] = true;
+                }
+
+                // Also include any eligible node that has $p in its ancestry chain (promoted)
+                foreach ($eligible as $route => $node) {
+                    // Check if $p appears in ancestry by climbing from declared parents
+                    $queue = $node['parents'];
+                    $visited = [];
+                    $found = false;
+                    while ($queue && !$found) {
+                        $cur = array_shift($queue);
+                        if (isset($visited[$cur])) continue;
+                        $visited[$cur] = true;
+                        if ($cur === $p) { $found = true; break; }
+                        if (!isset($all[$cur])) continue;
+                        $pp = $all[$cur]['parent'] ?? null;
+                        if ($pp === null) continue;
+                        foreach (is_array($pp) ? $pp : [$pp] as $up) {
+                            if (is_string($up) && $up !== '') $queue[] = $up;
+                        }
                     }
+                    if ($found) $seen[$route] = true;
                 }
             }
+
             $starts = array_keys($seen);
             $sortList($starts);
         }
@@ -185,7 +240,6 @@ class Builder {
                 if (isset($visited[$cur])) continue;
                 $visited[$cur] = true;
                 $out[$cur] = $makeLeaf($cur);
-                // enqueue children (we want *all* descendants in flat mode)
                 foreach ($children[$cur] ?? [] as $ch) $queue[] = $ch;
             }
             $sortKeys($out);
@@ -195,7 +249,7 @@ class Builder {
         // 4b) Depth >= 2: build nested tree up to $maxDepth; deeper nodes are omitted
         $buildTree = function(string $route, int $depth) use (&$buildTree, $maxDepth, $children, $makeLeaf): array {
             $node = $makeLeaf($route);
-            if ($depth >= $maxDepth) return $node; // reached cap; omit deeper nodes
+            if ($depth >= $maxDepth) return $node;
             $items = [];
             foreach ($children[$route] ?? [] as $ch) {
                 $items[$ch] = $buildTree($ch, $depth + 1);
@@ -214,7 +268,6 @@ class Builder {
         $sortKeys($result);
         return $result;
     }
-
 
     /**
      * Create Crumbs
