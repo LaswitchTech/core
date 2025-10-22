@@ -353,6 +353,17 @@ abstract class BaseModel extends Model {
     }
 
     /**
+     * Add joins to the query
+     *
+     * @param object $query
+     * @return object
+     */
+    protected function joins(object $query): object
+    {
+        return $query;
+    }
+
+    /**
      * Sanitize the data before inserting or updating
      *
      * @param array $data
@@ -548,14 +559,22 @@ abstract class BaseModel extends Model {
             ->table($this->table)
             ->select('*')
             ->join('owner', 'users', 'username')
+            ->join('owner.vcard', 'vcards', 'id')
             ->index($this->primary)
             ->filter()
             ->where('id', 9999, '<>');
 
-        // Set the Owner
+        // Verify the Organization
         if(array_key_exists('organization',$this->definition)){
-            $Query->join('organization', 'organizations', 'id')->where('organization', $this->Auth->user()->organization()->id);
+            if($this->Auth->isAuthenticated()){
+                $Query->join('organization', 'organizations', 'id')
+                    ->join('organization.vcard', 'vcards', 'id')
+                    ->where('organization', $this->Auth->user()->organization()->id);
+            }
         }
+
+        // Apply Joins
+        $Query = $this->joins($Query);
 
         // Check if the conditions are empty
         if(!empty($conditions)){
@@ -601,7 +620,52 @@ abstract class BaseModel extends Model {
      */
     public function count(array $conditions = [], string $conjunction = 'AND'): int
     {
-        return count($this->fetchAll($conditions, $conjunction));
+        // Create the Query
+        $Query = $this->Database->query()
+            ->table($this->table)
+            ->count()
+            ->join('owner', 'users', 'username')
+            ->join('owner.vcard', 'vcards', 'id')
+            ->index($this->primary)
+            ->filter()
+            ->where('id', 9999, '<>');
+
+        // Verify the Organization
+        if(array_key_exists('organization',$this->definition)){
+            if($this->Auth->isAuthenticated()){
+                $Query->join('organization', 'organizations', 'id')
+                    ->join('organization.vcard', 'vcards', 'id')
+                    ->where('organization', $this->Auth->user()->organization()->id);
+            }
+        }
+
+        // Apply Joins
+        $Query = $this->joins($Query);
+
+        // Check if the conditions are empty
+        if(!empty($conditions)){
+
+            // Add a Filter
+            $Query->filter();
+
+            // Add the Conditions
+            foreach($conditions as $key => $condition){
+
+                // Check if the key exists in the definition
+                if(!array_key_exists($condition['key'], $this->definition)){
+
+                    // Remove the key from the data
+                    unset($conditions[$key]);
+                    continue;
+                }
+
+                // Add the condition to the Query
+                $Query->where($condition["key"], $condition["value"], $condition["operator"], $conjunction);
+            }
+        }
+
+        // Retrieve the count
+        return $Query->execute();
     }
 
     /**
@@ -617,16 +681,24 @@ abstract class BaseModel extends Model {
             ->table($this->table)
             ->select('*')
             ->join('owner', 'users', 'username')
+            ->join('owner.vcard', 'vcards', 'id')
             ->filter()
             ->where('id', 9999, '<>')
             ->filter()
             ->where($this->primary, $id)
             ->limit(1);
 
-        // Set the Owner
+        // Verify the Organization
         if(array_key_exists('organization',$this->definition)){
-            $Query->join('organization', 'organizations', 'id')->where('organization', $this->Auth->user()->organization()->id);
+            if($this->Auth->isAuthenticated()){
+                $Query->join('organization', 'organizations', 'id')
+                    ->join('organization.vcard', 'vcards', 'id')
+                    ->where('organization', $this->Auth->user()->organization()->id);
+            }
         }
+
+        // Apply Joins
+        $Query = $this->joins($Query);
 
         // Retrieve the record
         $records = $Query->fetch();
