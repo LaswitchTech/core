@@ -126,6 +126,13 @@ class Query {
     private $params = [];
 
     /**
+     * Count distinct flag
+     *
+     * @var bool
+     */
+    private $countDistinct = false;
+
+    /**
      * Constructor
      *
      * @param Connector $connector
@@ -144,6 +151,31 @@ class Query {
     }
 
     /**
+     * FROM clause
+     *
+     * @param string $table
+     * @return self
+     */
+    public function table(string $table): self
+    {
+        $this->table = $table;
+        return $this;
+    }
+
+    /**
+     * INSERT query
+     *
+     * @param array  $data
+     * @return self
+     */
+    public function insert(array $data): self
+    {
+        $this->type = 'insert';
+        $this->values = $data;
+        return $this;
+    }
+
+    /**
      * SELECT query
      *
      * @param string $fields
@@ -157,14 +189,41 @@ class Query {
     }
 
     /**
-     * FROM clause
+     * COUNT query
      *
-     * @param string $table
+     * @param string $column
+     * @param bool   $distinct
      * @return self
      */
-    public function table(string $table): self
+    public function count(string $column = '*', bool $distinct = false): self
     {
-        $this->table = $table;
+        $this->type = 'count';
+        $this->fields = $column;
+        $this->countDistinct = $distinct;
+        return $this;
+    }
+
+    /**
+     * UPDATE query
+     *
+     * @param array  $data
+     * @return self
+     */
+    public function update(array $data): self
+    {
+        $this->type = 'update';
+        $this->values = $data;
+        return $this;
+    }
+
+    /**
+     * DELETE query
+     *
+     * @return self
+     */
+    public function delete(): self
+    {
+        $this->type = 'delete';
         return $this;
     }
 
@@ -286,43 +345,6 @@ class Query {
     }
 
     /**
-     * INSERT query
-     *
-     * @param array  $data
-     * @return self
-     */
-    public function insert(array $data): self
-    {
-        $this->type = 'insert';
-        $this->values = $data;
-        return $this;
-    }
-
-    /**
-     * UPDATE query
-     *
-     * @param array  $data
-     * @return self
-     */
-    public function update(array $data): self
-    {
-        $this->type = 'update';
-        $this->values = $data;
-        return $this;
-    }
-
-    /**
-     * DELETE query
-     *
-     * @return self
-     */
-    public function delete(): self
-    {
-        $this->type = 'delete';
-        return $this;
-    }
-
-    /**
      * Execute the query and return the result
      *
      * For a SELECT, returns an array of rows.
@@ -334,14 +356,19 @@ class Query {
     public function result()
     {
         $sql = $this->buildQuery();
-        $result = $this->connector->prepare($sql, $this->params);
+        $statement = $this->connector->prepare($sql, $this->params);
         if ($this->type === 'select') {
-            $result = $result->get_result();
+            $result = $statement->get_result();
             $rows = [];
             while ($row = $result->fetch_assoc()) {
                 $rows[] = $row;
             }
             return $this->buildRows($rows);
+        }
+        if ($this->type === 'count') {
+            $result = $statement->get_result();
+            $row = $result->fetch_assoc();
+            return (int) ($row['t__count'] ?? 0);
         }
         return $this->connector->affectedRows();
     }
@@ -374,6 +401,30 @@ class Query {
     public function fetch()
     {
         return $this->result();
+    }
+
+    /**
+     * Resolve column specification
+     *
+     * @param string $spec
+     * @return string
+     */
+    private function resolveColumn(string $spec): string
+    {
+        if ($spec === '*') return '*';
+
+        if (strpos($spec, '.') === false) {
+            return "t.`{$spec}`";
+        }
+
+        $parts = explode('.', $spec);
+        if ($parts[0] === 't' && count($parts) === 2) {
+            return "t.`{$parts[1]}`";
+        }
+
+        $column = array_pop($parts);
+        $alias  = 'j__' . implode('__', $parts);
+        return "`{$alias}`.`{$column}`";
     }
 
     /**
@@ -449,6 +500,18 @@ class Query {
                 }
                 if ($this->limit) {
                     $sql .= " LIMIT {$this->limit}";
+                }
+                return $sql;
+
+            case 'count':
+                $col = $this->resolveColumn($this->fields);
+                $countExpr = ($this->countDistinct && $col !== '*') ? "DISTINCT {$col}" : $col;
+                $sql = "SELECT COUNT({$countExpr}) AS `t__count` FROM `{$this->table}` AS t";
+                if (!empty($this->join)) {
+                    $sql .= ' ' . $this->buildJoin();
+                }
+                if (!empty($this->where)) {
+                    $sql .= ' WHERE ' . $this->buildWhere();
                 }
                 return $sql;
 
@@ -548,7 +611,7 @@ class Query {
             $clauses = [];
             foreach ($where['clauses'] as $i => $condition) {
                 $conjunction = $condition['conjunction'];
-                if ($this->type === 'select') {
+                if (in_array($this->type, ['select','count'], true)) {
                     $spec = $condition['column'];
                     if (strpos($spec, '.') === false) {
                         $col = "t.`{$spec}`";
