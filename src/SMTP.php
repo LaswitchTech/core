@@ -1,11 +1,5 @@
 <?php
 
-/**
- * Core Framework - SMTP
- *
- * @author     LaswitchTech <support@laswitchtech.com>
- */
-
 // Declaring namespace
 namespace LaswitchTech\Core;
 
