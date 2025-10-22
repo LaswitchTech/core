@@ -1,11 +1,5 @@
 <?php
 
-/**
- * Core Framework - SMTP
- *
- * @author     LaswitchTech <support@laswitchtech.com>
- */
-
 // Declaring namespace
 namespace LaswitchTech\Core;
 
@@ -40,6 +34,7 @@ class SMTP {
 	private $templates = [];
 	private $template;
 	private $path;
+    private $vars = [];
 
     /**
      * Constructor
@@ -84,6 +79,10 @@ class SMTP {
                 }
             }
         }
+
+        // Add default vars
+        $this->var('logo', 'data:'.mime_content_type($this->Config->root() . $this->logo()).';base64,' . base64_encode(file_get_contents($this->Config->root() . $this->logo())));
+        $this->var('brand', $this->Config->get('application','name'));
     }
 
     /**
@@ -382,13 +381,75 @@ class SMTP {
         return $this;
     }
 
+    /**
+     * Set a variable to be replaced in the template.
+     *
+     * @param  string $key
+     * @param  mixed $value
+     * @return self
+     */
+    public function var(string $key, mixed $value): self
+    {
+        $this->vars[$key] = $value;
+        return $this;
+    }
+
+    /**
+     * Create a new message instance.
+     *
+     * @return Message
+     */
     public function message(): Message
     {
         if(!$this->isAuthenticated()){ $this->authenticate(); }
         $message = new Message($this->connection);
         $message->template(file_get_contents($this->templates[$this->template]));
         $message->from($this->username);
+        foreach($this->vars as $key => $value){
+            $message->var($key, $value);
+        }
         return $message;
+    }
+
+    /**
+     * Get the logo path
+     *
+     * @return string
+     */
+    private function logo(): string
+    {
+        // Import Global Variables
+        global $CONFIG;
+
+        $src = '/assets/img/logo.svg';
+        if(!is_file($CONFIG->root() . $src)){
+            $src = '/assets/img/logo.png';
+        }
+        if(!is_file($CONFIG->root() . $src)){
+            $src = '/assets/img/logo.jpg';
+        }
+        if(!is_file($CONFIG->root() . $src)){
+            $src = '/assets/img/logo.gif';
+        }
+        if(!is_file($CONFIG->root() . $src)){
+            $src = '/assets/img/logo.webp';
+        }
+        if(!is_file($CONFIG->root() . $src)){
+            $src = '/vendor/laswitchtech/core/img/logo.svg';
+        }
+        if(!is_file($CONFIG->root() . $src)){
+            $src = '/vendor/laswitchtech/core/img/logo.png';
+        }
+        if(!is_file($CONFIG->root() . $src)){
+            $src = '/vendor/laswitchtech/core/img/logo.jpg';
+        }
+        if(!is_file($CONFIG->root() . $src)){
+            $src = '/vendor/laswitchtech/core/img/logo.gif';
+        }
+        if(!is_file($CONFIG->root() . $src)){
+            $src = '/vendor/laswitchtech/core/img/logo.webp';
+        }
+        return $src;
     }
 
     /**

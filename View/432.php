@@ -4,7 +4,7 @@
             <h2 class="h4 mb-1"><?= $this->Locale->get('Enter your verification code') ?></h2>
             <p class="opacity-50 mb-0"><?= $this->Locale->get('We sent you a code to your email') ?></p>
         </div>
-        <form method="POST" action="<?= $this->Request->getHostAddress() . $this->Request->getUri() . '?' . $this->Request->getQueryString()  ?>" class="needs-validation" autocomplete="off" novalidate>
+        <form method="POST" action="<?= $this->Request->getHostAddress() . $this->Request->getUri() . '?' . str_replace('&resend','',$this->Request->getQueryString()) ?>" class="needs-validation" autocomplete="off" novalidate>
             <?= $this->CSRF->field(); ?>
             <div class="mb-3">
                 <label for="code" class="form-label"><?= $this->Locale->get('Code') ?></label>
@@ -12,7 +12,7 @@
                 <div class="invalid-feedback"><?= $this->Locale->get('Please enter a valid pin.') ?></div>
             </div>
             <div class="d-flex justify-content-end align-items-center mb-4">
-                <a href="<?= $this->Request->getHostAddress() . $this->Request->getUri() . '?' . $this->Request->getQueryString() ?>&resend"><?= $this->Locale->get('Request a new code') ?><i class="bi bi-arrow-counterclockwise ms-1"></i></a>
+                <a href="<?= $this->Request->getHostAddress() . $this->Request->getUri() . '?' . str_replace('&resend','',$this->Request->getQueryString()) ?>&resend"><?= $this->Locale->get('Request a new code') ?><i class="bi bi-arrow-counterclockwise ms-1"></i></a>
             </div>
             <div class="d-flex justify-content-between align-items-center gap-3 mt-4 mb-2">
                 <button type="button" class="btn btn-outline-secondary" onclick="window.history.back();"><i class="bi bi-arrow-left me-1"></i><?= $this->Locale->get('Go Back') ?></button>

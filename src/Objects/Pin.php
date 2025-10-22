@@ -169,8 +169,6 @@ class Pin {
                 // Configure the message
                 $eml->to($user->username)
                     ->from($user->organization()->email ?? $CONFIG->get('smtp','username'))
-                    ->var('logo', 'data:'.mime_content_type($CONFIG->root() . '/webroot' . $this->logo()).';base64,' . base64_encode(file_get_contents($CONFIG->root() . '/webroot' . $this->logo())))
-                    ->var('brand', $CONFIG->get('application','name'))
                     ->var('greetings', "Sincerely,<br>".$user->organization()->name."'s Team");
 
                 // Send the message
@@ -186,47 +184,6 @@ class Pin {
         }
 
         return $status;
-    }
-
-    /**
-     * Get the logo path
-     *
-     * @return string
-     */
-    private function logo(): string
-    {
-        // Import Global Variables
-        global $CONFIG;
-
-        $src = '/assets/img/logo.svg';
-        if(!is_file($CONFIG->root() . '/webroot' . $src)){
-            $src = '/assets/img/logo.jpg';
-        }
-        if(!is_file($CONFIG->root() . '/webroot' . $src)){
-            $src = '/assets/img/logo.gif';
-        }
-        if(!is_file($CONFIG->root() . '/webroot' . $src)){
-            $src = '/assets/img/logo.webp';
-        }
-        if(!is_file($CONFIG->root() . '/webroot' . $src)){
-            $src = '/assets/img/logo.png';
-        }
-        if(!is_file($CONFIG->root() . '/webroot' . $src)){
-            $src = '/assets/core/img/logo.svg';
-        }
-        if(!is_file($CONFIG->root() . '/webroot' . $src)){
-            $src = '/assets/core/img/logo.jpg';
-        }
-        if(!is_file($CONFIG->root() . '/webroot' . $src)){
-            $src = '/assets/core/img/logo.gif';
-        }
-        if(!is_file($CONFIG->root() . '/webroot' . $src)){
-            $src = '/assets/core/img/logo.webp';
-        }
-        if(!is_file($CONFIG->root() . '/webroot' . $src)){
-            $src = '/assets/core/img/logo.png';
-        }
-        return $src;
     }
 
     /**
