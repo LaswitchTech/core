@@ -60,6 +60,9 @@ class User {
         // Set Properties
         $this->user = $user[0];
 
+        // Parse JSON fields
+        $this->user['settings'] = json_decode($this->user['settings'], true);
+
         // Retrieve the user vCard's Avatar
         $query = $this->Database->query()
             ->table('files')
@@ -143,6 +146,47 @@ class User {
 
         // Set the user Token
         $this->token = $this->UUID->toString($this->user['id']) . '-' . $this->UUID->toString($this->user['username']);
+    }
+
+    /**
+     * Retrieve a User Setting
+     *
+     * @param string $key
+     * @return mixed
+     */
+    public function setting(string $key): mixed
+    {
+        // Ensure settings is an array
+        if (!isset($this->user['settings']) || !is_array($this->user['settings'])) {
+            return null;
+        }
+
+        // Split on dots and walk the array
+        $segments = array_filter(explode('.', $key), fn($s) => $s !== '');
+        $cursor = $this->user['settings'];
+
+        foreach ($segments as $seg) {
+            // Allow numeric indexes if settings contains numeric-keyed arrays
+            $candidateKeys = [$seg];
+            if (ctype_digit($seg)) {
+                $candidateKeys[] = (int)$seg;
+            }
+
+            $found = false;
+            foreach ($candidateKeys as $ck) {
+                if (is_array($cursor) && array_key_exists($ck, $cursor)) {
+                    $cursor = $cursor[$ck];
+                    $found = true;
+                    break;
+                }
+            }
+
+            if (!$found) {
+                return null;
+            }
+        }
+
+        return $cursor;
     }
 
     /**
