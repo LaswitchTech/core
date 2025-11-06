@@ -115,10 +115,10 @@
                         <ul class="dropdown-menu">
                             <?php foreach($this->Locale->list() as $locale => $language): ?>
                                 <li>
-                                    <a href="?locale=<?= $locale ?>" class="dropdown-item d-flex align-items-center <?php if($locale === $this->Locale->current('name')){ echo 'active'; } ?>" aria-pressed="false">
+                                    <a href="?locale=<?= $locale ?>" class="dropdown-item d-flex align-items-center <?php if($locale === $this->Locale->current()){ echo 'active'; } ?>" aria-pressed="false">
                                         <i class="bi bi-globe-americas me-2" aria-hidden="true"></i>
                                         <span><?= $language ?></span>
-                                        <i class="bi bi-check2 ms-auto <?php if($locale !== $this->Locale->current('name')){ echo 'd-none'; } ?>" aria-hidden="true"></i>
+                                        <i class="bi bi-check2 ms-auto <?php if($locale !== $this->Locale->current()){ echo 'd-none'; } ?>" aria-hidden="true"></i>
                                     </a>
                                 </li>
                             <?php endforeach; ?>
