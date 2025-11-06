@@ -118,6 +118,7 @@ class Builder {
                 'color'   => $p['color'] ?? null,
                 'link'    => $route,
                 'parents' => $parents,
+                'view'    => $p['view'] ?? null,
             ];
         }
         if (!$eligible) return [];
@@ -227,6 +228,7 @@ class Builder {
                 'color' => $eligible[$route]['color'],
                 'items' => [],
                 'link'  => $eligible[$route]['link'],
+                'view'  => $eligible[$route]['view']
             ];
         };
 
