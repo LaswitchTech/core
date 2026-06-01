@@ -19,40 +19,47 @@ Core-Web provides foundational infrastructure for building multiple web applicat
 | **Routing** | Implemented | `Router.php` + `Builder->menu()` with sidebar-main/admin/dev, topbar, topnav locations |
 | **Layout System** | Implemented | `panel.php` (admin), `website.php` (app), `fullscreen.php`, `internal.php`, `index.php` (blank), 16 error pages |
 | **Theme System** | Implemented | Bootstrap 5, LESS compilation (`Style.php` + `wikimedia/less.php`), 3 themes (default, gentelella, glass) |
-| **Database Abstraction** | Partially implemented | `Database.php` + `Objects\Query` (fluent builder) + `Objects\Schema` (DDL); MySQL connector only; Schema heavily MySQL-specific (InnoDB, utf8mb4, DESCRIBE, SHOW TABLES, ENUM, MODIFY COLUMN); SQLite and PostgreSQL connectors are stubs |
-| **Auth** | Partially implemented | `Auth.php` (bearer/basic/session), database-backed sessions, remember-me cookie; 2FA/TOTP and registration not yet implemented |
+| **Database Abstraction** | Implemented | `Database.php` + `Objects\Query` (fluent builder) + `Objects\Schema` (DDL with `compare()`/`update()` migration) + MySQL connector |
+| **Auth** | Partially implemented | `Auth.php` (bearer/basic/session), database-backed sessions, remember-me cookie, `User->organization()`, `Objects\Pin` (numeric PIN only); 2FA/TOTP and registration not yet implemented |
 | **Helpers** | Implemented | Auto-loads from core, vendor, and plugin directories via `$HELPER-><name>` magic getter |
-| **Config** | Partially implemented | `Config.php` for JSON `.cfg` files; only 4 config files exist (`css.cfg`, `extensions.cfg`, `js.cfg`, `requirement.cfg`) |
+| **Config** | Implemented | `Config.php` for JSON `.cfg` files; 4 config files committed (css.cfg, extensions.cfg, js.cfg, requirement.cfg), others gitignored for instance-specific settings |
 | **CSRF** | Implemented | Automatic validation on POST/PUT/PATCH/DELETE, timing-safe comparison, token rotation |
 | **Output** | Implemented | CLI colorized + HTTP JSON output |
-| **Logging** | Implemented | `Log.php` with 5 levels, file rotation |
+| **Logging** | Implemented | `Log.php` with 5 levels, file rotation, IP tracking, debug_backtrace caller info |
 | **i18n** | Partially implemented | `Locales.php` supports en-ca/fr-ca, timezone management; Locale files not populated |
 | **Installer** | Partially implemented | `Installer.php` + `Database::install()` for schema/data bootstrapping |
 | **SMTP** | Implemented | `SMTP.php` email sender, used in password reset flows |
 | **Scaffold** | Partially implemented | `lib/skeleton/` boilerplate exists; `init.sh` initializer |
 | **Modules** | Implemented | `lib/modules/core/` as self-contained submodule |
+| **Dev Tools** | Implemented | `dev` plugin: `/dev/on`, `/dev/off`, `/dev/status` endpoints, `Developer` role, maintenance toggle, `Widget.php` (267 lines) |
+| **Core Info API** | Implemented | `/api/core/info` (`CoreEndpoint::infoAction()`) — version, name, owner, copyright, changelog, logo, license, authors |
+| **Organizations** | Implemented | `User->organization()` + `src/Objects/Organization.php` + `lib/plugins/organizations/` plugin with tables/repositories/admin UI |
+| **UI Builder** | Implemented | `assets/js/builder.js` — UI component builder for Bootstrap components, DataTables integration, extensible via extensions |
 
 ### What's Missing (Gaps)
 
 | Area | Severity | Notes |
 |------|----------|-------|
 | **Testing** | P0 | No `tests/` directory, no test framework, no PHPUnit config. Zero test coverage. |
-| **ConfigOverrideService** | P1 | No config override layer (no `config/local.php` pattern). Admin settings can't persist. |
-| **Settings Registry** | P1 | No application-wide settings system. `/admin/settings` doesn't exist. |
-| **Profile Modal** | P1 | No modal-based profile UI with section registry. |
-| **Debug Audit Logger** | P1 | No audit trail or debug logging service. |
-| **Global View Context** | P1 | No `ViewGlobals` class; view context is inconsistent across layouts. |
-| **Dependency Resolver** | P2 | No service dependency resolution; all services are loaded flat. |
-| **Migration Runner** | P2 | No database migration system (only install-time schema creation). |
-| **Documentation Plugin** | P2 | No docs generation plugin for the kernel. |
-| **VersionProvider** | P2 | Static `VERSION` file only; no version resolution API. |
-| **Developer Mode** | P2 | No `/admin/developer` page or scaffold generator. |
-| **Encryption Service** | P2 | `src/Encryption.php` is a 0-byte stub. |
-| **SMS / IMAP / SLS Services** | P3 | `SMS.php`, `IMAP.php`, `SLS.php` are 0-byte stubs. |
-| **PostgreSQL / SQLite Connectors** | P2 | Database connectors exist as stubs. MySQL-only connector blocks local development. |
-| **Menu Registry** | P2 | Menu is handled by `Builder->menu()` but no explicit `MenuRegistry` class. |
-| **Datatables Standardization** | P2 | Assets exist (`lib/plugins/datatables/`) but no standardized usage pattern. |
-| **Organization System** | P2 | `src/Objects/Organization.php` exists but no full plugin with tables/repositories. |
+| **Admin Settings Page** | P1 | No `/admin/settings` page. The config system already handles app-specific `.cfg` files (some committed, some gitignored for instance-specific settings). Needs a settings UI, not a new config service. |
+| **Profile Modal** | P1 | Currently `lib/plugins/profile/` is a page-based system — should be converted to a modal with section registry. |
+| **Debug Audit Logger** | P1 | `Log.php` provides logging (5 levels, file rotation, IP tracking) but there's no audit trail layer — no `DebugAuditLogger` class, no admin audit page. |
+| **Global View Context** | P1 | No centralized `ViewGlobals` class. View context handled through `Route` (`$ROUTE`/`$this`) and `Bootstrap`. Inconsistent across layouts. |
+| **Encryption Service** | P1 | `src/Encryption.php` is a 0-byte stub. No encryption/decryption utilities exist in the framework. |
+| **Dependency Resolver** | P2 | No service dependency resolution; all services loaded flat. Needed for extension install/uninstall lifecycle. |
+| **Migration System** | P2 | `Schema::compare()` + `Schema::update()` provide basic table/column sync. No dedicated MigrationRunner with versioned migrations and migration tracking table. |
+| **Documentation Plugin** | P2 | No docs generation plugin. Needs to read `docs/` directories at every level (kernel, app, plugins, themes, modules). |
+| **SMS / IMAP Services** | P2 | `src/SMS.php` and `src/IMAP.php` are 0-byte stubs. Needed for 2FA via SMS and email verification. |
+| **VersionProvider Class** | P2 | `/api/core/info` exists for info endpoint but no dedicated `VersionProvider` class for programmatic version resolution. |
+| **Developer Page** | P2 | `dev` plugin has API endpoints and Widget but no `/admin/developer` page or scaffold generator. |
+| **Datatables Standardization** | P2 | Assets exist (`lib/plugins/datatables/`) but no standardized usage pattern. Update to 2.3.8 + ColumnControl support needed. Standardization via `assets/js/builder.js`. |
+| **UI Builder Documentation** | P2 | `assets/js/builder.js` needs documentation — it's the standard UI component builder. |
+| **Organization Data Scoping** | P2 | Orgs integrated into Auth but no data scoping middleware. |
+| **SLS Service** | P3 | `src/SLS.php` is a 0-byte stub. Deferred pending licensing design. |
+| **PostgreSQL Connector** | P3 | Stub. MySQL + SQLite sufficient for V1.0. |
+| **SQLite Connector** | P2 | Stub. Blocks local development. Phase 2.7. |
+| **Menu Registry** | P2 | Menu is handled by `Builder->menu()` but no explicit `MenuRegistry` class. Current approach is sufficient for now. |
+| **Config Documentation** | P2 | Config files exist but no documentation on which files are committed vs gitignored and why. |
 
 ---
 
@@ -62,7 +69,7 @@ Foundational work that prevents bugs and enables safe development.
 
 ### 1.1 Testing Infrastructure (P0)
 
-**Why**: Zero test coverage means every change risks silent regressions. The codebase has 57 plugins, 30+ core classes, and a complex global injection system — testing is essential.
+**Why**: No tests exist anywhere in the codebase. This is the single highest-risk gap — every commit could silently break something.
 
 **Tasks:**
 - [ ] Add PHPUnit (or lightweight alternative) to `composer.json` dev dependencies
@@ -78,17 +85,16 @@ Foundational work that prevents bugs and enables safe development.
 - [ ] Test plugin auto-discovery (helpers, routes, menus)
 - [ ] Add PHPUnit CI workflow to `.github/workflows/`
 
-### 1.2 Configuration Override Layer (P1)
+### 1.2 Configuration Documentation (P2)
 
-**Why**: Without a config override layer, there's no way to persist application-specific settings. All config lives in checked-in `.cfg` files, making deployment impossible.
+**Why**: The config system already works — `.cfg` files in `config/` store app-specific settings. Some are committed (extensions.cfg, requirement.cfg, js.cfg, css.cfg), others are gitignored (contain instance-specific or sensitive settings). Needs documentation, not a new service.
 
 **Tasks:**
-- [ ] Create `ConfigOverrideService` that loads from `config/local.php` (if exists) and merges with `config/*.cfg`
-- [ ] Support dot-notation key access: `get('app.name')`, `get('database.host')`
-- [ ] Support write-through: `set('app.name', 'MyApp')` writes to `config/local.php`
-- [ ] Atomic file writes (write to temp + rename) to prevent corruption
-- [ ] Add `config/local.php.example` (gitignored)
-- [ ] Test config merge priority (local > base)
+- [ ] Document config file structure in `/docs/developer/config-files.md`
+- [ ] Document which `.cfg` files are committed vs gitignored (and why)
+- [ ] Document how to create a new `.cfg` file for an application-specific setting
+- [ ] Document config loading order and precedence
+- [ ] Document config file conventions (format, naming, structure)
 
 ### 1.3 Application Settings System (P1)
 
@@ -97,7 +103,7 @@ Foundational work that prevents bugs and enables safe development.
 **Tasks:**
 - [ ] Create `SettingsRegistry` class (plugin-provided settings sections)
 - [ ] Create `SettingsSection` value object (key prefix, label, icon, fields)
-- [ ] Build `/admin/settings` page (GET renders registry, POST saves via ConfigOverrideService)
+- [ ] Build `/admin/settings` page (GET renders registry, POST saves to `.cfg` file)
 - [ ] Build UI: card-based sections, field types (text, boolean, select), save confirmation
 - [ ] Provide `SettingsSection::register()` hook for plugins
 - [ ] Test settings save/load round-trip
@@ -105,7 +111,7 @@ Foundational work that prevents bugs and enables safe development.
 
 ### 1.4 Global View Context (P1)
 
-**Why**: Views/partials access globals inconsistently across the 5 layouts. Missing context causes silent errors. A guaranteed context layer is essential.
+**Why**: Views/partials access globals inconsistently across the 5 layouts. Currently handled through `Route` (`$ROUTE`/`$this`) and `Bootstrap`, but no centralized guarantee. Missing context causes silent errors.
 
 **Tasks:**
 - [ ] Create `ViewGlobals` class with `contextFromScope()` and `contextFromContainer()`
@@ -115,19 +121,41 @@ Foundational work that prevents bugs and enables safe development.
 - [ ] Test each layout renders without undefined variable errors
 - [ ] Document the contract in `/docs/developer/view-context.md`
 
+### 1.5 Encryption Service (P1)
+
+**Why**: `src/Encryption.php` is a 0-byte stub. No encryption/decryption utilities exist in the framework. Needed for secure data handling (PII, tokens, sensitive config values).
+
+**Tasks:**
+- [ ] Implement `Encryption` class with symmetric encryption (AES-256-GCM)
+- [ ] Implement key derivation from passphrase
+- [ ] Implement data encryption/decryption methods
+- [ ] Implement secure key generation
+- [ ] Add tests for encrypt/decrypt round-trip
+- [ ] Document in `/docs/developer/encryption.md`
+
 ---
 
 ## Phase 2: Core Services (Unblocking Feature Work)
 
 Services that unlock plugin and application development.
 
-### 2.1 Auth Feature Completion (P1)
+### 2.1 Auth System Security Review + Feature Completion (P1)
 
-**Why**: Auth is incomplete — 2FA/TOTP and user registration are stubs. Any production application needs full auth.
+**Why**: Auth is incomplete — 2FA/TOTP and user registration are stubs. The Auth system (`src/Auth.php`, `src/Backends/`, `src/Objects/User.php`, `src/Objects/Organization.php`) needs a security review and completion of missing features.
+
+**Auth system review scope:**
+- Session fixation/hijacking defenses
+- Token rotation and expiry handling (`Objects\Pin` — currently only numeric PIN, not TOTP)
+- Password policy enforcement
+- Backend extensibility (only `Local` backend exists; LDAP/ADDC/SMTP/IMAP/OAuth are commented-out stubs)
+- Organization membership model (currently `User->organization()` + `src/Objects/Organization.php`)
 
 **Tasks:**
-- [ ] Implement 2FA/TOTP (`Objects\Pin` refactor to TOTP using `phpseclib3/phpseclib`)
+- [ ] **Security review of `Auth.php`** — session fixation, token management, password policy, backend abstraction
+- [ ] Implement 2FA/TOTP (`Objects\Pin` → TOTP using `phpseclib3/phpseclib`)
 - [ ] Implement 2FA recovery codes (UUID format, one per user, single-use)
+- [ ] Implement 2FA via Email (SMTP) — generate OTP, send via SMTP, verify
+- [ ] Implement 2FA via SMS (SMS service) — generate OTP, send via SMS, verify
 - [ ] Implement user registration (config-gated, disabled by default)
 - [ ] Implement email verification flow (single-use token, 24h expiry)
 - [ ] Implement forgot password flow (single-use token, 60min expiry)
@@ -137,23 +165,23 @@ Services that unlock plugin and application development.
 
 ### 2.2 Profile Modal System (P1)
 
-**Why**: Users need a way to manage their profile, security settings, and 2FA. No modal UI exists.
+**Why**: Users need a way to manage their profile, security settings, and 2FA. Currently `lib/plugins/profile/` is a page-based system — should be converted to a modal.
 
 **Tasks:**
 - [ ] Create `ProfileModal` class with section registry
 - [ ] Create `ProfileSection` value object (tab, content callback, permissions)
 - [ ] Build modal UI in topbar (Bootstrap modal, tabbed interface)
-- [ ] Register core sections: Overview, Security (2FA), API Tokens
+- [ ] Migrate existing profile data (Overview, Security, API Tokens) to modal tabs
 - [ ] Support plugin-provided sections via hook
 - [ ] Test tab rendering, permission gating, AJAX content loading
 - [ ] Document in `/docs/developer/profile-modal.md`
 
 ### 2.3 Debug & Audit Logging (P1)
 
-**Why**: No audit trail means no way to track admin actions, security events, or debug issues in production.
+**Why**: `Log.php` provides logging (5 levels, file rotation, IP tracking) but there's no audit trail. Admin actions, security events, and debug issues need a dedicated audit log.
 
 **Tasks:**
-- [ ] Create `DebugAuditLogger` class (APP_DEBUG-gated)
+- [ ] Create `DebugAuditLogger` class (APP_DEBUG-gated, reuses `Log.php` infrastructure)
 - [ ] Log to `admin_audit_log` table (type: debug/audit, sanitized payloads, IP, user)
 - [ ] Create `/admin/audit` page with type filtering (`?type=all|debug|audit`)
 - [ ] Create `AuditLogger` class for production audit trail (non-debug)
@@ -163,7 +191,7 @@ Services that unlock plugin and application development.
 
 ### 2.4 Version Provider (P2)
 
-**Why**: No way to check kernel vs application version, or compare extension compatibility.
+**Why**: `/api/core/info` (`CoreEndpoint::infoAction()`) provides version, name, owner, copyright, changelog, logo, license, authors. But no dedicated `VersionProvider` class exists for programmatic version comparison (e.g., kernel/app version resolution, extension compatibility checks).
 
 **Tasks:**
 - [ ] Create `VersionProvider` class with kernel and application version resolution
@@ -173,7 +201,7 @@ Services that unlock plugin and application development.
 
 ### 2.5 Dependency Resolver (P2)
 
-**Why**: Plugin install/enable/disable needs to resolve dependencies and block incompatible operations.
+**Why**: Plugin install/enable/disable needs to resolve dependencies and block incompatible operations. Currently services are loaded flat in `Bootstrap.php`.
 
 **Tasks:**
 - [ ] Create `DependencyResolver` class
@@ -182,12 +210,14 @@ Services that unlock plugin and application development.
 - [ ] Add to extension catalog UI (block reason display)
 - [ ] Test dependency resolution with conflicting versions
 
-### 2.6 Migration Runner (P2)
+### 2.6 Migration System Improvement (P2)
 
-**Why**: Schema changes between versions require migration support. Currently only `Database::install()` handles schema creation.
+**Why**: `Schema::compare()` + `Schema::update()` provide basic table/column sync between definition files and DB structure. But no dedicated MigrationRunner exists for versioned migrations.
+
+**Existing: `Schema::compare()` compares in-memory column definitions vs DB structure, returns descriptive diffs or SQL queries. `Schema::update()` executes the queries. Used by plugin installation.**
 
 **Tasks:**
-- [ ] Create `MigrationRunner` class
+- [ ] Create `MigrationRunner` class with versioned migrations
 - [ ] Support versioned migrations (`migrations/001_create_users.php`, etc.)
 - [ ] Track applied migrations in `migrations` table
 - [ ] Integrate with plugin lifecycle (install → run migrations, uninstall → reverse migrations)
@@ -196,11 +226,9 @@ Services that unlock plugin and application development.
 
 ### 2.7 Database Connector Expansion (MySQL + SQLite) (P1)
 
-**Why**: MySQL-only blocks local development (PHP 8.1+ on macOS has no MySQL socket by default; SQLite works out-of-the-box). The Connector pattern is already in place — SQLite just needs implementation. MySQL's Schema/Query also has heavy SQL-dialect assumptions that need to be abstracted.
+**Why**: MySQL-only blocks local development (PHP 8.1+ on macOS has no MySQL socket by default; SQLite works out-of-the-box). The Connector pattern is already in place — SQLite just needs implementation.
 
-**Scope**: Implement SQLite connector, abstract MySQL-specific SQL in Schema/Query, add adapter layer for dialect differences. PostgreSQL is out of scope for this phase.
-
-**Files affected**:
+**Files affected:**
 - `src/Connectors/SQLite.php` (60-80 lines, from scratch)
 - `src/Database.php` (add SQLite to connector factory switch)
 - `src/Objects/Schema.php` (replace MySQL-specific SQL with adapter calls)
@@ -261,15 +289,37 @@ Services that unlock plugin and application development.
   - `/docs/developer/database-connectors.md` — connector interface, SQLite config, migration guide from MySQL
   - `/docs/developer/sqlite-notes.md` — known limitations (MODIFY COLUMN workaround, JSON_CONTAINS compatibility, ENUM handling)
 
+### 2.8 SMS / IMAP Services (P2)
+
+**Why**: `src/SMS.php` and `src/IMAP.php` are 0-byte stubs. Needed for 2FA via SMS, email verification, account recovery, and inbox integration.
+
+**Tasks:**
+- [ ] Implement `SMS.php` — send SMS via provider (Twilio, Vonage, etc.)
+- [ ] Implement `IMAP.php` — connect to mail server, read/parse emails
+- [ ] Add SMS as a 2FA channel (generate OTP, send via SMS, verify)
+- [ ] Add IMAP for email verification (parse incoming verification emails)
+- [ ] Test SMS/IMAP flows with mock providers
+- [ ] Document in `/docs/developer/sms-imap.md`
+
+### 2.9 SLS Service (P3)
+
+**Why**: `src/SLS.php` is a 0-byte stub. Deferred pending licensing design.
+
 ---
 
 ## Phase 3: Feature Completeness
 
 Features that make the kernel production-ready.
 
-### 3.1 Developer Tools (P2)
+### 3.1 Developer Mode Completion (P2)
 
-**Why**: Developers need tooling for scaffolding, debugging, and testing.
+**Why**: The `dev` plugin exists with `/dev/on`, `/dev/off`, `/dev/status` endpoints, `Developer` role, maintenance toggle, and `Widget.php` (267 lines). But no `/admin/developer` page or scaffold generator exists.
+
+**Current dev plugin (`lib/plugins/dev/`):**
+- `Endpoint.php` — `/dev/on`, `/dev/off`, `/dev/status` endpoints
+- `Widget.php` — dropdown in topbar with development/maintenance toggles
+- `routes.cfg` — phpMyAdmin link under developer location
+- `Developer` role defined in Auth system
 
 **Tasks:**
 - [ ] Create `/admin/developer` page
@@ -280,46 +330,68 @@ Features that make the kernel production-ready.
 
 ### 3.2 Documentation Plugin (P2)
 
-**Why**: No way to render documentation from within the application.
+**Why**: No docs generation plugin for the kernel.
 
 **Tasks:**
 - [ ] Create `documentation` plugin with lightweight markdown renderer
+- [ ] **Multi-level docs search:** Read `docs/` directories at every level:
+  - Kernel: `vendor/laswitchtech/core/docs/`
+  - Application: `app/docs/`
+  - Plugins: `lib/plugins/*/docs/`
+  - Themes: `lib/themes/*/docs/`
+  - Modules: `lib/modules/*/docs/`
 - [ ] Panel layout with sidebar TOC + prev/next navigation
 - [ ] Support headers, bold, italic, code, lists, links, images
 - [ ] Edit on GitHub link for admin users
 - [ ] Plugin self-registration with routes
 - [ ] Test rendering of common markdown patterns
 
-### 3.3 DataTables Standardization (P2)
+### 3.3 Datatables Standardization (P2)
 
-**Why**: DataTables assets exist but no standardized usage pattern across admin pages.
+**Why**: DataTables assets exist but no standardized usage pattern. Need to update library and standardize.
 
 **Tasks:**
+- [ ] Update DataTables library to v2.3.8
+- [ ] Add ColumnControl extension support
+- [ ] Standardize implementation via `assets/js/builder.js` DataTables builder
 - [ ] Create `DataTable` helper class for consistent initialization
 - [ ] Define standard configuration options
-- [ ] Update admin pages to use standardized pattern
+- [ ] Update existing DataTables usage to new standard
 - [ ] Document in `/docs/developer/datatables.md`
 
-### 3.4 Menu Registry (P2)
+### 3.4 UI Builder Documentation (P2)
 
-**Why**: Menu system works via `Builder->menu()` but no explicit registry makes it hard for plugins to register menu items.
+**Why**: `assets/js/builder.js` is the UI component builder used for all Bootstrap component generation. It needs documentation as the standard UI generation pattern.
 
-**Tasks:**
-- [ ] Create `MenuRegistry` class with plugin hooks
-- [ ] Support menu item registration with permissions, icons, order
-- [ ] Replace `Builder->menu()` with registry-backed menu building
-- [ ] Document menu plugin API
-
-### 3.5 Organization System (P2)
-
-**Why**: Multi-tenant data scoping requires organization support.
+**Current `builder.js`:**
+- `Builder` class with component registry (cards, tables, layouts, inputs, widgets)
+- DataTables integration (columnDefs, buttons, searchBuilder, exportTools, columnsVisibility, selectTools)
+- Extensible via extensions (Builder.extend())
+- Component lifecycle: `_init()` → `_create()` → `_load()` → `_insert()` → `_timeout()`
 
 **Tasks:**
-- [ ] Complete `lib/plugins/organizations/` plugin with tables, repositories
-- [ ] `organizations` + `organization_users` pivot tables
-- [ ] `OrganizationRepository` and `OrganizationMemberRepository`
+- [ ] Document `Builder` class API in `/docs/developer/builder.md`
+- [ ] Document component registration and extension patterns
+- [ ] Document DataTables builder options (columnDefs, buttons, searchBuilder, etc.)
+- [ ] Document component lifecycle hooks
+- [ ] Add JSDoc comments to `builder.js`
+- [ ] Add examples for common patterns
+
+### 3.5 Organization System Data Scoping (P2)
+
+**Why**: Organizations are integrated into Auth (`User->organization()`) and the plugin exists at `lib/plugins/organizations/` (tables: organizations, users, members). But data scoping middleware is missing — queries don't automatically scope to the user's organization.
+
+**Current state:**
+- `src/Objects/Organization.php` — org CRUD, member management
+- `src/Objects/User.php` → `organization()` method
+- Auth checks `$user->organization['isActive']`
+- Plugin tables: `organizations`, `users`, `organization_users`
+- Admin UI at `/security/organizations`
+
+**Tasks:**
+- [ ] Create `OrganizationScope` middleware (auto-filter queries by organization)
+- [ ] Add `OrganizationRepository` and `OrganizationMemberRepository`
 - [ ] Profile Modal integration (switch/create/list organizations)
-- [ ] Data scoping middleware (auto-filter queries by organization)
 - [ ] `/admin/organizations` listing page
 - [ ] Test organization creation, membership, context switching
 
@@ -346,13 +418,17 @@ Final work before V1.0 release.
 - [ ] Apply workflow with rollback capability
 - [ ] Admin UI for update management
 
-### 4.3 Config Migration Completion (P2)
+### 4.3 Menu Registry (P2)
+
+**Why**: Menu system works via `Builder->menu()` but no explicit `MenuRegistry` class makes it hard for plugins to register menu items.
+
+**Current**: `Builder->menu('developer')` and other locations in `Widget.php`.
 
 **Tasks:**
-- [ ] Migrate all DB-backed config to `ConfigOverrideService`
-- [ ] Plugin config (SMTP, Telico) non-sensitive keys to `config/local.php`
-- [ ] Sensitive credentials written directly to DB by plugins
-- [ ] Migrate remaining config sections
+- [ ] Create `MenuRegistry` class with plugin hooks
+- [ ] Support menu item registration with permissions, icons, order
+- [ ] Replace `Builder->menu()` with registry-backed menu building
+- [ ] Document menu plugin API
 
 ### 4.4 Theme/Runtime Management (P3)
 
@@ -370,20 +446,23 @@ Features required for V1.0 release (target: 2026-08-15).
 ### Required for V1.0
 
 - [ ] Complete testing infrastructure (Phase 1.1)
-- [ ] Config override layer (Phase 1.2)
+- [ ] Config documentation (Phase 1.2)
 - [ ] Settings registry (Phase 1.3)
 - [ ] Global view context (Phase 1.4)
-- [ ] Complete auth features (Phase 2.1)
+- [ ] Encryption service (Phase 1.5)
+- [ ] Complete auth features + security review (Phase 2.1)
 - [ ] Profile modal (Phase 2.2)
 - [ ] Debug/audit logging (Phase 2.3)
 - [ ] Version provider (Phase 2.4)
 - [ ] Dependency resolver (Phase 2.5)
-- [ ] Migration runner (Phase 2.6)
-- [ ] Developer tools (Phase 3.1)
-- [ ] Documentation plugin (Phase 3.2)
-- [ ] Organization system (Phase 3.5)
-- [ ] Data scoping middleware
+- [ ] Migration system (Phase 2.6)
 - [ ] Database connector expansion (MySQL + SQLite) (Phase 2.7)
+- [ ] SMS / IMAP services (Phase 2.8)
+- [ ] Developer mode completion (Phase 3.1)
+- [ ] Documentation plugin (Phase 3.2)
+- [ ] Datatables standardization (Phase 3.3)
+- [ ] UI Builder documentation (Phase 3.4)
+- [ ] Organization data scoping (Phase 3.5)
 
 ### Out of Scope for V1.0
 
@@ -413,53 +492,35 @@ These systems are large enough to warrant their own design documents and develop
 | Multi-instance auth sharing | Pending OAuth foundation |
 | Plugin signing | Pending marketplace infrastructure |
 | Distributed architecture | Post-V1.0 consideration |
-| SMS service (`SMS.php`) | Empty stub — deferred pending provider selection |
-| IMAP service (`IMAP.php`) | Empty stub — deferred pending use case |
-| SLS service (`SLS.php`) | Empty stub — deferred pending licensing design |
+| SMS service (`SMS.php`) | Phase 2.8 — In progress |
+| IMAP service (`IMAP.php`) | Phase 2.8 — In progress |
+| SLS service (`SLS.php`) | Phase 2.9 — Deferred pending licensing design |
+| PostgreSQL connector | Stub — MySQL + SQLite sufficient for V1.0 |
 | SQLite connector | Phase 2.7 — In progress |
-| PostgreSQL connector | Empty stub — MySQL + SQLite sufficient for V1.0 |
 
 ---
 
-## How to Use This Roadmap
+## Appendix: Current Phase Checklist
 
-1. **Start with Phase 1** — these are prerequisites for safe development
-2. **Pick the highest-priority unchecked item** in the earliest unblocked phase
-3. **Check dependencies** — some tasks unlock others (e.g., config override → settings registry)
-4. **Update this file** when a task is completed or when scope changes
-5. **Move tasks between phases** as new information becomes available
-
-## Priority Legend
-
-| Priority | Meaning |
-|----------|--------|
-| **P0** | Blocker — nothing else can proceed safely |
-| **P1** | Critical — needed for any production deployment |
-| **P2** | Important — needed for feature-complete kernel |
-| **P3** | Nice-to-have — nice before V1.0, fine after |
-
----
-
-## Current State
-
-| Area | Status | Next Step |
-|------|--------|-----------|
-| Plugin system | Implemented | Stabilize with tests |
-| Bootstrap / Services | Implemented | Test scope-based loading |
-| Routing | Implemented | Test route registration |
-| Layout System | Implemented | Add ViewGlobals context layer |
-| Theme / LESS | Implemented | Add theme runtime management |
-| Auth | Partial | Complete 2FA, registration, email verification |
-| Config | Partial | Add ConfigOverrideService |
-| Settings | Not started | Build SettingsRegistry + /admin/settings |
-| Testing | Not started | Add PHPUnit + first 10 tests |
-| Database Connectors | Partial | MySQL only; SQLite in Phase 2.7 |
-| Profile Modal | Not started | Build with section registry |
-| Debug/Audit | Not started | Build DebugAuditLogger + audit page |
-| Version Provider | Not started | Build with semver comparison |
-| Dependency Resolver | Not started | Build for plugin lifecycle |
-| Migration Runner | Not started | Build versioned migration system |
-| Developer Tools | Not started | Build scaffold generator |
-| Documentation | Not started | Build lightweight markdown plugin |
-| Organizations | Partial | Complete tables, repos, middleware |
-| V1.0 Target | **2026-08-15** | Scope defined above |
+| Phase | Area | Status | Notes |
+|-------|------|--------|-------|
+| 1.1 | Testing | Not started | No tests, no framework |
+| 1.2 | Config Documentation | Not started | Config files exist, docs needed |
+| 1.3 | Settings Registry | Not started | No `/admin/settings` |
+| 1.4 | Global View Context | Not started | No centralized `ViewGlobals` |
+| 1.5 | Encryption Service | Not started | `src/Encryption.php` is 0 bytes |
+| 2.1 | Auth + 2FA | Partial | 2FA/TOTP, registration, email/SMS 2FA pending |
+| 2.2 | Profile Modal | Not started | Currently page-based |
+| 2.3 | Debug/Audit Logger | Not started | `Log.php` exists, audit layer missing |
+| 2.4 | Version Provider | Not started | `/api/core/info` exists but no class |
+| 2.5 | Dependency Resolver | Not started | No resolver |
+| 2.6 | Migration Runner | Partial | `Schema::compare()`/`update()` exist, no versioned migrations |
+| 2.7 | Database Connectors | Partial | MySQL only; SQLite in Phase 2.7 |
+| 2.8 | SMS/IMAP | Not started | Both 0-byte stubs |
+| 2.9 | SLS | Not started | 0-byte stub |
+| 3.1 | Developer Mode | Partial | `dev` plugin exists, page/scaffold generator missing |
+| 3.2 | Documentation | Not started | No docs plugin |
+| 3.3 | DataTables | Not started | Standardization + update to 2.3.8 needed |
+| 3.4 | UI Builder | Not started | `builder.js` needs docs |
+| 3.5 | Organization | Partial | Core integration done, data scoping missing |
+| **V1.0 Target** | **2026-08-15** | Scope defined above | |
