@@ -71,43 +71,81 @@ Foundational work that prevents bugs and enables safe development.
 
 **Why**: No tests exist anywhere in the codebase. This is the single highest-risk gap — every commit could silently break something.
 
+**Approach**: Two-layer testing strategy.
+
+**Layer 1 — Syntax validation (pre-commit / CI gate)**:
+- [ ] Scan all `.php` files in the root directory recursively using `php -l` (lint)
+- [ ] Fail CI if any file has syntax errors
+- [ ] Script: `tests/syntax.sh` or `bin/php-lint.sh` for local use
+- [ ] Include all PHP files in `src/`, `lib/plugins/*/`, and `lib/modules/*/`
+
+**Layer 2 — Route accessibility tests**:
+- [ ] Compile all routes from every plugin (scan `routes.cfg` files in `lib/plugins/*/`)
+- [ ] Test each route with **public access** (should return 200 for public routes, 403/302 for private)
+- [ ] Test each route with **logged-in access** (should return 200 for authorized users)
+- [ ] Test each route with **unauthenticated access** (should redirect to login for private routes)
+- [ ] Validate HTTP status codes, response bodies, and headers
+- [ ] Use PHPUnit for route tests (or lightweight `guzzlehttp/guzzle` for HTTP calls)
+
+**CI integration**:
+- [ ] Add GitHub Actions workflow (`.github/workflows/ci.yml`)
+- [ ] Run `php -l` on all PHP files on every PR push
+- [ ] Run route accessibility tests on every PR push
+- [ ] Run PHPUnit tests when a `tests/` directory exists with test cases
+
 **Tasks:**
-- [ ] Add PHPUnit (or lightweight alternative) to `composer.json` dev dependencies
 - [ ] Create `tests/` directory with bootstrap file
-- [ ] Test `Bootstrap.php` service loading (ROUTER/API/CLI scopes)
-- [ ] Test `Config.php` CRUD operations (add, get, set, delete, list)
-- [ ] Test `CSRF.php` token generation and validation
-- [ ] Test `Router.php` route registration and dispatch
-- [ ] Test `Database.php` connection handling
-- [ ] Test `Query.php` fluent builder (select, insert, update, delete, joins, filters)
-- [ ] Test `Style.php` LESS compilation
-- [ ] Test `Auth.php` authentication flow (bearer, basic, session)
-- [ ] Test plugin auto-discovery (helpers, routes, menus)
-- [ ] Add PHPUnit CI workflow to `.github/workflows/`
+- [ ] Create `tests/syntax.sh` — recursive `php -l` across root directories
+- [ ] Create `tests/routes/` — route compilation and accessibility test suite
+- [ ] Add PHPUnit to `composer.json` dev dependencies
+- [ ] Create `.github/workflows/ci.yml` (runs `php -l` + route tests on every push/PR)
+- [ ] Update `.github/workflows/release.yml` to include CI step
 
 ### 1.2 Configuration Documentation (P2)
 
-**Why**: The config system already works — `.cfg` files in `config/` store app-specific settings. Some are committed (extensions.cfg, requirement.cfg, js.cfg, css.cfg), others are gitignored (contain instance-specific or sensitive settings). Needs documentation, not a new service.
+**Why**: The config system already works — `.cfg` files in `config/` store app-specific settings. Some are committed (extensions.cfg, requirement.cfg, js.cfg, css.cfg), others are gitignored (contain instance-specific or sensitive settings). Documentation should follow the existing docs/index.md structure.
+
+**Target docs location**: `docs/03-using/` (matching the existing docs/index.md TOC structure)
 
 **Tasks:**
-- [ ] Document config file structure in `/docs/developer/config-files.md`
+- [ ] Create `docs/03-using/configuration.md` — general config system documentation
+- [ ] Create `docs/03-using/config-override.md` — config override layer (gitignored files)
+- [ ] Create `docs/03-using/bootstrap-config.md` — how Bootstrap loads config
+- [ ] Create `docs/03-using/app-settings.md` — how applications define settings
 - [ ] Document which `.cfg` files are committed vs gitignored (and why)
-- [ ] Document how to create a new `.cfg` file for an application-specific setting
 - [ ] Document config loading order and precedence
 - [ ] Document config file conventions (format, naming, structure)
+- [ ] Add examples for creating a new config file
+- [ ] Link from docs/index.md TOC (already present)
 
 ### 1.3 Application Settings System (P1)
 
-**Why**: No `/admin/settings` page means administrators can't configure the application at runtime. This blocks deployment of any real application.
+**Why**: No `/admin` or `/admin/settings` page exists. Administrators need a way to configure the application at runtime. This blocks deployment of any real application.
 
-**Tasks:**
+**Phase breakdown** — start with `/admin` as a minimal landing page, then expand the namespace:
+
+**1.3.1 — `/admin` landing page**:
+- [ ] Create minimal `/admin` endpoint (Controller/Endpoint pair)
+- [ ] Use `panel.php` template for admin layout
+- [ ] Create admin sidebar with navigation to sub-pages
+- [ ] Add link to `/admin` in the user menu (via the `profile` plugin — add to `routes.cfg`)
+- [ ] Use `Builder->menu('sidebar-admin')` for the admin sidebar
+
+**1.3.2 — Settings registry**:
 - [ ] Create `SettingsRegistry` class (plugin-provided settings sections)
 - [ ] Create `SettingsSection` value object (key prefix, label, icon, fields)
 - [ ] Build `/admin/settings` page (GET renders registry, POST saves to `.cfg` file)
 - [ ] Build UI: card-based sections, field types (text, boolean, select), save confirmation
 - [ ] Provide `SettingsSection::register()` hook for plugins
+- [ ] Add `/admin/security` page (2FA, password policy settings)
+- [ ] Add `/admin/maintenance` page (app config, SMTP, theme toggle)
 - [ ] Test settings save/load round-trip
 - [ ] Test plugin-registered sections appear correctly
+- [ ] Document in `/docs/04-administering/admin-settings.md`
+
+**Existing references to update**:
+- `docs/index.md` already lists `Admin Panel Overview`, `Settings Page`, `Security Settings`, `Debug Audit Logging`, `Developer Mode`, `Scaffold Generator` under `04-administering/` — create these docs as admin pages are built
+- `lib/plugins/profile/routes.cfg` — add `/admin` link under the "user" menu location
 
 ### 1.4 Global View Context (P1)
 
@@ -445,9 +483,9 @@ Features required for V1.0 release (target: 2026-08-15).
 
 ### Required for V1.0
 
-- [ ] Complete testing infrastructure (Phase 1.1)
-- [ ] Config documentation (Phase 1.2)
-- [ ] Settings registry (Phase 1.3)
+- [ ] Complete testing infrastructure + CI (Phase 1.1)
+- [ ] Config documentation under docs/03-using/ (Phase 1.2)
+- [ ] Admin landing page + settings registry (Phase 1.3)
 - [ ] Global view context (Phase 1.4)
 - [ ] Encryption service (Phase 1.5)
 - [ ] Complete auth features + security review (Phase 2.1)
