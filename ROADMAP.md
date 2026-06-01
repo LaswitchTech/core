@@ -19,7 +19,7 @@ Core-Web provides foundational infrastructure for building multiple web applicat
 | **Routing** | Implemented | `Router.php` + `Builder->menu()` with sidebar-main/admin/dev, topbar, topnav locations |
 | **Layout System** | Implemented | `panel.php` (admin), `website.php` (app), `fullscreen.php`, `internal.php`, `index.php` (blank), 16 error pages |
 | **Theme System** | Implemented | Bootstrap 5, LESS compilation (`Style.php` + `wikimedia/less.php`), 3 themes (default, gentelella, glass) |
-| **Database Abstraction** | Partially implemented | `Database.php` + `Objects\Query` (fluent builder) + `Objects\Schema` (DDL); MySQL connector only (PostgreSQL/SQLite stubs) |
+| **Database Abstraction** | Partially implemented | `Database.php` + `Objects\Query` (fluent builder) + `Objects\Schema` (DDL); MySQL connector only; Schema heavily MySQL-specific (InnoDB, utf8mb4, DESCRIBE, SHOW TABLES, ENUM, MODIFY COLUMN); SQLite and PostgreSQL connectors are stubs |
 | **Auth** | Partially implemented | `Auth.php` (bearer/basic/session), database-backed sessions, remember-me cookie; 2FA/TOTP and registration not yet implemented |
 | **Helpers** | Implemented | Auto-loads from core, vendor, and plugin directories via `$HELPER-><name>` magic getter |
 | **Config** | Partially implemented | `Config.php` for JSON `.cfg` files; only 4 config files exist (`css.cfg`, `extensions.cfg`, `js.cfg`, `requirement.cfg`) |
@@ -49,7 +49,7 @@ Core-Web provides foundational infrastructure for building multiple web applicat
 | **Developer Mode** | P2 | No `/admin/developer` page or scaffold generator. |
 | **Encryption Service** | P2 | `src/Encryption.php` is a 0-byte stub. |
 | **SMS / IMAP / SLS Services** | P3 | `SMS.php`, `IMAP.php`, `SLS.php` are 0-byte stubs. |
-| **PostgreSQL / SQLite Connectors** | P3 | Database connectors exist as stubs. |
+| **PostgreSQL / SQLite Connectors** | P2 | Database connectors exist as stubs. MySQL-only connector blocks local development. |
 | **Menu Registry** | P2 | Menu is handled by `Builder->menu()` but no explicit `MenuRegistry` class. |
 | **Datatables Standardization** | P2 | Assets exist (`lib/plugins/datatables/`) but no standardized usage pattern. |
 | **Organization System** | P2 | `src/Objects/Organization.php` exists but no full plugin with tables/repositories. |
@@ -194,6 +194,73 @@ Services that unlock plugin and application development.
 - [ ] Test migration apply/reverse
 - [ ] Document migration format in `/docs/developer/migrations.md`
 
+### 2.7 Database Connector Expansion (MySQL + SQLite) (P1)
+
+**Why**: MySQL-only blocks local development (PHP 8.1+ on macOS has no MySQL socket by default; SQLite works out-of-the-box). The Connector pattern is already in place — SQLite just needs implementation. MySQL's Schema/Query also has heavy SQL-dialect assumptions that need to be abstracted.
+
+**Scope**: Implement SQLite connector, abstract MySQL-specific SQL in Schema/Query, add adapter layer for dialect differences. PostgreSQL is out of scope for this phase.
+
+**Files affected**:
+- `src/Connectors/SQLite.php` (60-80 lines, from scratch)
+- `src/Database.php` (add SQLite to connector factory switch)
+- `src/Objects/Schema.php` (replace MySQL-specific SQL with adapter calls)
+- `src/Objects/Query.php` (replace MySQLi-specific calls with adapter calls)
+- `src/Objects/Definition.php` (SQLite type mapping)
+- `src/Installer.php` (SQLite config format support)
+- `config/database.cfg` (add SQLite example)
+
+**Tasks:**
+- [ ] **Task 1: Implement `Connectors\SQLite.php` (60-80 lines)**
+  - Use `PDO_SQLITE` driver (not `sqlite3` — PDO supports prepared statements natively)
+  - `connect()`: Open DB file path from config (`database.cfg → path`), auto-create file if not exists
+  - `describe()`: `PRAGMA table_info(<table>)` mapped to DESCRIBE format: `{Field, Type, Null, Key, Default, Extra}`
+  - `lastId()`: `PDO::lastInsertId()`
+  - `affectedRows()`: `PDO::rowCount()` (note: SELECT returns -1 in SQLite, needs `COUNT(*)` workaround)
+  - `prepare()`: PDO prepared statement with `bindValue()` (no type-string workaround needed like MySQL)
+  - Handle SQLite file permissions (`chmod 0644` on creation)
+- [ ] **Task 2: Create `DatabaseAdapter` interface for SQL dialect differences**
+  - Define `describeTable(string): array` — column introspection (SQLite: PRAGMA, MySQL: DESCRIBE)
+  - Define `showTables(): array` — list tables (SQLite: sqlite_master query, MySQL: SHOW TABLES)
+  - Define `buildCreateTable(string $table, string $columnsSQL): string` — dialect-specific wrapper
+  - Define `buildAlterModify(string $table, string $col, string $def): string` — SQLite workaround for MODIFY
+  - Define `autoIncrement(int): string` — dialect-specific AUTO_INCREMENT syntax
+  - MySQL adapter: `MySQL::describeTable()` wraps existing `describe()`
+  - SQLite adapter: `SQLite::describeTable()` wraps `PRAGMA table_info`
+- [ ] **Task 3: Make `Schema.php` connector-aware**
+  - Replace `const engine = 'InnoDB'` with `$this->engine = $connector->getDefaultEngine()`
+  - Replace `const charset = 'utf8mb4'` with `$this->charset = $connector->getDefaultCharset()`
+  - Replace `SHOW TABLE STATUS LIKE` with adapter's `describeTable()`
+  - Replace `SHOW TABLES LIKE` with adapter's `showTables()`
+  - Replace `buildColumnSQL()` hardcoded `ENGINE=... CHARSET=... COLLATE=...` with `$connector->buildCreateTable()`
+  - Handle SQLite's lack of `MODIFY COLUMN` via adapter
+- [ ] **Task 4: Update `Query.php` for SQLite**
+  - Replace `get_result()` / `fetch_assoc()` with `$stmt->fetch(PDO::FETCH_ASSOC)` for SQLite
+  - Handle `affectedRows()` for SELECT queries in SQLite (use `COUNT(*)` workaround)
+  - Replace `AUTO_INCREMENT` with `AUTOINCREMENT` for SQLite
+- [ ] **Task 5: Update `Installer.php` for SQLite**
+  - Detect connector type
+  - Use adapter-aware schema creation
+  - SQLite config format: `{ "path": "data/database.sqlite" }` vs MySQL: `{ "host": "localhost", "database": "demo", "username": "root", "password": "" }`
+- [ ] **Task 6: Update `Definition.php` — SQLite type mappings**
+  - Map `tinyint(1)` → `BOOLEAN` for SQLite
+  - Map `ENUM` → `TEXT` (SQLite doesn't support ENUM; add comment with enum values)
+  - Map `AUTO_INCREMENT` → `AUTOINCREMENT`
+  - Map `on update CURRENT_TIMESTAMP` → unsupported in SQLite (warn or skip)
+- [ ] **Task 7: Add SQLite to `requirement.cfg` and documentation**
+  - Document SQLite as valid connector (`connector: sqlite`)
+  - Document SQLite system requirements (PHP 8.1+ with PDO_SQLITE extension)
+  - Add SQLite config example to `config/database.cfg`
+- [ ] **Task 8: Add tests**
+  - SQLite connection test
+  - SQLite Query builder tests (SELECT, INSERT, UPDATE, DELETE, JOIN, ORDER BY, LIMIT, INDEX)
+  - SQLite Schema tests (create, describe, compare, update)
+  - SQLite migration/upgrade tests (ALTER TABLE limitations, create-drop-rename workaround)
+  - Config migration: MySQL → SQLite round-trip test
+  - Definition type mapping tests
+- [ ] **Task 9: Document SQLite support**
+  - `/docs/developer/database-connectors.md` — connector interface, SQLite config, migration guide from MySQL
+  - `/docs/developer/sqlite-notes.md` — known limitations (MODIFY COLUMN workaround, JSON_CONTAINS compatibility, ENUM handling)
+
 ---
 
 ## Phase 3: Feature Completeness
@@ -316,6 +383,7 @@ Features required for V1.0 release (target: 2026-08-15).
 - [ ] Documentation plugin (Phase 3.2)
 - [ ] Organization system (Phase 3.5)
 - [ ] Data scoping middleware
+- [ ] Database connector expansion (MySQL + SQLite) (Phase 2.7)
 
 ### Out of Scope for V1.0
 
@@ -348,8 +416,8 @@ These systems are large enough to warrant their own design documents and develop
 | SMS service (`SMS.php`) | Empty stub — deferred pending provider selection |
 | IMAP service (`IMAP.php`) | Empty stub — deferred pending use case |
 | SLS service (`SLS.php`) | Empty stub — deferred pending licensing design |
-| PostgreSQL connector | Empty stub — MySQL sufficient for V1.0 |
-| SQLite connector | Empty stub — MySQL sufficient for V1.0 |
+| SQLite connector | Phase 2.7 — In progress |
+| PostgreSQL connector | Empty stub — MySQL + SQLite sufficient for V1.0 |
 
 ---
 
@@ -385,6 +453,7 @@ These systems are large enough to warrant their own design documents and develop
 | Config | Partial | Add ConfigOverrideService |
 | Settings | Not started | Build SettingsRegistry + /admin/settings |
 | Testing | Not started | Add PHPUnit + first 10 tests |
+| Database Connectors | Partial | MySQL only; SQLite in Phase 2.7 |
 | Profile Modal | Not started | Build with section registry |
 | Debug/Audit | Not started | Build DebugAuditLogger + audit page |
 | Version Provider | Not started | Build with semver comparison |
