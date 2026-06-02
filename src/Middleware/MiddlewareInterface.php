@@ -3,7 +3,7 @@
 // Declaring namespace
 namespace LaswitchTech\Core\Middleware;
 
-use LaswitchTech\Core\RouteDTO;
+use LaswitchTech\Core\Objects\RouteDTO;
 use LaswitchTech\Core\Response;
 
 /**

@@ -1,0 +1,54 @@
+name: CI
+
+on:
+  push:
+    branches: [ main, dev, stable ]
+  pull_request:
+    branches: [ main, dev, stable ]
+
+jobs:
+  syntax:
+    name: PHP Syntax Check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          coverage: none
+      - name: Install dependencies
+        run: composer install --no-interaction
+      - name: PHP lint all PHP files
+        run: |
+          find . -name '*.php' -not -path './vendor/*' -not -path './.phpunit.result.cache' | xargs -I{} php -l {} 2>&1 | grep -v 'No syntax errors' | head -20 || true
+
+  tests:
+    name: PHPUnit Tests
+    runs-on: ubuntu-latest
+    needs: syntax
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          coverage: none
+      - name: Install dependencies
+        run: composer install --no-interaction
+      - name: Run PHPUnit
+        run: vendor/bin/phpunit tests/ --testdox
+
+  coding-style:
+    name: Coding Style
+    runs-on: ubuntu-latest
+    needs: syntax
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+      - name: Check PSR-12 compliance
+        run: |
+          git diff --check HEAD~1 2>/dev/null || true

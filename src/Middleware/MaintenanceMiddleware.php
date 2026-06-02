@@ -4,7 +4,7 @@
 namespace LaswitchTech\Core\Middleware;
 
 use LaswitchTech\Core\Response;
-use LaswitchTech\Core\RouteDTO;
+use LaswitchTech\Core\Objects\RouteDTO;
 
 /**
  * Maintenance mode middleware
