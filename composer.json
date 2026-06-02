@@ -17,5 +17,8 @@
     "minimum-stability": "stable",
     "require": {
         "wikimedia/less.php": "^5.3"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^10.0"
     }
 }

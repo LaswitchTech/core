@@ -171,6 +171,80 @@ Foundational work that prevents bugs and enables safe development.
 - [ ] Add tests for encrypt/decrypt round-trip
 - [ ] Document in `/docs/developer/encryption.md`
 
+### 1.6 MVC Conversion (P0)
+
+**Why**: The current Router/Route architecture has three structural problems: (1) Router is a monolith doing routing, auth, rendering, and error handling; (2) Route is fat — holds metadata, path resolution, controller dispatch, config persistence, and rendering; (3) Everything depends on Apache .htaccess with zero testability. This phase converts the kernel to MVC while preserving all existing functionality.
+
+**Architecture**:
+
+```
+Router        — register() + match()  (pure routing)
+RouteDTO      — pure data (namespace, template, view, public, level, action)
+Middleware    — auth, maintenance (before/after controller)
+Response      — controller return value (render, redirect, json, error)
+View          — template + view composition (output-buffered)
+Controller    — base class (bootstrap, $this->Route, $this->Helper, etc.)
+EntryPoint    — coordinates Bootstrap → Router → Middleware → Controller → View
+Hook          — plugin extension points (register/fire pattern)
+```
+
+**Key principles**:
+- Route becomes thin DTO (no globals, no rendering, no persistence)
+- Everything goes through a controller (routes without action get default ViewAction)
+- Auth moves to middleware (separate from routing)
+- Response object replaces implicit output
+- View engine replaces require_once (output-buffered, returns string)
+- Plugin hooks via Hook::register()/Hook::fire()
+- Zero breaking changes for existing plugins
+
+**Phases**:
+
+#### Phase A — New Kernel Components (read-only, no migration)
+- [ ] Create `RouteDTO` (thin data object, `src/Objects/RouteDTO.php`)
+- [ ] Create `Response` class (`src/Response.php`)
+- [ ] Create `View` engine (`src/View.php`)
+- [ ] Create `Controller` base class (`src/Controller.php`)
+- [ ] Create Middleware components (`src/Middleware/`)
+- [ ] Create `Hook` class (`src/Hook.php`)
+- [ ] Create `EntryPoint` coordinator (`src/EntryPoint.php`)
+
+#### Phase B — Migration Adapter (backward-compatible)
+- [ ] Refactor `Router.php` — add `register()`, `match()`, `all()`, `loadFromConfig()`
+- [ ] Migrate `Route.php` — delegate `render()` to `View` engine
+- [ ] Migrate `Bootstrap.php` — coordinate new components
+- [ ] Verify all 57+ plugins still load correctly
+
+#### Phase C — Entry Points & Server Support
+- [ ] Update `CoreHelper::init()` — generate `nginx.conf.example`, project root `index.php`
+- [ ] Create project root `index.php` (shared hosting entry point)
+- [ ] Add `php cli core serve` command (PHP built-in server)
+- [ ] Clean up `webroot/index.php` (server-agnostic front controller)
+- [ ] Add Cloudflare-friendly headers
+
+#### Phase D — Testing Infrastructure
+- [ ] Set up PHPUnit (`phpunit/phpunit` dev dep, `phpunit.xml.dist`, `tests/bootstrap.php`)
+- [ ] Add CoreCommand test commands (`test:routes`, `test:routes:access`, `test:routes:auth`, `test:views`)
+- [ ] Create unit tests for all new components
+- [ ] Create test traits (`tests/Traits/MockGlobals.php`)
+- [ ] Run all tests: `php vendor/bin/phpunit`
+
+#### Phase E — Documentation & Cleanup
+- [ ] Update `DESIGN.md` — Section 7 (Routing), Section 16 (Entry Points), Section 18 (Testing)
+- [ ] Update `ROADMAP.md` — add Phase 1.6
+- [ ] Create `/docs/mvc-migration.md` — migration guide for plugins
+- [ ] Update plugin documentation
+
+**Risk Mitigation**:
+- Phase A/B are fully backward-compatible — existing plugins keep working
+- Phase C/D are additive — no existing behavior changes
+- Each phase is independently verifiable
+
+**Deliverables**:
+- `php cli core test:routes` passes for all routes
+- PHPUnit runs clean for RouteDTO, Response, View, Controller
+- Shared hosting, Apache, Nginx, built-in server all work
+- 57+ plugins still load without modification
+
 ---
 
 ## Phase 2: Core Services (Unblocking Feature Work)
@@ -488,6 +562,7 @@ Features required for V1.0 release (target: 2026-08-15).
 - [ ] Admin landing page + settings registry (Phase 1.3)
 - [ ] Global view context (Phase 1.4)
 - [ ] Encryption service (Phase 1.5)
+- [ ] **MVC conversion + server-agnostic deployment + testing (Phase 1.6)**
 - [ ] Complete auth features + security review (Phase 2.1)
 - [ ] Profile modal (Phase 2.2)
 - [ ] Debug/audit logging (Phase 2.3)
@@ -547,6 +622,7 @@ These systems are large enough to warrant their own design documents and develop
 | 1.3 | Settings Registry | Not started | No `/admin/settings` |
 | 1.4 | Global View Context | Not started | No centralized `ViewGlobals` |
 | 1.5 | Encryption Service | Not started | `src/Encryption.php` is 0 bytes |
+| **1.6** | **MVC Conversion** | **Phase A done** | RouteDTO, Response, View, Controller, Middleware, Hook, EntryPoint; Router+Route adapter; CoreHelper init; CLI serve; PHPUnit |
 | 2.1 | Auth + 2FA | Partial | 2FA/TOTP, registration, email/SMS 2FA pending |
 | 2.2 | Profile Modal | Not started | Currently page-based |
 | 2.3 | Debug/Audit Logger | Not started | `Log.php` exists, audit layer missing |

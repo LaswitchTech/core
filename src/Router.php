@@ -5,6 +5,7 @@ namespace LaswitchTech\Core;
 
 // Import additionnal class into the global namespace
 use LaswitchTech\Core\Objects;
+use LaswitchTech\Core\Objects\RouteDTO;
 use Exception;
 
 class Router {
@@ -45,6 +46,7 @@ class Router {
     // Properties
     private $Route;
     private $Routes = [];
+    private $dtoRoutes = []; // Parallel storage for RouteDTO (new MVC path)
 
     /**
      * Constructor
@@ -126,7 +128,12 @@ class Router {
      */
     public function route(string $route, ?array $data = null, ?string $directory = null): Objects\Route
     {
-        return new Objects\Route($this, $route, $data, $directory);
+        $object = new Objects\Route($this, $route, $data, $directory);
+
+        // Also create a DTO for the new MVC path
+        $this->dtoRoutes[$route] = new RouteDTO($route, $data);
+
+        return $object;
     }
 
     /**
@@ -142,6 +149,85 @@ class Router {
         }
 
         return $this->Routes;
+    }
+
+    /**
+     * Register a route (MVC path)
+     *
+     * @param string $namespace The route path
+     * @param RouteDTO $route The route DTO
+     * @return self
+     */
+    public function register(string $namespace, RouteDTO $route): self
+    {
+        $this->dtoRoutes[$namespace] = $route;
+        return $this;
+    }
+
+    /**
+     * Match a route by namespace (MVC path)
+     *
+     * @param string $namespace The request namespace
+     * @return RouteDTO|null
+     */
+    public function match(string $namespace): ?RouteDTO
+    {
+        return $this->dtoRoutes[$namespace] ?? null;
+    }
+
+    /**
+     * List all registered routes (MVC path)
+     *
+     * @return RouteDTO[]
+     */
+    public function all(): array
+    {
+        return $this->dtoRoutes;
+    }
+
+    /**
+     * Load routes from config files (MVC path)
+     *
+     * @return self
+     */
+    public function loadFromConfig(): self
+    {
+        global $CONFIG;
+
+        // Load from config/routes.cfg (app-level routes)
+        $routesCfg = $CONFIG->root() . DIRECTORY_SEPARATOR . 'config' . DIRECTORY_SEPARATOR . 'routes.cfg';
+        if (is_file($routesCfg)) {
+            $content = file_get_contents($routesCfg);
+            if ($content) {
+                $routes = json_decode($content, true);
+                if (is_array($routes)) {
+                    foreach ($routes as $namespace => $data) {
+                        $this->dtoRoutes[$namespace] = new RouteDTO($namespace, $data);
+                    }
+                }
+            }
+        }
+
+        // Load from plugin routes.cfg files
+        $pluginsPath = $CONFIG->root() . DIRECTORY_SEPARATOR . 'lib' . DIRECTORY_SEPARATOR . 'plugins';
+        if (is_dir($pluginsPath)) {
+            foreach (array_diff(scandir($pluginsPath), array('..', '.')) as $plugin) {
+                $pluginPath = $pluginsPath . DIRECTORY_SEPARATOR . $plugin;
+                if (is_dir($pluginPath) && is_file($pluginPath . DIRECTORY_SEPARATOR . 'routes.cfg')) {
+                    $content = file_get_contents($pluginPath . DIRECTORY_SEPARATOR . 'routes.cfg');
+                    if ($content) {
+                        $routes = json_decode($content, true);
+                        if (is_array($routes)) {
+                            foreach ($routes as $namespace => $data) {
+                                $this->dtoRoutes[$namespace] = new RouteDTO($namespace, $data);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        return $this;
     }
 
     /**

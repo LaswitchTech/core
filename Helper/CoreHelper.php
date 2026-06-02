@@ -79,6 +79,26 @@ class CoreHelper extends Helper {
         // Update the status
         $status = $status && is_file($htaccess);
 
+        // Generate nginx.conf.example
+        $nginx = $CONFIG->root() . DIRECTORY_SEPARATOR . "nginx.conf.example";
+        if($force && is_file($nginx)) {
+            unlink($nginx);
+        }
+        if(!is_file($nginx)) {
+            file_put_contents($nginx, $this->getNginxConfig());
+        }
+        $status = $status && is_file($nginx);
+
+        // Generate project root index.php (shared hosting entry point)
+        $rootIndex = $CONFIG->root() . DIRECTORY_SEPARATOR . "index.php";
+        if($force && is_file($rootIndex)) {
+            unlink($rootIndex);
+        }
+        if(!is_file($rootIndex)) {
+            file_put_contents($rootIndex, $this->getRootIndexContent());
+        }
+        $status = $status && is_file($rootIndex);
+
         // Path to file
         $webroot = $CONFIG->root() . DIRECTORY_SEPARATOR . "webroot";
 
@@ -1140,5 +1160,103 @@ class CoreHelper extends Helper {
         }
 
         return $html;
+    }
+
+    /**
+     * Generate nginx.conf.example content
+     *
+     * @return string
+     */
+    protected function getNginxConfig(): string
+    {
+        $root = $this->Config->root();
+        $content = "# Nginx configuration for Core-Web" . PHP_EOL;
+        $content .= "# Place in your nginx server config directory" . PHP_EOL . PHP_EOL;
+        $content .= "server {" . PHP_EOL;
+        $content .= "    listen 80;" . PHP_EOL;
+        $content .= "    server_name example.com;" . PHP_EOL;
+        $content .= "    root {$root}/webroot;" . PHP_EOL;
+        $content .= "    index index.php;" . PHP_EOL . PHP_EOL;
+        $content .= "    # Security headers" . PHP_EOL;
+        $content .= "    add_header X-Frame-Options SAMEORIGIN;" . PHP_EOL;
+        $content .= "    add_header X-Content-Type-Options nosniff;" . PHP_EOL;
+        $content .= "    add_header X-XSS-Protection \"1; mode=block\";" . PHP_EOL . PHP_EOL;
+        $content .= "    # Cloudflare real IP" . PHP_EOL;
+        $content .= "    set \$realip \$remote_addr;" . PHP_EOL;
+        $content .= "    if (\$http_cfConnectingIP != '') {" . PHP_EOL;
+        $content .= "        set \$realip \$http_cfConnectingIP;" . PHP_EOL;
+        $content .= "    }" . PHP_EOL . PHP_EOL;
+        $content .= "    # Cloudflare SSL" . PHP_EOL;
+        $content .= "    if (\$http_cfVisitor = 'scheme:wss') {" . PHP_EOL;
+        $content .= "        set \$scheme https;" . PHP_EOL;
+        $content .= "    }" . PHP_EOL . PHP_EOL;
+        $content .= "    # API routes" . PHP_EOL;
+        $content .= "    rewrite ^/api(.*)$ /endpoint.php break;" . PHP_EOL . PHP_EOL;
+        $content .= "    # Static assets" . PHP_EOL;
+        $content .= "    location /assets/ {" . PHP_EOL;
+        $content .= "        expires 1y;" . PHP_EOL;
+        $content .= "        add_header Cache-Control \"public, immutable\";" . PHP_EOL;
+        $content .= "    }" . PHP_EOL . PHP_EOL;
+        $content .= "    # Main routing" . PHP_EOL;
+        $content .= "    location / {" . PHP_EOL;
+        $content .= "        try_files \$uri \$uri/ /index.php?\$query_string;" . PHP_EOL;
+        $content .= "    }" . PHP_EOL . PHP_EOL;
+        $content .= "    # PHP handler" . PHP_EOL;
+        $content .= "    location ~ \\.php$ {" . PHP_EOL;
+        $content .= "        fastcgi_pass unix:/run/php/php8.2-fpm.sock;" . PHP_EOL;
+        $content .= "        fastcgi_param SCRIPT_FILENAME \$document_root\$fastcgi_script_name;" . PHP_EOL;
+        $content .= "        fastcgi_param QUERY_STRING \$query_string;" . PHP_EOL;
+        $content .= "        fastcgi_param REQUEST_METHOD \$request_method;" . PHP_EOL;
+        $content .= "        fastcgi_param CONTENT_TYPE \$content_type;" . PHP_EOL;
+        $content .= "        fastcgi_param CONTENT_LENGTH \$content_length;" . PHP_EOL;
+        $content .= "        fastcgi_param SCRIPT_NAME \$fastcgi_script_name;" . PHP_EOL;
+        $content .= "        fastcgi_param SCRIPT_FILENAME \$document_root\$fastcgi_script_name;" . PHP_EOL;
+        $content .= "        fastcgi_param REQUEST_URI \$request_uri;" . PHP_EOL;
+        $content .= "        fastcgi_param DOCUMENT_URI \$document_uri;" . PHP_EOL;
+        $content .= "        fastcgi_param DOCUMENT_ROOT \$document_root;" . PHP_EOL;
+        $content .= "        fastcgi_param SERVER_PROTOCOL \$server_protocol;" . PHP_EOL;
+        $content .= "        fastcgi_param REQUEST_SCHEME \$scheme;" . PHP_EOL;
+        $content .= "        fastcgi_param HTTPS \$https if_not_empty;" . PHP_EOL;
+        $content .= "        fastcgi_param HTTP_CF_CONNECTING_IP \$realip;" . PHP_EOL;
+        $content .= "        fastcgi_param GATEWAY_INTERFACE CGI/1.1;" . PHP_EOL;
+        $content .= "        fastcgi_param SERVER_SOFTWARE nginx/\"\";" . PHP_EOL;
+        $content .= "        fastcgi_param REMOTE_ADDR \$remote_addr;" . PHP_EOL;
+        $content .= "        fastcgi_param REMOTE_PORT \$remote_port;" . PHP_EOL;
+        $content .= "        fastcgi_param SERVER_ADDR \$server_addr;" . PHP_EOL;
+        $content .= "        fastcgi_param SERVER_PORT \$server_port;" . PHP_EOL;
+        $content .= "        fastcgi_param SERVER_NAME \$server_name;" . PHP_EOL;
+        $content .= "        fastcgi_param HTTPS \$https if_not_empty;" . PHP_EOL;
+        $content .= "        fastcgi_param HTTP_HOST \$host;" . PHP_EOL;
+        $content .= "        fastcgi_buffer_size 128k;" . PHP_EOL;
+        $content .= "        fastcgi_busy_buffers_size 256k;" . PHP_EOL;
+        $content .= "        fastcgi_temp_file_write_size 256k;" . PHP_EOL;
+        $content .= "        fastcgi_intercept_errors on;" . PHP_EOL;
+        $content .= "        include fastcgi_params;" . PHP_EOL;
+        $content .= "    }" . PHP_EOL . PHP_EOL;
+        $content .= "    # Deny access to .git, .env, etc." . PHP_EOL;
+        $content .= "    location ~ /\\. {" . PHP_EOL;
+        $content .= "        deny all;" . PHP_EOL;
+        $content .= "    }" . PHP_EOL;
+        $content .= "}" . PHP_EOL;
+        return $content;
+    }
+
+    /**
+     * Generate project root index.php content (shared hosting entry point)
+     *
+     * @return string
+     */
+    protected function getRootIndexContent(): string
+    {
+        $content = '<?php' . PHP_EOL;
+        $content .= '// Core-Web — Project Root Entry Point' . PHP_EOL;
+        $content .= '// This file serves as the entry point for shared hosting environments' . PHP_EOL;
+        $content .= '// where the document root cannot be configured.' . PHP_EOL;
+        $content .= '// For advanced setups, point the document root to webroot/ and use webroot/index.php instead.' . PHP_EOL . PHP_EOL;
+        $content .= '// Load Composer autoloader' . PHP_EOL;
+        $content .= 'require_once __DIR__ . "/vendor/autoload.php";' . PHP_EOL . PHP_EOL;
+        $content .= '// Bootstrap Core-Web' . PHP_EOL;
+        $content .= '$BOOTSTRAP = new \LaswitchTech\Core\Bootstrap("ROUTER");' . PHP_EOL;
+        return $content;
     }
 }

@@ -5,6 +5,7 @@ namespace LaswitchTech\Core\Objects;
 
 // Import additionnal class into the global namespace
 use Exception;
+use LaswitchTech\Core\View;
 
 class Route {
 
@@ -539,7 +540,10 @@ class Route {
     /**
      * Render the route
      *
-     * @param bool $full
+     * Delegates to the View engine for template+view composition.
+     * Module routes (css/logo) are handled directly (not templating).
+     *
+     * @param bool $full Whether to render the template wrapper
      * @return self
      */
     public function render(bool $full = true): self
@@ -565,18 +569,25 @@ class Route {
             return $this;
         }
 
-        // Load the template
-        if($full && $this->Template && !$this->Interrupt){
-
-            // Load the Template
-            require_once $this->template();
+        // Check if we should interrupt (early termination)
+        if($this->Interrupt) {
+            return $this;
         }
 
-        // Load the view
-        if($this->View && !$this->Interrupt){
-
-            // Load the View
-            require_once $this->view();
+        // Delegate to the View engine
+        if($full && $this->Template){
+            $view = new View();
+            // Use output buffering to capture the rendered output
+            ob_start();
+            $html = $view->render($this->Template, $this->View, ['directory' => $this->Directory]);
+            // Echo the rendered HTML (existing behavior: direct output)
+            echo $html;
+        } elseif($this->View){
+            // View-only (no template wrapper)
+            $view = new View();
+            ob_start();
+            $html = $view->view($this->View, $this->Directory);
+            echo $html;
         }
 
         return $this;

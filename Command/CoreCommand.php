@@ -611,4 +611,124 @@ class CoreCommand extends Command {
                 return;
         }
     }
+
+    /**
+     * Start the PHP built-in server for local development
+     *
+     * Usage: php cli core serve [--port=8080]
+     */
+    public function serveAction(): void
+    {
+        // Parse arguments
+        $port = 8080;
+        $args = $this->Request->getArguments();
+        foreach ($args as $arg) {
+            if (str_starts_with($arg, '--port=')) {
+                $port = (int) substr($arg, 7);
+            }
+        }
+
+        $webroot = $this->Config->root() . DIRECTORY_SEPARATOR . 'webroot';
+
+        // Ensure webroot exists
+        if (!is_dir($webroot)) {
+            $this->Helper->Core->init(true);
+        }
+
+        $index = $webroot . DIRECTORY_SEPARATOR . 'index.php';
+        if (!is_file($index)) {
+            $this->Output->error('webroot/index.php not found. Run `php cli core init` first.');
+            return;
+        }
+
+        $this->Output->info("Starting PHP built-in server on http://localhost:{$port}");
+        $this->Output->info("Document root: {$webroot}");
+        $this->Output->info("Press Ctrl+C to stop");
+
+        // Start the PHP built-in server
+        $command = "php -S localhost:{$port} {$index}";
+
+        // Execute in foreground (allows Ctrl+C to stop)
+        passthru($command, $status);
+
+        if ($status !== 0) {
+            $this->Output->error("Server stopped with status {$status}");
+        }
+    }
+
+    /**
+     * Test all routes — list and verify they load
+     *
+     * Usage: php cli core test:routes [--verbose] [--format=json]
+     */
+    public function testRoutesAction(): void
+    {
+        global $CONFIG;
+
+        $verbose = in_array('--verbose', $this->Request->getArguments());
+        $format = 'text';
+        foreach ($this->Request->getArguments() as $arg) {
+            if (str_starts_with($arg, '--format=')) {
+                $format = substr($arg, 9);
+            }
+        }
+
+        // Collect all routes from all sources
+        $routes = [];
+
+        // App-level routes
+        $routesCfg = $CONFIG->root() . DIRECTORY_SEPARATOR . 'config' . DIRECTORY_SEPARATOR . 'routes.cfg';
+        if (is_file($routesCfg)) {
+            $content = file_get_contents($routesCfg);
+            if ($content) {
+                foreach (json_decode($content, true) as $namespace => $data) {
+                    $routes[$namespace] = ['source' => 'app', 'data' => $data];
+                }
+            }
+        }
+
+        // Plugin routes
+        $pluginsPath = $CONFIG->root() . DIRECTORY_SEPARATOR . 'lib' . DIRECTORY_SEPARATOR . 'plugins';
+        if (is_dir($pluginsPath)) {
+            foreach (array_diff(scandir($pluginsPath), array('..', '.')) as $plugin) {
+                $pluginPath = $pluginsPath . DIRECTORY_SEPARATOR . $plugin;
+                if (is_dir($pluginPath) && is_file($pluginPath . DIRECTORY_SEPARATOR . 'routes.cfg')) {
+                    $content = file_get_contents($pluginPath . DIRECTORY_SEPARATOR . 'routes.cfg');
+                    if ($content) {
+                        foreach (json_decode($content, true) as $namespace => $data) {
+                            $routes[$namespace] = ['source' => "plugin:{$plugin}", 'data' => $data];
+                        }
+                    }
+                }
+            }
+        }
+
+        if ($format === 'json') {
+            $this->Output->print(json_encode(['total' => count($routes), 'routes' => $routes], JSON_PRETTY_PRINT));
+            return;
+        }
+
+        $this->Output->info("=== Route Test Report ===");
+        $this->Output->print("Total routes: " . count($routes));
+        $this->Output->print("");
+
+        foreach ($routes as $namespace => $info) {
+            $data = $info['data'];
+            $public = $data['public'] ?? true;
+            $level = $data['level'] ?? 0;
+            $template = $data['template'] ?? 'none';
+            $view = $data['view'] ?? 'none';
+            $action = $data['action'] ?? 'none';
+
+            $status = $public ? 'PUBLIC' : 'PRIVATE (level ' . $level . ')';
+            $this->Output->print("  [{$status}] {$namespace} (template={$template}, view={$view}, action={$action}, source={$info['source']})");
+
+            if ($verbose) {
+                $this->Output->print("    Metadata: " . json_encode($data));
+            }
+        }
+
+        $this->Output->print("");
+        $this->Output->success("Route test complete.");
+    }
 }

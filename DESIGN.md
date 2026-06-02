@@ -301,39 +301,124 @@ Backends are loaded from the `backends` table (one per user). They provide:
 
 ---
 
-## 7. Routing Architecture
+## 7. Routing Architecture (MVC)
 
-### 7.1 HTTP Route System
+Core-Web uses a traditional MVC pattern with thin data objects and separated concerns.
 
-`Router.php` registers routes by HTTP status code (treating codes as route groups):
+### 7.1 Components
 
-```php
-const HttpCodes = [330,400,401,403,404,405,422,423,427,428,429,430,432,500,501,503];
+| Component | File | Responsibility |
+|---|---|---|
+| **RouteDTO** | `src/Objects/RouteDTO.php` | Thin data transfer object — route metadata only (namespace, template, view, public, level, action, label, icon, color, parent, location) |
+| **Router** | `src/Router.php` | Route registration (`register()`), matching (`match()`), listing (`all()`) |
+| **Middleware** | `src/Middleware/` | Auth checks (`AuthMiddleware`), maintenance mode (`MaintenanceMiddleware`) |
+| **Response** | `src/Response.php` | Controller return value — `render`, `redirect`, `json`, `error` |
+| **View** | `src/View.php` | Template + view composition engine — output-buffered, returns string |
+| **Controller** | `src/Controller.php` | Base class for controllers — extends `Abstracts\Controller`, adds `Response`/`View` support |
+| **EntryPoint** | `src/EntryPoint.php` | Thin coordinator — `Bootstrap → Router → Middleware → Controller → View` |
+
+### 7.2 Routing Flow
+
+```
+Request → Router::match(namespace)
+            ↓
+        Middleware chain:
+          1. AuthMiddleware → 430/401/403/432 if auth fails
+          2. MaintenanceMiddleware → 503 if maintenance mode
+            ↓
+        Controller dispatch (if route has action)
+            ↓
+        Response (returned by controller)
+            ↓
+        Response::send() → headers + content
 ```
 
-Standard codes (404, 500, etc.) → error pages.
-Custom codes (330, 427, 430, 432) → authenticated route pages.
+### 7.3 Route Registration
 
-Each route maps to a directory + view file + optional endpoint.
+Routes are loaded from `routes.cfg` JSON files (same format as before):
 
-### 7.2 Route Object
+```json
+{
+    "/dashboard": {
+        "template": "panel.php",
+        "view": "index.php",
+        "public": false,
+        "level": 1,
+        "action": "dashboard/fetch",
+        "location": ["apps"],
+        "level": 0,
+        "parent": null,
+        "label": "Dashboard",
+        "icon": "speedometer2",
+        "color": null
+    }
+}
+```
 
-`Objects\Route` encapsulates a single route:
-- `directory` — plugin directory
-- `view` — view file
-- `template` — layout template
-- `public` — whether auth is required (default: true)
-- `level` — minimum auth level
-- `label`, `icon`, `color` — navigation metadata
-- `hooks` — widget hooks
+Loading order:
+1. App-level `config/routes.cfg`
+2. Plugin `routes.cfg` files (`lib/plugins/*/routes.cfg`)
+3. HTTP status code routes (330, 400–432, 500–503)
+4. Module routes (`/css`, `/logo`)
 
-### 7.3 Plugin Route Loading
+### 7.4 Controller Pattern
 
-Each plugin can define `routes.cfg` in its directory. The router scans all plugin directories and registers their routes automatically.
+Controllers extend `Controller` (or keep existing `Endpoint` pattern):
 
-### 7.4 Error Pages
+```php
+// New pattern (optional)
+class DashboardController extends Controller {
+    public function fetchAction() {
+        return Response::json($data);
+    }
+}
 
-The `View/` directory contains PHP templates for every supported HTTP status code. They are served directly by the Router.
+// Existing pattern (still works)
+class DashboardEndpoint extends Endpoint {
+    public function fetchAction() {
+        $this->Output->json($data);
+    }
+}
+```
+
+Actions can return `Response` (new) or use `$this->Output` (existing). Both are supported.
+
+### 7.5 View Engine
+
+Templates are resolved through a cascade:
+1. `{root}/Template/View/{template}`
+2. `{root}/lib/themes/{theme}/Template/View/{template}`
+3. `{root}/vendor/laswitchtech/core/Template/View/{template}`
+
+Views are resolved through:
+1. `{root}/{directory}/View/{view}`
+2. `{root}/vendor/laswitchtech/core/View/{view}`
+
+The View engine uses output buffering — it returns a string instead of printing directly. Existing templates require zero changes (they use `<?php require_once $this->view(); ?>`).
+
+### 7.6 Auth Middleware Chain
+
+Private routes go through this auth chain (same as before):
+1. Auth module loaded? → 430
+2. User authenticated? → 430
+3. User deleted? → 401
+4. User banned? → 403
+5. User verified? → 432
+6. User authorized for route+level? → 403
+
+### 7.7 Plugin Hooks
+
+New hook system for extension points:
+```php
+Hook::register('route.registered', function($route) { ... });
+Hook::fire('view.before', $template, $view);
+```
+
+Default hooks: `route.registered`, `auth.fail`, `view.before`, `view.after`
+
+### 7.8 Error Pages
+
+The `View/` directory contains PHP templates for every supported HTTP status code. They are served via the Response/View system.
 
 ---
 
@@ -570,11 +655,26 @@ $CSRF->validate($token); // Validate a token
 
 ### 16.1 HTTP (Router)
 
+**Shared hosting (project root):**
 ```
 https://example.com/
+  → index.php (project root — thin proxy)
   → Bootstrap('ROUTER')
-  → Router loads routes from all plugins
-  → Dispatches to Endpoint or View
+  → Router::match(namespace)
+  → Middleware chain (Auth → Maintenance)
+  → Controller dispatch or Response::render()
+  → Response::send()
+```
+
+**Advanced (webroot document root):**
+```
+https://example.com/
+  → webroot/index.php (front controller)
+  → Bootstrap('ROUTER')
+  → Router::match(namespace)
+  → Middleware chain (Auth → Maintenance)
+  → Controller dispatch or Response::render()
+  → Response::send()
 ```
 
 ### 16.2 REST API
@@ -591,6 +691,14 @@ https://example.com/api/<endpoint>/<method>
 php cli <command>
   → Bootstrap('CLI')
   → CLI dispatcher runs registered commands
+
+Available commands:
+  core init         — Scaffold webroot, .htaccess, symlinks
+  core compile      — Compile database schemas
+  core cron         — Execute CRON jobs
+  core extension    — Extension management
+  core serve        — Start PHP built-in server (dev)
+  core test:routes  — Test all routes
 ```
 
 ### 16.4 Installer
@@ -603,7 +711,43 @@ https://example.com/install.php
 
 ---
 
-## 17. Frontend Stack
+## 17. Server Deployment
+
+Core-Web supports multiple deployment targets:
+
+### 17.1 Shared Hosting (GoDaddy, Bluehost, etc.)
+
+- No document root configuration needed
+- `index.php` at project root serves as entry point
+- No .htaccess required (routing handled in PHP)
+- Run `php cli core init` to scaffold all files
+
+### 17.2 Apache (Advanced)
+
+- Point document root to `webroot/`
+- `.htaccess` generated by `php cli core init`
+- Redirects all requests to `webroot/index.php`
+
+### 17.3 Nginx
+
+- `nginx.conf.example` generated by `php cli core init`
+- Uses `try_files` for routing
+- Place in nginx server config directory
+
+### 17.4 PHP Built-in Server (Development)
+
+```
+php cli core serve [--port=8080]
+```
+
+### 17.5 Cloudflare
+
+- Cloudflare-friendly headers supported (CF-Connecting-IP)
+- No special configuration needed (works as long as PHP runs)
+
+---
+
+## 18. Frontend Stack
 
 - **CSS**: Bootstrap 5 + Bootstrap Icons + custom LESS compilation
 - **JavaScript**: jQuery + plugin-specific `library.js` files
@@ -618,7 +762,7 @@ https://example.com/install.php
 
 ---
 
-## 18. Plugin Inventory (57 plugins)
+## 19. Plugin Inventory (57 plugins)
 
 ### 18.1 Core / Infrastructure
 
@@ -693,9 +837,57 @@ https://example.com/install.php
 
 ---
 
-## 19. Design Decisions
+## 20. Testing Architecture
 
-### 19.1 Global Variables over Dependency Injection
+### 20.1 Two-Layer Testing Strategy
+
+**Layer 1 — Syntax validation**: `php -l` on all PHP files (CI gate)
+**Layer 2 — Route accessibility tests**: CoreCommand test commands
+**Layer 3 — Unit tests**: PHPUnit for individual components
+
+### 20.2 CoreCommand Test Commands
+
+Integration tests accessible via CLI:
+
+| Command | Purpose |
+|---|---|
+| `php cli core test:routes` | List and verify all routes load |
+| `php cli core test:routes --format=json` | JSON output for programmatic parsing |
+| `php cli core test:routes --verbose` | Show full metadata per route |
+| `php cli core test:routes:access` | Test public/private route access |
+| `php cli core test:routes:auth` | Test auth chain branches |
+| `php cli core test:views` | Verify template/view resolution |
+
+### 20.3 PHPUnit
+
+- Config: `phpunit.xml.dist`
+- Bootstrap: `tests/bootstrap.php`
+- Tests: `tests/Unit/*.php`
+- Traits: `tests/Traits/MockGlobals.php`
+
+### 20.4 Testing New Components
+
+New components are designed for testability:
+
+| Component | Testable? | How |
+|---|---|---|
+| RouteDTO | Yes | Pure data object, no globals needed |
+| Response | Yes | Static factory methods, no I/O |
+| View | Partial | Needs filesystem (test with temp dirs) |
+| Router | Yes | `register()` + `match()` are pure functions |
+| Middleware | Yes | Can test with mock Request/Auth |
+| Controller | Yes | Action returns can be tested |
+
+### 20.5 CI Integration
+
+- `.github/workflows/ci.yml` runs `php -l` + `php cli core test:routes --format=json` on every PR
+- PHPUnit runs when tests/ directory has changes
+
+---
+
+## 21. Design Decisions
+
+### 21.1 Global Variables over Dependency Injection
 
 **Decision**: Services are loaded as `$GLOBALS` (`$DATABASE`, `$AUTH`, etc.).
 
@@ -703,7 +895,7 @@ https://example.com/install.php
 
 **Trade-off**: Makes testing harder and dependencies implicit. Mitigated by the `Module` fallback stub — if a service fails to load, code still compiles (it gets a stub that warns on use).
 
-### 19.2 JSON Config Files over .env
+### 21.2 JSON Config Files over .env
 
 **Decision**: Application config uses `config/*.cfg` JSON files, not `.env` files.
 
@@ -711,43 +903,43 @@ https://example.com/install.php
 
 **Trade-off**: Config is on-disk rather than in environment. Secrets should still use `.env` or server-level config.
 
-### 19.3 Pluggable Database Connectors
+### 21.3 Pluggable Database Connectors
 
 **Decision**: Database abstraction uses a connector pattern with abstract base class.
 
 **Rationale**: MySQL is the only fully implemented connector; PostgreSQL and SQLite are stubs for future support. New connectors just extend `Abstracts\Connector`.
 
-### 19.4 Status Codes as Route Groups
+### 21.4 Status Codes as Route Groups
 
 **Decision**: HTTP status codes (404, 500, etc.) double as route groups.
 
 **Rationale**: Reuses existing error pages as route directories. Custom codes (330, 427, 430, 432) map to authenticated flow steps (reset password, 2FA, unauthenticated, unverified).
 
-### 19.5 Thin Controllers, Focused Services
+### 21.5 Thin Controllers, Focused Services
 
 **Decision**: Controllers/Endpoints are thin — they delegate to Models, Helpers, and domain objects.
 
 **Rationale**: Keeps the kernel generic and plugins focused. Reusable code lives in `src/Objects/` and `src/Abstracts/`.
 
-### 19.6 No Heavy Framework Dependency
+### 21.6 No Heavy Framework Dependency
 
 **Decision**: Only external dependency is `wikimedia/less.php` (for LESS compilation). PDF generation uses `mpdf/mpdf` and `setasign/fpdi` (pulled as peer dependencies).
 
 **Rationale**: Minimizes attack surface, simplifies deployment, keeps the kernel lightweight.
 
-### 19.7 Empty Stubs for Future Features
+### 21.7 Empty Stubs for Future Features
 
 Several classes (`Encryption`, `SMS`, `IMAP`, `SLS`) are 0-byte stubs. They exist in the codebase as placeholders for future implementation.
 
 **Decision**: Keep the stubs rather than removing them. They document planned features and allow forward-compatibility.
 
-### 19.8 Database-Sessions over PHP-Sessions-Only
+### 21.8 Database-Sessions over PHP-Sessions-Only
 
 **Decision**: Sessions are persisted to the `sessions` table, not just stored in PHP's default file handler.
 
 **Rationale**: Enables multi-server deployments, session inspection, and session management features. The PHP native session is used as a transport layer, but the authoritative session data is in the database.
 
-### 19.9 UUID-Based Auth Tokens
+### 21.9 UUID-Based Auth Tokens
 
 **Decision**: Authentication tokens use UUIDs (via `UUID.php`) rather than random strings.
 
@@ -755,30 +947,30 @@ Several classes (`Encryption`, `SMS`, `IMAP`, `SLS`) are 0-byte stubs. They exis
 
 ---
 
-## 20. Security Model
+## 22. Security Model
 
-### 20.1 CSRF Protection
+### 22.1 CSRF Protection
 
 - Automatic validation on all non-GET requests
 - Timing-safe token comparison (`hash_equals`)
 - Token rotation after each use
 - Header or form field submission
 
-### 20.2 Authentication Methods
+### 22.2 Authentication Methods
 
 - Session-based (database-backed sessions)
 - Bearer token (HTTP header)
 - Basic auth (HTTP header)
 - 2FA via `pins` table (custom status code 427)
 
-### 20.3 Secret Handling
+### 22.3 Secret Handling
 
 - No secrets in code
 - `.env` files excluded from git
 - Config files use `requirement.cfg` for system checks
 - Installation process writes config to disk (no hardcoded defaults)
 
-### 20.4 Session Security
+### 22.4 Session Security
 
 - Sessions tied to IP, user agent, and host
 - UUID-based auth tokens stored separately from PHP session ID
@@ -787,23 +979,23 @@ Several classes (`Encryption`, `SMS`, `IMAP`, `SLS`) are 0-byte stubs. They exis
 
 ---
 
-## 21. Future Architecture Direction
+## 23. Future Architecture Direction
 
-### 21.1 Planned (stubbed but not implemented)
+### 23.1 Planned (stubbed but not implemented)
 
 - `Encryption` — encryption/decryption utilities
 - `SMS` — SMS messaging
 - `IMAP` — email inbox reading
 - `SLS` — Software Licensing Service
 
-### 21.2 Planned (inferred from design)
+### 23.2 Planned (inferred from design)
 
 - MySQL connector is the only implemented database connector
 - OAuth support (mentioned in CLAUDE.md goals)
 - Licensing system (mentioned in CLAUDE.md goals)
 - PostgreSQL and SQLite database connectors
 
-### 21.3 Architecture Principles for Future Work
+### 23.3 Architecture Principles for Future Work
 
 - Domain logic in plugins, not kernel
 - Plugins should extend abstract base classes
