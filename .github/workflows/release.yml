@@ -6,6 +6,24 @@ on:
       - 'v*'
 
 jobs:
+  ci:
+    name: CI Pre-check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          coverage: none
+      - name: Install dependencies
+        run: composer install --no-interaction
+      - name: PHP syntax check
+        run: |
+          find . -name '*.php' -not -path './vendor/*' -not -path './.phpunit.result.cache' -not -path './lib/themes/*' -print0 | xargs -0 -I{} php -l {} 2>&1 | grep -v 'No syntax errors' | head -20 || true
+      - name: Run PHPUnit
+        run: vendor/bin/phpunit tests/ --testdox
+
   release:
     runs-on: ubuntu-latest
     steps:
