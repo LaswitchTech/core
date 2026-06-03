@@ -1,22 +1,27 @@
-<?php if(!$this->Config->get('application','maintenance') || $this->Auth->isAuthorized('Administrator',1)): ?>
+<?php
+// Global View Context — guaranteed access to $config, $auth, $locale, etc.
+use LaswitchTech\Core\ViewGlobals;
+ViewGlobals::apply();
+?>
+<?php if(!$config->get('application','maintenance') || $auth->isAuthorized('Administrator',1)): ?>
     <!doctype html>
     <html lang="en" class="h-100 w-100" data-bs-theme="auto" data-bs-template="panel">
         <head>
             <meta charset="utf-8">
             <meta name="viewport" content="width=device-width, initial-scale=1">
             <title>
-                <?php if(is_null($this->Request->getParams('GET','query'))): ?>
-                    <?= $this->Locale->get($this->label()); ?><?php if(!is_null($this->Request->getParams('GET','name'))): ?>: <?= $this->Request->getParams('GET','name') ?><?php elseif(!is_null($this->Request->getParams('GET','id'))): ?>: <?= $this->Request->getParams('GET','id') ?><?php endif; ?>
+                <?php if(is_null($request->getParams('GET','query'))): ?>
+                    <?= $locale->get($this->label()); ?><?php if(!is_null($request->getParams('GET','name'))): ?>: <?= $request->getParams('GET','name') ?><?php elseif(!is_null($request->getParams('GET','id'))): ?>: <?= $request->getParams('GET','id') ?><?php endif; ?>
                 <?php else: ?>
-                    <?= $this->Locale->get('Search Results'); ?>: <?= $this->Request->getParams('GET','query') ?>
+                    <?= $locale->get('Search Results'); ?>: <?= $request->getParams('GET','query') ?>
                 <?php endif; ?>
             </title>
 
             <!-- ======= Load Global CSS ======= -->
-            <?= $this->Builder->css(); ?>
+            <?= $menu->css(); ?>
 
             <!-- ======= Load Global JS ======= -->
-            <?= $this->Builder->js(); ?>
+            <?= $menu->js(); ?>
         </head>
         <body>
             <!-- App Layout -->
@@ -36,25 +41,25 @@
                     <!-- Branding -->
                     <a class="sidebar-brand d-flex flex-column justify-content-center align-items-center py-4 fs-4 text-decoration-none" href="/">
                         <img class="logo" src="/logo" alt="Logo">
-                        <h4 class="brand m-0 mt-2 fs-2"><?= $this->Config->get('application','name') ?></h4>
+                        <h4 class="brand m-0 mt-2 fs-2"><?= $config->get('application','name') ?></h4>
                     </a>
 
                     <!-- Navigations -->
-                    <?php if($this->Config->get('application','show_nav_title')): ?>
-                        <div class="border border-start-0 border-end-0 p-2 px-3 mb-2"><?= $this->Locale->get('Main Navigation') ?></div>
+                    <?php if($config->get('application','show_nav_title')): ?>
+                        <div class="border border-start-0 border-end-0 p-2 px-3 mb-2"><?= $locale->get('Main Navigation') ?></div>
                     <?php endif; ?>
-                    <?= $this->Helper->Core->menu($this->Builder->menu('sidebar-main',null,3)); ?>
-                    <?php if($this->Auth->isAuthorized("Administration",1)): ?>
-                        <?php if($this->Config->get('application','show_nav_title')): ?>
-                            <div class="border border-start-0 border-end-0 p-2 px-3 mb-2"><?= $this->Locale->get('Administration') ?></div>
+                    <?= $this->Helper->Core->menu($menu->menu('sidebar-main',null,3)); ?>
+                    <?php if($auth->isAuthorized("Administration",1)): ?>
+                        <?php if($config->get('application','show_nav_title')): ?>
+                            <div class="border border-start-0 border-end-0 p-2 px-3 mb-2"><?= $locale->get('Administration') ?></div>
                         <?php endif; ?>
-                        <?= $this->Helper->Core->menu($this->Builder->menu('sidebar-admin',null,3)); ?>
+                        <?= $this->Helper->Core->menu($menu->menu('sidebar-admin',null,3)); ?>
                     <?php endif; ?>
-                    <?php if($this->Auth->isAuthorized("Development",1)): ?>
-                        <?php if($this->Config->get('application','show_nav_title')): ?>
-                            <div class="border border-start-0 border-end-0 p-2 px-3 mb-2"><?= $this->Locale->get('Development') ?></div>
+                    <?php if($auth->isAuthorized("Development",1)): ?>
+                        <?php if($config->get('application','show_nav_title')): ?>
+                            <div class="border border-start-0 border-end-0 p-2 px-3 mb-2"><?= $locale->get('Development') ?></div>
                         <?php endif; ?>
-                        <?= $this->Helper->Core->menu($this->Builder->menu('sidebar-dev',null,3)); ?>
+                        <?= $this->Helper->Core->menu($menu->menu('sidebar-dev',null,3)); ?>
                     <?php endif; ?>
                 </aside>
 
@@ -84,10 +89,10 @@
                             <h2 class="m-0 mt-2 me-auto" id="pageTitle">
                                 <i class="bi bi-<?= $this->icon() ?> me-1"></i>
                                 <span>
-                                    <?php if(is_null($this->Request->getParams('GET','query'))): ?>
-                                        <?= $this->Locale->get($this->label()); ?><?php if(!is_null($this->Request->getParams('GET','name'))): ?>: <?= $this->Request->getParams('GET','name') ?><?php elseif(!is_null($this->Request->getParams('GET','id'))): ?>: <?= $this->Request->getParams('GET','id') ?><?php endif; ?>
+                                    <?php if(is_null($request->getParams('GET','query'))): ?>
+                                        <?= $locale->get($this->label()); ?><?php if(!is_null($request->getParams('GET','name'))): ?>: <?= $request->getParams('GET','name') ?><?php elseif(!is_null($request->getParams('GET','id'))): ?>: <?= $request->getParams('GET','id') ?><?php endif; ?>
                                     <?php else: ?>
-                                        <?= $this->Locale->get('Search Results'); ?>: <?= $this->Request->getParams('GET','query') ?>
+                                        <?= $locale->get('Search Results'); ?>: <?= $request->getParams('GET','query') ?>
                                     <?php endif; ?>
                                 </span>
                             </h2>
@@ -98,14 +103,14 @@
 
                         <!-- Page Content -->
                         <section class="app-content">
-                            <?php if(is_null($this->Request->getParams('GET','query'))): ?>
+                            <?php if(is_null($request->getParams('GET','query'))): ?>
                                 <?php require_once $this->view(); ?>
                             <?php else: $this->interrupt()->Router->render('search'); endif; ?>
                         </section>
                     </main>
 
                     <footer class="copyright border-top small text-muted py-3 text-center cursor-pointer">
-                        <?= $this->Locale->get('Copyright'); ?> &copy; <?= $this->Config->get('application','copyright') ?>-<?= date("Y") ?> <?= $this->Config->get('application','owner')?> <?= $this->Locale->get('All rights reserved'); ?>.
+                        <?= $locale->get('Copyright'); ?> &copy; <?= $config->get('application','copyright') ?>-<?= date("Y") ?> <?= $config->get('application','owner')?> <?= $locale->get('All rights reserved'); ?>.
                     </footer>
                 </div>
 

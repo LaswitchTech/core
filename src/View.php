@@ -38,6 +38,9 @@ class View
         $templatePath = $this->resolveTemplate($template);
         $viewPath = $view !== null ? $this->resolveView($view, $data['directory'] ?? null) : null;
 
+        // Extract ViewGlobals into template scope (guaranteed context for every layout)
+        ViewGlobals::apply();
+
         // Extract extra data into template scope
         if (!empty($data)) {
             extract($data);

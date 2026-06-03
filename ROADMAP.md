@@ -41,6 +41,7 @@ Core-Web provides foundational infrastructure for building multiple web applicat
 | Area | Severity | Notes |
 |------|----------|-------|
 | **Route Accessibility Tests (HTTP)** | P0 | PHPUnit route tests exist but need HTTP client library (guzzle/browser-kit) for public/private/auth simulation. CLI `testroutes` covers route compilation. |
+| **Global View Context doc** | P1 | ViewGlobals implemented and wired into all 5 layouts. Contract docs needed (`/docs/developer/view-context.md`). |
 | **Admin Settings Page** | P1 | No `/admin/settings` page. The config system already handles app-specific `.cfg` files (some committed, some gitignored for instance-specific settings). Needs a settings UI, not a new config service. |
 | **Profile Modal** | P1 | Currently `lib/plugins/profile/` is a page-based system — should be converted to a modal with section registry. |
 | **Debug Audit Logger** | P1 | `Log.php` provides logging (5 levels, file rotation, IP tracking) but there's no audit trail layer — no `DebugAuditLogger` class, no admin audit page. |
@@ -152,11 +153,12 @@ Foundational work that prevents bugs and enables safe development.
 **Why**: Views/partials access globals inconsistently across the 5 layouts. Currently handled through `Route` (`$ROUTE`/`$this`) and `Bootstrap`, but no centralized guarantee. Missing context causes silent errors.
 
 **Tasks:**
-- [ ] Create `ViewGlobals` class with `contextFromScope()` and `contextFromContainer()`
-- [ ] Define guaranteed globals: `$auth`, `$currentUser`, `$menu`, `$breadcrumbs`, `$locale`, `$csrf`, `$config`, `$app`
-- [ ] Update all 5 layouts to call `ViewGlobals::contextFromScope()` at entry point
-- [ ] Guest-safe defaults for unauthenticated users
-- [ ] Test each layout renders without undefined variable errors
+- [x] Create `ViewGlobals` class with `apply()` and `context()` (guaranteed context from request scope)
+- [x] Define guaranteed globals: `$auth`, `$currentUser`, `$menu`, `$breadcrumbs`, `$locale`, `$csrf`, `$config`, `$app`
+- [x] Update all 5 layouts to call `ViewGlobals::apply()` at entry point (panel, website, fullscreen, internal, index)
+- [x] Guest-safe defaults for unauthenticated users (null currentUser, safe defaults)
+- [x] View engine injects ViewGlobals into every render (automatic, no controller changes)
+- [x] Test each layout renders without undefined variable errors (260 files, 86 tests)
 - [ ] Document the contract in `/docs/developer/view-context.md`
 
 ### 1.5 Encryption Service (P1)
@@ -562,6 +564,7 @@ Features required for V1.0 release (target: 2026-08-15).
 - [ ] Global view context (Phase 1.4)
 - [ ] Encryption service (Phase 1.5)
 - [x] **Complete testing infrastructure + CI (Phase 1.1)** — 80 tests, syntax check, CI workflow, release pre-check
+- [x] **Global view context (Phase 1.4)** — ViewGlobals class, all 5 layouts wired
 - [x] **MVC conversion + server-agnostic deployment + testing (Phase 1.6)** — all phases A-E wired
 - [ ] Complete auth features + security review (Phase 2.1)
 - [ ] Profile modal (Phase 2.2)
@@ -620,9 +623,9 @@ These systems are large enough to warrant their own design documents and develop
 | **1.1** | **Testing** | **Complete** | PHPUnit + 80 tests; `tests/syntax.sh`; CI workflow + release pre-checks; Route compilation via `testroutes` (HTTP accessibility tests pending guzzle/browser-kit) |
 | 1.2 | Config Documentation | Not started | Config files exist, docs needed |
 | 1.3 | Settings Registry | Not started | No `/admin/settings` |
-| 1.4 | Global View Context | Not started | No centralized `ViewGlobals` |
+| **1.4** | **Global View Context** | **Complete** | `ViewGlobals` class; all 5 layouts updated; View engine injects globals; 86 tests pass |
 | 1.5 | Encryption Service | Not started | `src/Encryption.php` is 0 bytes |
-| **1.6** | **MVC Conversion** | **Complete** | All phases A-E wired; Router::startMVC(); Bootstrap globals (HOOK, ENTRYPOINT); NullConnector for CLI scope; 80 tests pass; `php cli core testroutes` verifies all 62 routes |
+| **1.6** | **MVC Conversion** | **Complete** | All phases A-E wired; Router::startMVC(); Bootstrap globals (HOOK, ENTRYPOINT); NullConnector for CLI scope; 86 tests pass; `php cli core testroutes` verifies all 62 routes |
 | 2.1 | Auth + 2FA | Partial | 2FA/TOTP, registration, email/SMS 2FA pending |
 | 2.2 | Profile Modal | Not started | Currently page-based |
 | 2.3 | Debug/Audit Logger | Not started | `Log.php` exists, audit layer missing |
