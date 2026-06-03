@@ -78,6 +78,17 @@ class Schema {
     }
 
     /**
+     * Check if this connector can execute queries
+     *
+     * @return bool
+     */
+    private function canExecute(): bool
+    {
+        return $this->connector !== null
+            && $this->connector instanceof \LaswitchTech\Core\Connectors\NullConnector === false;
+    }
+
+    /**
      * Describe a table
      *
      * @return mixed
@@ -104,6 +115,11 @@ class Schema {
 
         // If the definition file does not exist, generate the definition
         if (!file_exists($path)) {
+
+            // Guard: cannot describe tables without a database connection
+            if (!$this->canExecute()) {
+                return $this;
+            }
 
             // Load the table definition
             $definitions = $this->connector->describe($table);
@@ -564,6 +580,10 @@ class Schema {
      */
     public function tables(): array
     {
+        if (!$this->canExecute()) {
+            return [];
+        }
+
         $sql = "SHOW TABLES";
         $result = $this->connector->query($sql);
         $tables = [];

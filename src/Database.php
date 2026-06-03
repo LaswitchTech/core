@@ -59,7 +59,9 @@ class Database {
                 $this->connector->connect();
                 break;
             default:
-                // throw new Exception('Invalid database connector');
+                // Fall back to a no-op connector when no database is configured.
+                // This allows bootstrap, CLI, and tests to run without a database.
+                $this->connector = new Connectors\NullConnector();
         }
     }
 

@@ -6,3 +6,9 @@ require_once __DIR__ . "/vendor/autoload.php";
 
 // Initiate Bootstrap
 $BOOTSTRAP = new LaswitchTech\Core\Bootstrap("CLI");
+
+// Dispatch CLI commands
+global $CLI;
+if (isset($CLI) && method_exists($CLI, 'start')) {
+    $CLI->start();
+}

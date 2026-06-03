@@ -186,6 +186,21 @@ class Bootstrap {
                 "ROUTER"
             ]
         ],
+        "ENTRYPOINT" => [
+            "class" => "\\LaswitchTech\\Core\\EntryPoint",
+            "scope" => [
+                "ROUTER"
+            ]
+        ],
+        // Hooks
+        "HOOK" => [
+            "class" => "\\LaswitchTech\\Core\\Hook",
+            "scope" => [
+                "ROUTER",
+                "API",
+                "CLI"
+            ]
+        ],
         "API" => [
             "class" => "\\LaswitchTech\\Core\\API",
             "scope" => [

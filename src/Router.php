@@ -365,4 +365,37 @@ class Router {
         // Return the instance
         return $this;
     }
+
+    /**
+     * Start the router using the MVC architecture
+     *
+     * Coordinates Bootstrap → Router → Middleware chain → Controller → View.
+     * Backward-compatible: existing start() is unchanged.
+     *
+     * @return Response
+     */
+    public function startMVC(): Response
+    {
+        global $HELPER;
+
+        // Initialize the Core Framework
+        $HELPER->Core->init();
+
+        // Determine namespace (same logic as start())
+        $namespace = ($this->Config->get('application', 'installed')
+                      || $this->Request->getNamespace() === '/css')
+            ? $this->Request->getNamespace()
+            : '/install';
+
+        // Load DTO routes from config (only once)
+        if (empty($this->dtoRoutes)) {
+            $this->loadFromConfig();
+        }
+
+        // Execute through EntryPoint
+        $entryPoint = new EntryPoint();
+        $response = $entryPoint->execute($this, $namespace);
+        $response->send();
+        return $response;
+    }
 }

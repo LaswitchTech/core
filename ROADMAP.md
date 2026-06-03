@@ -622,7 +622,7 @@ These systems are large enough to warrant their own design documents and develop
 | 1.3 | Settings Registry | Not started | No `/admin/settings` |
 | 1.4 | Global View Context | Not started | No centralized `ViewGlobals` |
 | 1.5 | Encryption Service | Not started | `src/Encryption.php` is 0 bytes |
-| **1.6** | **MVC Conversion** | **Phase A done** | RouteDTO, Response, View, Controller, Middleware, Hook, EntryPoint; Router+Route adapter; CoreHelper init; CLI serve; PHPUnit |
+| **1.6** | **MVC Conversion** | **Complete** | All phases A-E wired; Router::startMVC(); Bootstrap globals (HOOK, ENTRYPOINT); 78 tests pass |
 | 2.1 | Auth + 2FA | Partial | 2FA/TOTP, registration, email/SMS 2FA pending |
 | 2.2 | Profile Modal | Not started | Currently page-based |
 | 2.3 | Debug/Audit Logger | Not started | `Log.php` exists, audit layer missing |

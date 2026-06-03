@@ -92,7 +92,8 @@ class View
     public function resolveTemplate(string $name, ?string $theme = null): string
     {
         // Get root path
-        $root = Config::root();
+        global $CONFIG;
+        $root = $CONFIG ? $CONFIG->root() : getcwd();
 
         // Build cascade paths
         $paths = [
@@ -105,8 +106,7 @@ class View
             $paths[] = $root . DIRECTORY_SEPARATOR . 'lib' . DIRECTORY_SEPARATOR . 'themes' . DIRECTORY_SEPARATOR . $theme
                 . DIRECTORY_SEPARATOR . 'Template' . DIRECTORY_SEPARATOR . 'View' . DIRECTORY_SEPARATOR . $name;
         } else {
-            global $CONFIG;
-            $activeTheme = $CONFIG->get('application', 'theme');
+            $activeTheme = $CONFIG ? $CONFIG->get('application', 'theme') : null;
             if ($activeTheme) {
                 $paths[] = $root . DIRECTORY_SEPARATOR . 'lib' . DIRECTORY_SEPARATOR . 'themes' . DIRECTORY_SEPARATOR . $activeTheme
                     . DIRECTORY_SEPARATOR . 'Template' . DIRECTORY_SEPARATOR . 'View' . DIRECTORY_SEPARATOR . $name;
@@ -137,7 +137,8 @@ class View
      */
     public function resolveView(string $name, ?string $directory = null): string
     {
-        $root = Config::root();
+        global $CONFIG;
+        $root = $CONFIG ? $CONFIG->root() : getcwd();
         $defaultPath = $root . DIRECTORY_SEPARATOR . 'vendor' . DIRECTORY_SEPARATOR . 'laswitchtech' . DIRECTORY_SEPARATOR . 'core';
 
         if ($directory !== null) {

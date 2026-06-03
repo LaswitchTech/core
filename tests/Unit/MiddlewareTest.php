@@ -12,7 +12,7 @@ class MiddlewareTest extends TestCase
 {
     public function testMiddlewareInterfaceExists(): void
     {
-        $this->assertTrue(class_exists(MiddlewareInterface::class));
+        $this->assertTrue(interface_exists(MiddlewareInterface::class));
     }
 
     public function testMiddlewareInterfaceHasHandleMethod(): void
