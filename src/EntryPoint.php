@@ -3,6 +3,7 @@
 // Declaring namespace
 namespace LaswitchTech\Core;
 
+use LaswitchTech\Core\Middleware\Auth2FAMiddleware;
 use LaswitchTech\Core\Middleware\AuthMiddleware;
 use LaswitchTech\Core\Middleware\MaintenanceMiddleware;
 use LaswitchTech\Core\Response;
@@ -42,6 +43,7 @@ class EntryPoint
         // Run middleware chain
         $middlewareChain = [
             new AuthMiddleware(),
+            new Auth2FAMiddleware(),
             new MaintenanceMiddleware(),
         ];
 

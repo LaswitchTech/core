@@ -19,6 +19,9 @@ class Auth {
     protected $status = false;
     protected $requested = false;
 
+    /** @var bool Set to true when password auth succeeded but TOTP verification is pending */
+    public $needs_2fa = false;
+
     /**
      * Constructor
      */
@@ -33,6 +36,83 @@ class Auth {
 
         // Import Auth Configurations
         $this->Config->add('auth');
+    }
+
+    /**
+     * Authenticate using Remember-Token (selector + validator pair)
+     *
+     * @return bool
+     */
+    protected function byRememberToken(): bool {
+        // Import Global Variables
+        global $REQUEST;
+
+        if (is_null($REQUEST->getParams('COOKIE', session_id()))) {
+            return false;
+        }
+
+        $value = $REQUEST->getParams('COOKIE', session_id());
+
+        // Split selector:validator — reject invalid format
+        if (!str_contains($value, ':')) {
+            return false;
+        }
+
+        [$selector, $rawValidator] = explode(':', $value, 2);
+
+        if (strlen($selector) < 4 || strlen($rawValidator) < 32) {
+            return false;
+        }
+
+        // Query non-expired remember_tokens entry for this selector
+        $result = $this->Database->query()
+            ->table('remember_tokens')
+            ->select('*')
+            ->where('selector', $selector)
+            ->where('expires', date('Y-m-d H:i:s'), '>')
+            ->limit(1)
+            ->result();
+
+        if (empty($result)) {
+            return false;
+        }
+
+        $entry = $result[0];
+
+        // Timing-safe validator verification
+        if (!password_verify($rawValidator, $entry['validator_hash'])) {
+            return false;
+        }
+
+        // Rotate token on successful authentication
+        $newSelector   = bin2hex(random_bytes(16));  // 32-char hex
+        $newValidator  = bin2hex(random_bytes(32));   // 64-char hex
+        $expires       = date('Y-m-d H:i:s', strtotime('+7 days'));
+
+        $this->Database->query()
+            ->table('remember_tokens')
+            ->update([
+                'selector'         => $newSelector,
+                'validator_hash'   => password_hash($newValidator, PASSWORD_DEFAULT),
+                'expires'          => $expires,
+                'last_rotated'     => date('Y-m-d H:i:s'),
+            ])
+            ->where('id', $entry['id'])
+            ->result();
+
+        // Reissue cookie with new selector:validator
+        setcookie(
+            session_id(),
+            $newSelector . ':' . $newValidator,
+            time() + 60 * 60 * 24 * 7,
+            '/',
+            '',
+            true,   // secure
+            true    // httponly
+        );
+
+        // Authenticate the user
+        return $this->authenticate((int) $entry['user']);
     }
 
     /**
@@ -74,6 +154,13 @@ class Auth {
         // Check Session Authentication
         if ($this->bySession()) {
             $this->method = 'session';
+            $this->status = true;
+            return $this->status;
+        }
+
+        // Check Remember-Token Authentication (selector + validator pair)
+        if ($this->byRememberToken()) {
+            $this->method = 'remember_token';
             $this->status = true;
             return $this->status;
         }
@@ -471,6 +558,15 @@ class Auth {
 
                         // Set Session
                         $this->user->session()->create();
+
+                        // Check if TOTP is enabled for this user and not yet verified in this session
+                        if ($this->user->setting('totp_enabled') === true) {
+                            $twoFaVerified = $REQUEST->getParams('SESSION', 'auth-2fa-' . session_id());
+                            if (!$twoFaVerified) {
+                                $this->needs_2fa = true;
+                                return true;  // password OK — middleware intercepts after this returns
+                            }
+                        }
 
                         // Check if the user is verified
                         if(!$this->user->verified()){

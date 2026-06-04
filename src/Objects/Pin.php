@@ -63,7 +63,7 @@ class Pin {
 
         // Generate random pin
         for ($i = 0; $i < $length; $i++) {
-            $pin .= $characters[rand(0, $charactersLength - 1)];
+            $pin .= $characters[random_int(0, $charactersLength - 1)];
         }
 
         return $pin;

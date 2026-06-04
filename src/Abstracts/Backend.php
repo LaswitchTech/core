@@ -124,6 +124,8 @@ abstract class Backend {
     /**
      * Reset the Backend Password and notify the user
      *
+     * @deprecated Use PasswordResetToken::generate() + verifyAndReset() instead.
+     *   This generates a random insecure password that is emailed directly.
      * @return string
      */
     public function reset(): string

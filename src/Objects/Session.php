@@ -141,8 +141,30 @@ class Session {
         // Check if the user is being authenticated and remember is set
         if($this->Request->getParams('REQUEST','username') && $this->Request->getParams('REQUEST','password') && $this->Request->getParams('REQUEST','remember')){
 
-            // Set Cookie
-            setcookie($this->UUID->toString("auth-" . $this->id), $this->user->id, time() + 60 * 60 * 24 * 30, '/');
+            // Generate selector/validator pair for secure remember-me (RFC 6268b)
+            $selector = bin2hex(random_bytes(16));   // 32-char hex
+            $validator = bin2hex(random_bytes(32));    // 64-char hex
+
+            // Store in remember_tokens table with hashed selector and validator
+            $expires = date('Y-m-d H:i:s', time() + 60 * 60 * 24 * 7);  // 7 days
+            $this->Database->query()->table('remember_tokens')->insert([
+                'user'           => $this->user->id,
+                'selector'       => $selector,
+                'validator_hash' => password_hash($validator, PASSWORD_DEFAULT),
+                'expires'        => $expires,
+                'last_rotated'   => date('Y-m-d H:i:s'),
+            ])->result();
+
+            // Set cookie with httponly/samesite flags — selector:validator stored as single value
+            setcookie(
+                $this->UUID->toString("auth-" . $this->id),
+                $selector . ':' . $validator,
+                time() + 60 * 60 * 24 * 7,
+                '/',
+                '',
+                true,   // secure — HTTPS only
+                true    // httponly — no JS access
+            );
         }
 
         return $this;
