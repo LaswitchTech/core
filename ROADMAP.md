@@ -40,12 +40,10 @@ Core-Web provides foundational infrastructure for building multiple web applicat
 
 | Area | Severity | Notes |
 |------|----------|-------|
-| **Route Accessibility Tests (HTTP)** | P0 | PHPUnit route tests exist but need HTTP client library (guzzle/browser-kit) for public/private/auth simulation. CLI `testroutes` covers route compilation. |
-| **Global View Context doc** | P1 | ViewGlobals implemented and wired into all 5 layouts. Contract docs needed (`/docs/developer/view-context.md`). |
+| **Route Accessibility Tests (HTTP)** | P1 | PHPUnit unit tests for new kernel components cover Router, Response, View, Controller, Middleware, Hook, EntryPoint. HTTP accessibility layer (guzzle/browser-kit for public/private/auth simulation) deferred — CLI `testroutes` verifies route compilation. |
 | **Admin Settings Page** | P1 | No `/admin/settings` page. The config system already handles app-specific `.cfg` files (some committed, some gitignored for instance-specific settings). Needs a settings UI, not a new config service. |
 | **Profile Modal** | P1 | Currently `lib/plugins/profile/` is a page-based system — should be converted to a modal with section registry. |
 | **Debug Audit Logger** | P1 | `Log.php` provides logging (5 levels, file rotation, IP tracking) but there's no audit trail layer — no `DebugAuditLogger` class, no admin audit page. |
-| **Global View Context** | P1 | No centralized `ViewGlobals` class. View context handled through `Route` (`$ROUTE`/`$this`) and `Bootstrap`. Inconsistent across layouts. |
 | **Encryption Service** | P1 | `src/Encryption.php` is a 0-byte stub. No encryption/decryption utilities exist in the framework. |
 | **Dependency Resolver** | P2 | No service dependency resolution; all services loaded flat. Needed for extension install/uninstall lifecycle. |
 | **Migration System** | P2 | `Schema::compare()` + `Schema::update()` provide basic table/column sync. No dedicated MigrationRunner with versioned migrations and migration tracking table. |
@@ -58,7 +56,7 @@ Core-Web provides foundational infrastructure for building multiple web applicat
 | **Organization Data Scoping** | P2 | Orgs integrated into Auth but no data scoping middleware. |
 | **SLS Service** | P3 | `src/SLS.php` is a 0-byte stub. Deferred pending licensing design. |
 | **PostgreSQL Connector** | P3 | Stub. MySQL + SQLite sufficient for V1.0. |
-| **SQLite Connector** | P2 | Stub. Blocks local development. Phase 2.7. |
+| **SQLite Connector** | P2 | Detailed plan in Phase 2.7; implementation pending. Blocks local development. |
 | **Menu Registry** | P2 | Menu is handled by `Builder->menu()` but no explicit `MenuRegistry` class. Current approach is sufficient for now. |
 | **Config Documentation** | P2 | Config files exist but no documentation on which files are committed vs gitignored and why. |
 
@@ -97,7 +95,7 @@ Foundational work that prevents bugs and enables safe development.
 **Tasks:**
 - [x] Create `tests/` directory with bootstrap file
 - [x] Create `tests/syntax.sh` — recursive `php -l` across root directories
-- [x] Create `tests/Unit/` — 5 test files, 80 tests for Router, Response, View, Controller, Middleware, Hook, EntryPoint
+- [x] Create `tests/Unit/` — 6 test files (86 tests) for Router, Response, View, Controller, Middleware, Hook, EntryPoint, ViewGlobals
 - [x] Add PHPUnit to `composer.json` dev dependencies
 - [x] Create `.github/workflows/ci.yml` (runs `php -l` + PHPUnit on every push/PR)
 - [x] Update `.github/workflows/release.yml` to include CI pre-check
@@ -159,7 +157,7 @@ Foundational work that prevents bugs and enables safe development.
 - [x] Guest-safe defaults for unauthenticated users (null currentUser, safe defaults)
 - [x] View engine injects ViewGlobals into every render (automatic, no controller changes)
 - [x] Test each layout renders without undefined variable errors (260 files, 86 tests)
-- [ ] Document the contract in `/docs/developer/view-context.md`
+- [x] Document the contract in `/docs/developer/view-context.md`
 
 ### 1.5 Encryption Service (P1)
 
@@ -202,39 +200,40 @@ Hook          — plugin extension points (register/fire pattern)
 **Phases**:
 
 #### Phase A — New Kernel Components (read-only, no migration)
-- [ ] Create `RouteDTO` (thin data object, `src/Objects/RouteDTO.php`)
-- [ ] Create `Response` class (`src/Response.php`)
-- [ ] Create `View` engine (`src/View.php`)
-- [ ] Create `Controller` base class (`src/Controller.php`)
-- [ ] Create Middleware components (`src/Middleware/`)
-- [ ] Create `Hook` class (`src/Hook.php`)
-- [ ] Create `EntryPoint` coordinator (`src/EntryPoint.php`)
+- [x] Create `RouteDTO` (thin data object, `src/Objects/RouteDTO.php`)
+- [x] Create `Response` class (`src/Response.php`)
+- [x] Create `View` engine (`src/View.php`)
+- [x] Create `Controller` base class (`src/Controller.php`)
+- [x] Create Middleware components (`src/Middleware/`)
+- [x] Create `Hook` class (`src/Hook.php`)
+- [x] Create `EntryPoint` coordinator (`src/EntryPoint.php`)
 
 #### Phase B — Migration Adapter (backward-compatible)
-- [ ] Refactor `Router.php` — add `register()`, `match()`, `all()`, `loadFromConfig()`
-- [ ] Migrate `Route.php` — delegate `render()` to `View` engine
-- [ ] Migrate `Bootstrap.php` — coordinate new components
-- [ ] Verify all 57+ plugins still load correctly
+- [x] Refactor `Router.php` — add `register()`, `match()`, `all()`, `loadFromConfig()`, `startMVC()`
+- [x] Migrate `Route.php` — delegate `render()` to `View` engine
+- [x] Migrate `Bootstrap.php` — coordinate new components (add HOOK, ENTRYPOINT globals)
+- [x] Verify all 57+ plugins still load correctly (62 routes verified via `php cli core testroutes`)
 
 #### Phase C — Entry Points & Server Support
-- [ ] Update `CoreHelper::init()` — generate `nginx.conf.example`, project root `index.php`
-- [ ] Create project root `index.php` (shared hosting entry point)
-- [ ] Add `php cli core serve` command (PHP built-in server)
-- [ ] Clean up `webroot/index.php` (server-agnostic front controller)
+- [x] Update `CoreHelper::init()` — project root `index.php` created
+- [x] Create project root `index.php` (shared hosting entry point)
+- [x] Add `php cli core serve` command (PHP built-in server) via `CoreCommand::serveAction()`
+- [x] Clean up `webroot/index.php` (server-agnostic front controller)
+- [ ] Add `nginx.conf.example` from `CoreHelper::init()`
 - [ ] Add Cloudflare-friendly headers
 
 #### Phase D — Testing Infrastructure
-- [ ] Set up PHPUnit (`phpunit/phpunit` dev dep, `phpunit.xml.dist`, `tests/bootstrap.php`)
-- [ ] Add CoreCommand test commands (`test:routes`, `test:routes:access`, `test:routes:auth`, `test:views`)
-- [ ] Create unit tests for all new components
-- [ ] Create test traits (`tests/Traits/MockGlobals.php`)
-- [ ] Run all tests: `php vendor/bin/phpunit`
+- [x] Set up PHPUnit (`phpunit/phpunit` dev dep, `phpunit.xml.dist`, `tests/bootstrap.php`)
+- [x] Add CoreCommand test commands (`test:routes` via `CoreCommand::testRoutesAction()`)
+- [x] Create unit tests for all new components (6 test files, 86 tests: Router, Response, View, Controller, Middleware, Hook, EntryPoint, ViewGlobals)
+- [x] Create test traits (`tests/Traits/MockGlobals.php`)
+- [x] Run all tests: `php vendor/bin/phpunit` (86 tests, 198 assertions, all pass)
 
 #### Phase E — Documentation & Cleanup
-- [ ] Update `DESIGN.md` — Section 7 (Routing), Section 16 (Entry Points), Section 18 (Testing)
-- [ ] Update `ROADMAP.md` — add Phase 1.6
-- [ ] Create `/docs/mvc-migration.md` — migration guide for plugins
-- [ ] Update plugin documentation
+- [x] Update `ROADMAP.md` — add Phase 1.6, mark Complete
+- [x] Create `/docs/mvc-migration.md` — plugin migration guide (endpoints → controllers, hooks, deployment)
+- [ ] Update `DESIGN.md` — Section 7 (Routing), Section 16 (Entry Points), Section 18 (Testing) — **still pending**
+- [ ] Update plugin documentation — deferred (no breaking changes required)
 
 **Risk Mitigation**:
 - Phase A/B are fully backward-compatible — existing plugins keep working
@@ -242,10 +241,13 @@ Hook          — plugin extension points (register/fire pattern)
 - Each phase is independently verifiable
 
 **Deliverables**:
-- `php cli core test:routes` passes for all routes
-- PHPUnit runs clean for RouteDTO, Response, View, Controller
-- Shared hosting, Apache, Nginx, built-in server all work
-- 57+ plugins still load without modification
+- [x] `php cli core testroutes` passes for all 62 routes
+- [x] PHPUnit runs clean (86 tests, 198 assertions) for all new components
+- [x] Shared hosting entry point (`index.php`, `webroot/index.php`) works
+- [x] `php cli core serve` — PHP built-in server works
+- [x] 57+ plugins still load without modification
+- [ ] Nginx config (needs generation from `CoreHelper::init()`)
+- [ ] Cloudflare-friendly headers (needs implementation in `Request.php`)
 
 ---
 
@@ -559,13 +561,12 @@ Features required for V1.0 release (target: 2026-08-15).
 
 ### Required for V1.0
 
-- [ ] Config documentation under docs/03-using/ (Phase 1.2)
+- [x] **Complete testing infrastructure + CI (Phase 1.1)** — 86 unit tests, syntax check, CI workflow, release pre-check
+- [ ] Config documentation under `docs/03-using/` (Phase 1.2)
 - [ ] Admin landing page + settings registry (Phase 1.3)
-- [ ] Global view context (Phase 1.4)
+- [x] **Global view context (Phase 1.4)** — ViewGlobals class, all 5 layouts wired, doc created (`docs/developer/view-context.md`)
 - [ ] Encryption service (Phase 1.5)
-- [x] **Complete testing infrastructure + CI (Phase 1.1)** — 80 tests, syntax check, CI workflow, release pre-check
-- [x] **Global view context (Phase 1.4)** — ViewGlobals class, all 5 layouts wired
-- [x] **MVC conversion + server-agnostic deployment + testing (Phase 1.6)** — all phases A-E wired
+- [x] **MVC conversion + server-agnostic deployment + testing (Phase 1.6)** — phases A-D complete; Phase E pending `DESIGN.md` update, nginx config, Cloudflare headers
 - [ ] Complete auth features + security review (Phase 2.1)
 - [ ] Profile modal (Phase 2.2)
 - [ ] Debug/audit logging (Phase 2.3)
@@ -597,6 +598,25 @@ These systems are large enough to warrant their own design documents and develop
 
 ---
 
+## Timeline Assessment (Updated 2026-06-04)
+
+| Metric | Value |
+|--------|-------|
+| Current version | v0.0.92 |
+| Target date | 2026-08-15 (~70 days from today) |
+| Phases complete | 1/5 (Testing, Global View Context) + partially MVC |
+| Remaining major phases | 5, 6, 7, 8, 9 (Phases 2–5 in doc) |
+
+**Status**: At current pace, V1.0 is **at risk**. The following must be accelerated or de-scoped:
+
+- **Must have for V1.0**: Auth completion (2.1), profile modal (2.2), encryption (1.5), SQLite connector (2.7)
+- **Should have**: Settings registry (1.3), config docs (1.2), debug logging (2.3)
+- **Can defer**: Version provider (2.4), dependency resolver (2.5), migration system (2.6), SMS/IMAP (2.8), developer mode completion (3.1), docs plugin (3.2), DataTables standardization (3.3), UI Builder docs (3.4), org data scoping (3.5)
+
+**Recommendation**: Prioritize Phases 1.5, 2.1, 2.7, and 1.3 for V1.0. Defer everything in Phase 3+ to post-V1.0 unless it blocks core functionality.
+
+---
+
 ## Deferred / Explicitly Not Now
 
 | Item | Reason |
@@ -620,19 +640,19 @@ These systems are large enough to warrant their own design documents and develop
 
 | Phase | Area | Status | Notes |
 |-------|------|--------|-------|
-| **1.1** | **Testing** | **Complete** | PHPUnit + 80 tests; `tests/syntax.sh`; CI workflow + release pre-checks; Route compilation via `testroutes` (HTTP accessibility tests pending guzzle/browser-kit) |
+| **1.1** | **Testing** | **Complete** | PHPUnit + 86 tests; `tests/syntax.sh`; CI workflow + release pre-checks; Route compilation via `testroutes` (HTTP accessibility tests pending guzzle/browser-kit) |
 | 1.2 | Config Documentation | Not started | Config files exist, docs needed |
 | 1.3 | Settings Registry | Not started | No `/admin/settings` |
-| **1.4** | **Global View Context** | **Complete** | `ViewGlobals` class; all 5 layouts updated; View engine injects globals; 86 tests pass |
+| **1.4** | **Global View Context** | **Complete** | `ViewGlobals` class; all 5 layouts updated; View engine injects globals; doc created; 86 tests pass |
 | 1.5 | Encryption Service | Not started | `src/Encryption.php` is 0 bytes |
-| **1.6** | **MVC Conversion** | **Complete** | All phases A-E wired; Router::startMVC(); Bootstrap globals (HOOK, ENTRYPOINT); NullConnector for CLI scope; 86 tests pass; `php cli core testroutes` verifies all 62 routes |
+| **1.6** | **MVC Conversion** | **Complete (mostly)** | Phases A-D complete; Phase E: `DESIGN.md` update, nginx config generation, Cloudflare headers still pending; Bootstrap globals (HOOK, ENTRYPOINT, BUILDER, HELPER); NullConnector for CLI scope; 86 tests pass; `php cli core testroutes` verifies all 62 routes |
 | 2.1 | Auth + 2FA | Partial | 2FA/TOTP, registration, email/SMS 2FA pending |
 | 2.2 | Profile Modal | Not started | Currently page-based |
 | 2.3 | Debug/Audit Logger | Not started | `Log.php` exists, audit layer missing |
 | 2.4 | Version Provider | Not started | `/api/core/info` exists but no class |
 | 2.5 | Dependency Resolver | Not started | No resolver |
 | 2.6 | Migration Runner | Partial | `Schema::compare()`/`update()` exist, no versioned migrations |
-| 2.7 | Database Connectors | Partial | MySQL + NullConnector; SQLite in Phase 2.7 |
+| 2.7 | Database Connectors | Planned | MySQL implemented; SQLite has detailed 9-task plan in Phase 2.7 |
 | 2.8 | SMS/IMAP | Not started | Both 0-byte stubs |
 | 2.9 | SLS | Not started | 0-byte stub |
 | 3.1 | Developer Mode | Partial | `dev` plugin exists, page/scaffold generator missing |
@@ -640,4 +660,4 @@ These systems are large enough to warrant their own design documents and develop
 | 3.3 | DataTables | Not started | Standardization + update to 2.3.8 needed |
 | 3.4 | UI Builder | Not started | `builder.js` needs docs |
 | 3.5 | Organization | Partial | Core integration done, data scoping missing |
-| **V1.0 Target** | **2026-08-15** | Scope defined above | |
+| **V1.0 Target** | **2026-08-15** | Scope defined above | **Timeline risk** — Phase 1 only complete; ~4 months remaining for 5 phases |
