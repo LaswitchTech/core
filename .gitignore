@@ -53,6 +53,7 @@ TOKEN
 
 # PHPUnit
 .phpunit.result.cache
+*.cache
 
 # Example Files
 /example/vendor/
