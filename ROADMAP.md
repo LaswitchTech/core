@@ -1,6 +1,6 @@
 # Core-Web — Project Roadmap
 
-> **Version**: v0.0.92
+> **Version**: v0.0.93
 > **Status**: Early architecture / skeleton phase. APIs and internals may change between commits.
 > **V1.0 target**: 2026-08-15
 
@@ -44,7 +44,7 @@ Core-Web provides foundational infrastructure for building multiple web applicat
 | **Admin Settings Page** | P1 | No `/admin/settings` page. The config system already handles app-specific `.cfg` files (some committed, some gitignored for instance-specific settings). Needs a settings UI, not a new config service. |
 | **Profile Modal** | P1 | Currently `lib/plugins/profile/` is a page-based system — should be converted to a modal with section registry. |
 | **Debug Audit Logger** | P1 | `Log.php` provides logging (5 levels, file rotation, IP tracking) but there's no audit trail layer — no `DebugAuditLogger` class, no admin audit page. |
-| **Encryption Service** | P1 | `src/Encryption.php` is a 0-byte stub. No encryption/decryption utilities exist in the framework. |
+| ~~**Encryption Service**~~ | ~~P1~~ | ~~`src/Encryption.php` was a 0-byte stub. Implemented with AES-256-GCM, key derivation, and token generation.~~ |
 | **Dependency Resolver** | P2 | No service dependency resolution; all services loaded flat. Needed for extension install/uninstall lifecycle. |
 | **Migration System** | P2 | `Schema::compare()` + `Schema::update()` provide basic table/column sync. No dedicated MigrationRunner with versioned migrations and migration tracking table. |
 | **Documentation Plugin** | P2 | No docs generation plugin. Needs to read `docs/` directories at every level (kernel, app, plugins, themes, modules). |
@@ -168,12 +168,12 @@ Foundational work that prevents bugs and enables safe development.
 **Why**: `src/Encryption.php` is a 0-byte stub. No encryption/decryption utilities exist in the framework. Needed for secure data handling (PII, tokens, sensitive config values).
 
 **Tasks:**
-- [ ] Implement `Encryption` class with symmetric encryption (AES-256-GCM)
-- [ ] Implement key derivation from passphrase
-- [ ] Implement data encryption/decryption methods
-- [ ] Implement secure key generation
-- [ ] Add tests for encrypt/decrypt round-trip
-- [ ] Document in `/docs/developer/encryption.md`
+- [x] Implement `Encryption` class with symmetric encryption (AES-256-GCM)
+- [x] Implement key derivation from passphrase
+- [x] Implement data encryption/decryption methods
+- [x] Implement secure key generation
+- [x] Add tests for encrypt/decrypt round-trip
+- [x] Document in `/docs/developer/encryption.md`
 
 ### 1.6 MVC Conversion (P0)
 
@@ -569,7 +569,7 @@ Features required for V1.0 release (target: 2026-08-15).
 - [ ] Config documentation under `docs/03-using/` (Phase 1.2)
 - [x] **Application settings registry + `/admin` (Phase 1.3)** — SettingsRegistry, config plugin with /admin dashboard, /admin/settings, /admin/security, /admin/maintenance; card-based UI with field types; redirect-after-save flash messages
 - [x] **Global view context (Phase 1.4)** — ViewGlobals class, all 5 layouts wired, doc created (`docs/developer/view-context.md`)
-- [ ] Encryption service (Phase 1.5)
+- [x] **Encryption service (Phase 1.5)** — AES-256-GCM, PBKDF2 key derivation, token generation, HMAC utilities; 30 tests, full docs
 - [x] **MVC conversion + server-agnostic deployment + testing (Phase 1.6)** — phases A-D complete; Phase E pending `DESIGN.md` update, nginx config, Cloudflare headers
 - [ ] Complete auth features + security review (Phase 2.1)
 - [ ] Profile modal (Phase 2.2)
@@ -648,7 +648,7 @@ These systems are large enough to warrant their own design documents and develop
 | 1.2 | Config Documentation | Not started | Config files exist, docs needed |
 | **1.3** | **Settings Registry** | **Complete** | SettingsRegistry, SettingsSection, SettingsField; config plugin with /admin dashboard, /admin/settings, /admin/security, /admin/maintenance; card-based UI; redirect-after-save flash messages; default app settings seeded |
 | **1.4** | **Global View Context** | **Complete** | `ViewGlobals` class; all 5 layouts updated; View engine injects globals; doc created; 86 tests pass |
-| 1.5 | Encryption Service | Not started | `src/Encryption.php` is 0 bytes |
+| **1.5** | **Encryption Service** | **Complete** | AES-256-GCM, PBKDF2 key derivation (100k iterations), nonce reuse protection, AAD binding; `generateKey`, `encrypt`/`decrypt`, `encryptWithPassphrase`/`decryptWithPassphrase`, `token`, `urlToken`, `hmac`; 30 tests pass |
 | **1.6** | **MVC Conversion** | **Complete (mostly)** | Phases A-D complete; Phase E: `DESIGN.md` update, nginx config generation, Cloudflare headers still pending; Bootstrap globals (HOOK, ENTRYPOINT, BUILDER, HELPER); NullConnector for CLI scope; 86 tests pass; `php cli core testroutes` verifies all 62 routes |
 | 2.1 | Auth + 2FA | Partial | 2FA/TOTP, registration, email/SMS 2FA pending |
 | 2.2 | Profile Modal | Not started | Currently page-based |

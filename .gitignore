@@ -51,6 +51,9 @@ TOKEN
 # Backups
 /backup/
 
+# PHPUnit
+.phpunit.result.cache
+
 # Example Files
 /example/vendor/
 

@@ -89,7 +89,7 @@ new Bootstrap('CLI');    // loads $DATABASE, $CLI, etc.
 | Global Variable | Class | Scope | Purpose |
 |---|---|---|---|
 | `UUID` | `UUID` | ROUTER, API, CLI | UUID generation |
-| `ENCRYPTION` | `Encryption` | *(none — empty stub)* | Placeholder |
+| `ENCRYPTION` | `Encryption` | ROUTER, API, CLI | AES-256-GCM symmetric encryption, key derivation, token generation |
 | `REQUEST` | `Request` | ROUTER, API, CLI | HTTP request parsing |
 | `OUTPUT` | `Output` | ROUTER, API, CLI | Response/consoles output |
 | `LOG` | `Log` | ROUTER, API, CLI | Level-based logging |
@@ -983,7 +983,6 @@ Several classes (`Encryption`, `SMS`, `IMAP`, `SLS`) are 0-byte stubs. They exis
 
 ### 23.1 Planned (stubbed but not implemented)
 
-- `Encryption` — encryption/decryption utilities
 - `SMS` — SMS messaging
 - `IMAP` — email inbox reading
 - `SLS` — Software Licensing Service

@@ -23,7 +23,7 @@ class Bootstrap {
         ],
         "ENCRYPTION" => [
             "class" => "\\LaswitchTech\\Core\\Encryption",
-            "scope" => []
+            "scope" => ["ROUTER", "API", "CLI"]
         ],
         // Input/Output
         "REQUEST" => [
