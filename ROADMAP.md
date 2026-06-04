@@ -1,6 +1,6 @@
 # Core-Web — Project Roadmap
 
-> **Version**: v0.0.93
+> **Version**: v0.0.94
 > **Status**: Early architecture / skeleton phase. APIs and internals may change between commits.
 > **V1.0 target**: 2026-08-15
 
@@ -58,7 +58,7 @@ Core-Web provides foundational infrastructure for building multiple web applicat
 | **PostgreSQL Connector** | P3 | Stub. MySQL + SQLite sufficient for V1.0. |
 | **SQLite Connector** | P2 | Detailed plan in Phase 2.7; implementation pending. Blocks local development. |
 | **Menu Registry** | P2 | Menu is handled by `Builder->menu()` but no explicit `MenuRegistry` class. Current approach is sufficient for now. |
-| **Config Documentation** | P2 | Config files exist but no documentation on which files are committed vs gitignored and why. |
+| ~~**Config Documentation**~~ | ~~P2~~ | ~~4 docs written in `docs/03-using/` (~512 lines) covering config API, override layer, bootstrap loading, and application settings.~~ |
 
 ---
 
@@ -107,14 +107,14 @@ Foundational work that prevents bugs and enables safe development.
 **Target docs location**: `docs/03-using/` (matching the existing docs/index.md TOC structure)
 
 **Tasks:**
-- [ ] Create `docs/03-using/configuration.md` — general config system documentation
-- [ ] Create `docs/03-using/config-override.md` — config override layer (gitignored files)
-- [ ] Create `docs/03-using/bootstrap-config.md` — how Bootstrap loads config
-- [ ] Create `docs/03-using/app-settings.md` — how applications define settings
-- [ ] Document which `.cfg` files are committed vs gitignored (and why)
-- [ ] Document config loading order and precedence
-- [ ] Document config file conventions (format, naming, structure)
-- [ ] Add examples for creating a new config file
+- [x] Create `docs/03-using/configuration.md` — Config class API, JSON format, path resolution, committed vs gitignored, examples
+- [x] Create `docs/03-using/config-override.md` — which files are committed vs gitignored and why, deploy pattern
+- [x] Create `docs/03-using/bootstrap-config.md` — bootstrap config loading order, override format, $CONFIG global
+- [x] Create `docs/03-using/app-settings.md` — SettingsRegistry, SettingsSection, SettingsField (text, textarea, boolean, select, hidden)
+- [x] Document which `.cfg` files are committed vs gitignored (and why)
+- [x] Document config loading order and precedence
+- [x] Document config file conventions (format, naming, structure)
+- [x] Add examples for creating a new config file
 - [ ] Link from docs/index.md TOC (already present)
 
 ### 1.3 Application Settings System (P1)
@@ -566,7 +566,7 @@ Features required for V1.0 release (target: 2026-08-15).
 ### Required for V1.0
 
 - [x] **Complete testing infrastructure + CI (Phase 1.1)** — 86 unit tests, syntax check, CI workflow, release pre-check
-- [ ] Config documentation under `docs/03-using/` (Phase 1.2)
+- [x] **Config documentation (Phase 1.2)** — 4 docs in `docs/03-using/`: config API, override layer, bootstrap loading, app settings (~512 lines)
 - [x] **Application settings registry + `/admin` (Phase 1.3)** — SettingsRegistry, config plugin with /admin dashboard, /admin/settings, /admin/security, /admin/maintenance; card-based UI with field types; redirect-after-save flash messages
 - [x] **Global view context (Phase 1.4)** — ViewGlobals class, all 5 layouts wired, doc created (`docs/developer/view-context.md`)
 - [x] **Encryption service (Phase 1.5)** — AES-256-GCM, PBKDF2 key derivation, token generation, HMAC utilities; 30 tests, full docs
@@ -645,7 +645,7 @@ These systems are large enough to warrant their own design documents and develop
 | Phase | Area | Status | Notes |
 |-------|------|--------|-------|
 | **1.1** | **Testing** | **Complete** | PHPUnit + 86 tests; `tests/syntax.sh`; CI workflow + release pre-checks; Route compilation via `testroutes` (HTTP accessibility tests pending guzzle/browser-kit) |
-| 1.2 | Config Documentation | Not started | Config files exist, docs needed |
+| **1.2** | **Config Documentation** | **Complete** | `docs/03-using/configuration.md` (Config API, JSON format), `config-override.md` (committed vs gitignored), `bootstrap-config.md` (loading order, $CONFIG global), `app-settings.md` (SettingsRegistry, SettingsSection, field types) — 4 docs, ~512 lines |
 | **1.3** | **Settings Registry** | **Complete** | SettingsRegistry, SettingsSection, SettingsField; config plugin with /admin dashboard, /admin/settings, /admin/security, /admin/maintenance; card-based UI; redirect-after-save flash messages; default app settings seeded |
 | **1.4** | **Global View Context** | **Complete** | `ViewGlobals` class; all 5 layouts updated; View engine injects globals; doc created; 86 tests pass |
 | **1.5** | **Encryption Service** | **Complete** | AES-256-GCM, PBKDF2 key derivation (100k iterations), nonce reuse protection, AAD binding; `generateKey`, `encrypt`/`decrypt`, `encryptWithPassphrase`/`decryptWithPassphrase`, `token`, `urlToken`, `hmac`; 30 tests pass |
