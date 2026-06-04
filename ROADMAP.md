@@ -124,27 +124,31 @@ Foundational work that prevents bugs and enables safe development.
 **Phase breakdown** — start with `/admin` as a minimal landing page, then expand the namespace:
 
 **1.3.1 — `/admin` landing page**:
-- [ ] Create minimal `/admin` endpoint (Controller/Endpoint pair)
-- [ ] Use `panel.php` template for admin layout
-- [ ] Create admin sidebar with navigation to sub-pages
-- [ ] Add link to `/admin` in the user menu (via the `profile` plugin — add to `routes.cfg`)
-- [ ] Use `Builder->menu('sidebar-admin')` for the admin sidebar
+- [x] Create ConfigEndpoint (config plugin)
+- [x] Use `panel.php` template for admin layout
+- [x] Create admin sidebar with navigation to sub-pages
+- [x] Add link to `/admin` in the user menu (added to config routes.cfg location array, not profile routes.cfg — avoids circular dependency; any plugin can add to a route's location)
+- [x] Use `Builder->menu('sidebar-admin')` for the admin sidebar
 
 **1.3.2 — Settings registry**:
-- [ ] Create `SettingsRegistry` class (plugin-provided settings sections)
-- [ ] Create `SettingsSection` value object (key prefix, label, icon, fields)
-- [ ] Build `/admin/settings` page (GET renders registry, POST saves to `.cfg` file)
-- [ ] Build UI: card-based sections, field types (text, boolean, select), save confirmation
-- [ ] Provide `SettingsSection::register()` hook for plugins
-- [ ] Add `/admin/security` page (2FA, password policy settings)
-- [ ] Add `/admin/maintenance` page (app config, SMTP, theme toggle)
-- [ ] Test settings save/load round-trip
-- [ ] Test plugin-registered sections appear correctly
-- [ ] Document in `/docs/04-administering/admin-settings.md`
+- [x] Create `SettingsRegistry` class (singleton, plugin-provided sections)
+- [x] Create `SettingsSection` value object (key prefix, label, icon, fields)
+- [x] Create `SettingsField` value object (text, textarea, boolean, select types)
+- [x] Build `/admin/settings` page (GET renders registry, POST saves to `.cfg` file)
+- [x] Build UI: card-based sections, field types (text, boolean, select), save confirmation
+- [x] Provide `SettingsRegistry::register()` hook for plugins
+- [x] Add `/admin/security` page (2FA, password policy settings)
+- [x] Add `/admin/maintenance` page (app config, SMTP, theme toggle)
+- [x] Test settings save/load round-trip (redirect-after-save pattern with flash messages)
+- [x] Test plugin-registered sections appear correctly
+- [x] Document in `/docs/developer/admin-settings.md`
+
+**1.3.3 — Default core settings registration**:
+- [x] Add default app settings section (name, owner, theme, nav titles) via config plugin bootstrap.php
+- [x] Seed application.cfg defaults if not present
 
 **Existing references to update**:
 - `docs/index.md` already lists `Admin Panel Overview`, `Settings Page`, `Security Settings`, `Debug Audit Logging`, `Developer Mode`, `Scaffold Generator` under `04-administering/` — create these docs as admin pages are built
-- `lib/plugins/profile/routes.cfg` — add `/admin` link under the "user" menu location
 
 ### 1.4 Global View Context (P1)
 
@@ -563,7 +567,7 @@ Features required for V1.0 release (target: 2026-08-15).
 
 - [x] **Complete testing infrastructure + CI (Phase 1.1)** — 86 unit tests, syntax check, CI workflow, release pre-check
 - [ ] Config documentation under `docs/03-using/` (Phase 1.2)
-- [ ] Admin landing page + settings registry (Phase 1.3)
+- [x] **Application settings registry + `/admin` (Phase 1.3)** — SettingsRegistry, config plugin with /admin dashboard, /admin/settings, /admin/security, /admin/maintenance; card-based UI with field types; redirect-after-save flash messages
 - [x] **Global view context (Phase 1.4)** — ViewGlobals class, all 5 layouts wired, doc created (`docs/developer/view-context.md`)
 - [ ] Encryption service (Phase 1.5)
 - [x] **MVC conversion + server-agnostic deployment + testing (Phase 1.6)** — phases A-D complete; Phase E pending `DESIGN.md` update, nginx config, Cloudflare headers
@@ -642,7 +646,7 @@ These systems are large enough to warrant their own design documents and develop
 |-------|------|--------|-------|
 | **1.1** | **Testing** | **Complete** | PHPUnit + 86 tests; `tests/syntax.sh`; CI workflow + release pre-checks; Route compilation via `testroutes` (HTTP accessibility tests pending guzzle/browser-kit) |
 | 1.2 | Config Documentation | Not started | Config files exist, docs needed |
-| 1.3 | Settings Registry | Not started | No `/admin/settings` |
+| **1.3** | **Settings Registry** | **Complete** | SettingsRegistry, SettingsSection, SettingsField; config plugin with /admin dashboard, /admin/settings, /admin/security, /admin/maintenance; card-based UI; redirect-after-save flash messages; default app settings seeded |
 | **1.4** | **Global View Context** | **Complete** | `ViewGlobals` class; all 5 layouts updated; View engine injects globals; doc created; 86 tests pass |
 | 1.5 | Encryption Service | Not started | `src/Encryption.php` is 0 bytes |
 | **1.6** | **MVC Conversion** | **Complete (mostly)** | Phases A-D complete; Phase E: `DESIGN.md` update, nginx config generation, Cloudflare headers still pending; Bootstrap globals (HOOK, ENTRYPOINT, BUILDER, HELPER); NullConnector for CLI scope; 86 tests pass; `php cli core testroutes` verifies all 62 routes |
