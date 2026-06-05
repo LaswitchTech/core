@@ -1,7 +1,7 @@
 # Core-Web — Project Roadmap
 
 > **Version**: v0.0.94
-> **Status**: Early architecture / skeleton phase. APIs and internals may change between commits.
+> **Status**: Phase 1 complete (Stabilization + Core Services). MVC conversion, settings system, encryption service, and auth core all implemented. V1.0 scope: Auth completion, SQLite connector, profile modal, debug logging.
 > **V1.0 target**: 2026-08-15
 
 ---
@@ -20,7 +20,7 @@ Core-Web provides foundational infrastructure for building multiple web applicat
 | **Layout System** | Implemented | `panel.php` (admin), `website.php` (app), `fullscreen.php`, `internal.php`, `index.php` (blank), 16 error pages |
 | **Theme System** | Implemented | Bootstrap 5, LESS compilation (`Style.php` + `wikimedia/less.php`), 3 themes (default, gentelella, glass) |
 | **Database Abstraction** | Implemented | `Database.php` + `Objects\Query` (fluent builder) + `Objects\Schema` (DDL with `compare()`/`update()` migration) + MySQL connector |
-| **Auth** | Partially implemented | `Auth.php` (bearer/basic/session), database-backed sessions, remember-me cookie, `User->organization()`, `Objects\Pin` (numeric PIN only); 2FA/TOTP and registration not yet implemented |
+| **Auth** | Substantially implemented | Auth core + 2FA/TOTP + password reset tokens completed; email verification, forgot password, SMS 2FA, user registration flow still pending |
 | **Helpers** | Implemented | Auto-loads from core, vendor, and plugin directories via `$HELPER-><name>` magic getter |
 | **Config** | Implemented | `Config.php` for JSON `.cfg` files; 4 config files committed (css.cfg, extensions.cfg, js.cfg, requirement.cfg), others gitignored for instance-specific settings |
 | **CSRF** | Implemented | Automatic validation on POST/PUT/PATCH/DELETE, timing-safe comparison, token rotation |
@@ -602,22 +602,22 @@ These systems are large enough to warrant their own design documents and develop
 
 ---
 
-## Timeline Assessment (Updated 2026-06-04)
+## Timeline Assessment (Updated 2026-06-05)
 
 | Metric | Value |
 |--------|-------|
-| Current version | v0.0.92 |
-| Target date | 2026-08-15 (~70 days from today) |
-| Phases complete | 1/5 (Testing, Global View Context) + partially MVC |
-| Remaining major phases | 5, 6, 7, 8, 9 (Phases 2–5 in doc) |
+| Current version | v0.0.94 |
+| Target date | 2026-08-15 (~71 days from today) |
+| Phases complete | 1/5 (all of Phase 1 + Auth core, Encryption, MVC A-D, Route Smoke Test) |
+| Remaining major phases | 2.1 through 3.5 in doc |
 
 **Status**: At current pace, V1.0 is **at risk**. The following must be accelerated or de-scoped:
 
-- **Must have for V1.0**: Auth completion (2.1), profile modal (2.2), encryption (1.5), SQLite connector (2.7)
-- **Should have**: Settings registry (1.3), config docs (1.2), debug logging (2.3)
+- **Must have for V1.0**: Auth completion (2.1), profile modal (2.2), SQLite connector (2.7), debug logging (2.3)
+- **Should have**: Settings registry (1.3), config docs (1.2) — already done ✓
 - **Can defer**: Version provider (2.4), dependency resolver (2.5), migration system (2.6), SMS/IMAP (2.8), developer mode completion (3.1), docs plugin (3.2), DataTables standardization (3.3), UI Builder docs (3.4), org data scoping (3.5)
 
-**Recommendation**: Prioritize Phases 1.5, 2.1, 2.7, and 1.3 for V1.0. Defer everything in Phase 3+ to post-V1.0 unless it blocks core functionality.
+**Recommendation**: Prioritize Phases 2.7 (SQLite — unblocks local dev), 2.1 (Auth completion), and 2.3 (debug logging) for V1.0. Defer everything in Phase 3+ to post-V1.0 unless it blocks core functionality.
 
 ---
 
@@ -644,13 +644,13 @@ These systems are large enough to warrant their own design documents and develop
 
 | Phase | Area | Status | Notes |
 |-------|------|--------|-------|
-| **1.1** | **Testing** | **Complete** | PHPUnit + 86 tests; `tests/syntax.sh`; CI workflow + release pre-checks; Route compilation via `testroutes` (HTTP accessibility tests pending guzzle/browser-kit) |
+| **1.1** | **Testing** | **Complete** | PHPUnit + 86 tests; `tests/syntax.sh`; CI workflow + release pre-checks; Route compilation via `testroutes` (HTTP accessibility tests pending guzzle/browser-kit); Route Smoke Test (`tests/route_smoke_test.php`) — CLI-based route dispatch verification for all 68 discovered routes in guest and auth modes |
 | **1.2** | **Config Documentation** | **Complete** | `docs/03-using/configuration.md` (Config API, JSON format), `config-override.md` (committed vs gitignored), `bootstrap-config.md` (loading order, $CONFIG global), `app-settings.md` (SettingsRegistry, SettingsSection, field types) — 4 docs, ~512 lines |
 | **1.3** | **Settings Registry** | **Complete** | SettingsRegistry, SettingsSection, SettingsField; config plugin with /admin dashboard, /admin/settings, /admin/security, /admin/maintenance; card-based UI; redirect-after-save flash messages; default app settings seeded |
 | **1.4** | **Global View Context** | **Complete** | `ViewGlobals` class; all 5 layouts updated; View engine injects globals; doc created; 86 tests pass |
 | **1.5** | **Encryption Service** | **Complete** | AES-256-GCM, PBKDF2 key derivation (100k iterations), nonce reuse protection, AAD binding; `generateKey`, `encrypt`/`decrypt`, `encryptWithPassphrase`/`decryptWithPassphrase`, `token`, `urlToken`, `hmac`; 30 tests pass |
 | **1.6** | **MVC Conversion** | **Complete (mostly)** | Phases A-D complete; Phase E: `DESIGN.md` update, nginx config generation, Cloudflare headers still pending; Bootstrap globals (HOOK, ENTRYPOINT, BUILDER, HELPER); NullConnector for CLI scope; 86 tests pass; `php cli core testroutes` verifies all 62 routes |
-| 2.1 | Auth + 2FA | Partial | 2FA/TOTP, registration, email/SMS 2FA pending |
+| 2.1 | Auth + 2FA | Substantially implemented | 2FA/TOTP, recovery codes, password reset tokens complete (d3ee34c); email verification, forgot password flow, user registration still pending |
 | 2.2 | Profile Modal | Not started | Currently page-based |
 | 2.3 | Debug/Audit Logger | Not started | `Log.php` exists, audit layer missing |
 | 2.4 | Version Provider | Not started | `/api/core/info` exists but no class |
@@ -664,4 +664,4 @@ These systems are large enough to warrant their own design documents and develop
 | 3.3 | DataTables | Not started | Standardization + update to 2.3.8 needed |
 | 3.4 | UI Builder | Not started | `builder.js` needs docs |
 | 3.5 | Organization | Partial | Core integration done, data scoping missing |
-| **V1.0 Target** | **2026-08-15** | Scope defined above | **Timeline risk** — Phase 1 only complete; ~4 months remaining for 5 phases |
+| **V1.0 Target** | **2026-08-15** | Scope defined above | **Timeline risk** — Phase 1 fully complete; Auth core + MVC + Settings done; ~4 months remaining for SQLite connector, profile modal, debug logging, and auth completion |
