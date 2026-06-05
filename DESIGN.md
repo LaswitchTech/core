@@ -311,7 +311,7 @@ Core-Web uses a traditional MVC pattern with thin data objects and separated con
 |---|---|---|
 | **RouteDTO** | `src/Objects/RouteDTO.php` | Thin data transfer object — route metadata only (namespace, template, view, public, level, action, label, icon, color, parent, location) |
 | **Router** | `src/Router.php` | Route registration (`register()`), matching (`match()`), listing (`all()`) |
-| **Middleware** | `src/Middleware/` | Auth checks (`AuthMiddleware`), maintenance mode (`MaintenanceMiddleware`) |
+| **Middleware** | `src/Middleware/` | Auth checks (`AuthMiddleware`), 2FA gate (`Auth2FAMiddleware`), maintenance mode (`MaintenanceMiddleware`) |
 | **Response** | `src/Response.php` | Controller return value — `render`, `redirect`, `json`, `error` |
 | **View** | `src/View.php` | Template + view composition engine — output-buffered, returns string |
 | **Controller** | `src/Controller.php` | Base class for controllers — extends `Abstracts\Controller`, adds `Response`/`View` support |
@@ -324,7 +324,8 @@ Request → Router::match(namespace)
             ↓
         Middleware chain:
           1. AuthMiddleware → 430/401/403/432 if auth fails
-          2. MaintenanceMiddleware → 503 if maintenance mode
+          2. Auth2FAMiddleware → 427 if 2FA required
+          3. MaintenanceMiddleware → 503 if maintenance mode
             ↓
         Controller dispatch (if route has action)
             ↓
@@ -346,7 +347,6 @@ Routes are loaded from `routes.cfg` JSON files (same format as before):
         "level": 1,
         "action": "dashboard/fetch",
         "location": ["apps"],
-        "level": 0,
         "parent": null,
         "label": "Dashboard",
         "icon": "speedometer2",
@@ -398,13 +398,14 @@ The View engine uses output buffering — it returns a string instead of printin
 
 ### 7.6 Auth Middleware Chain
 
-Private routes go through this auth chain (same as before):
+Private routes go through this auth chain:
 1. Auth module loaded? → 430
 2. User authenticated? → 430
 3. User deleted? → 401
 4. User banned? → 403
 5. User verified? → 432
-6. User authorized for route+level? → 403
+6. 2FA required & not verified? → 427
+7. User authorized for route+level? → 403
 
 ### 7.7 Plugin Hooks
 
@@ -661,7 +662,7 @@ https://example.com/
   → index.php (project root — thin proxy)
   → Bootstrap('ROUTER')
   → Router::match(namespace)
-  → Middleware chain (Auth → Maintenance)
+  → Middleware chain: Auth → 2FA → Maintenance
   → Controller dispatch or Response::render()
   → Response::send()
 ```
@@ -672,7 +673,7 @@ https://example.com/
   → webroot/index.php (front controller)
   → Bootstrap('ROUTER')
   → Router::match(namespace)
-  → Middleware chain (Auth → Maintenance)
+  → Middleware chain: Auth → 2FA → Maintenance
   → Controller dispatch or Response::render()
   → Response::send()
 ```
@@ -839,11 +840,11 @@ php cli core serve [--port=8080]
 
 ## 20. Testing Architecture
 
-### 20.1 Two-Layer Testing Strategy
+### 20.1 Three-Layer Testing Strategy
 
 **Layer 1 — Syntax validation**: `php -l` on all PHP files (CI gate)
-**Layer 2 — Route accessibility tests**: CoreCommand test commands
-**Layer 3 — Unit tests**: PHPUnit for individual components
+**Layer 2 — Route smoke test**: `tests/route_smoke_test.php` dispatches every registered route in guest + auth modes, fails on any HTTP 500 or exception
+**Layer 3 — Unit tests**: PHPUnit for individual components (Router, Response, View, Controller, Middleware, Hook, EntryPoint, ViewGlobals)
 
 ### 20.2 CoreCommand Test Commands
 
