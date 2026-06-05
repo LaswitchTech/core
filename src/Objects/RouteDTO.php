@@ -46,7 +46,9 @@ class RouteDTO
             $this->public   = $data['public'] ?? true;
             $this->level    = $data['level'] ?? 0;
             $this->action   = $data['action'] ?? null;
-            $this->parent   = $data['parent'] ?? null;
+            // parent can be a string, array, or null — normalize to ?string
+            $p = $data['parent'] ?? null;
+            $this->parent = is_array($p) ? (empty($p) ? null : json_encode($p)) : ($p ?? null);
             $this->location = $data['location'] ?? [];
             $this->label    = $data['label'] ?? null;
             $this->icon     = $data['icon'] ?? null;

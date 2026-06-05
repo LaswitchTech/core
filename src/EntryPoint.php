@@ -6,6 +6,7 @@ namespace LaswitchTech\Core;
 use LaswitchTech\Core\Middleware\Auth2FAMiddleware;
 use LaswitchTech\Core\Middleware\AuthMiddleware;
 use LaswitchTech\Core\Middleware\MaintenanceMiddleware;
+use LaswitchTech\Core\Objects\RouteDTO;
 use LaswitchTech\Core\Response;
 
 /**
@@ -79,10 +80,15 @@ class EntryPoint
             return $this->dispatchController($route);
         }
 
-        // No action — default to rendering template+view
-        return Response::render($route->template, $route->view, [
-            'directory' => null,
-        ]);
+        // No action — render template+view if available
+        if ($route->template !== null) {
+            return Response::render($route->template, $route->view, [
+                'directory' => null,
+            ]);
+        }
+
+        // Route has neither action nor template — incomplete definition
+        return Response::error(501, "Route '{$route->namespace}' has no action or template.");
     }
 
     /**
@@ -113,9 +119,11 @@ class EntryPoint
         $actionName = ($parts[1] ?? '') . 'Action';
 
         // Resolve controller path
-        $path = Config::root() . DIRECTORY_SEPARATOR . 'Controller' . DIRECTORY_SEPARATOR . $controllerName . '.php';
+        global $CONFIG;
+        $root = $CONFIG ? $CONFIG->root() : ROOT_PATH;
+        $path = $root . DIRECTORY_SEPARATOR . 'Controller' . DIRECTORY_SEPARATOR . $controllerName . '.php';
         if (!is_file($path)) {
-            $path = Config::root() . DIRECTORY_SEPARATOR . 'lib' . DIRECTORY_SEPARATOR . 'plugins' . DIRECTORY_SEPARATOR . ($parts[0] ?? '') . DIRECTORY_SEPARATOR . 'Controller.php';
+            $path = $root . DIRECTORY_SEPARATOR . 'lib' . DIRECTORY_SEPARATOR . 'plugins' . DIRECTORY_SEPARATOR . ($parts[0] ?? '') . DIRECTORY_SEPARATOR . 'Controller.php';
         }
 
         if (!is_file($path) || !class_exists($controllerName)) {

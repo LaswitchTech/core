@@ -16,20 +16,19 @@ use Exception;
 class Module {
 
     /**
-     * Call
+     * Magic method for undefined methods.
+     *
+     * Emits a warning but does NOT exit — callers should check return values.
+     * This is intentional: Module is a generic container, not a final authority.
      */
     public function __call($name, $arguments){
 
-        // Set a warning message to notify the user that the method is not available and that the class/module is not installed
+        // Emit a warning message and log it
         $message = "Warning: Method " . $name . " is not available. The class/module is not installed." . PHP_EOL;
+        trigger_error($message, E_USER_WARNING);
+        error_log(trim($message));
 
-        // Output the warning message
-        echo $message;
-
-        // Log the warning message
-        error_log($message);
-
-        // Exit the script and stop the execution
-        exit;
+        // Return false (safe fallback) instead of exiting
+        return false;
     }
 }
