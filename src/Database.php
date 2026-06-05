@@ -58,6 +58,10 @@ class Database {
                 $this->connector = new Connectors\MySQL();
                 $this->connector->connect();
                 break;
+            case 'sqlite':
+                $this->connector = new Connectors\SQLite();
+                $this->connector->connect();
+                break;
             default:
                 // Fall back to a no-op connector when no database is configured.
                 // This allows bootstrap, CLI, and tests to run without a database.
