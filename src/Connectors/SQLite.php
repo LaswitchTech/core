@@ -38,10 +38,13 @@ class SQLite extends Connector
             throw new Exception("SQLite connector requires 'path' in database.cfg");
         }
 
-        // If path is relative, resolve it from the current working directory
-        $fullName = ($path[0] === '/') ? $path : (realpath('.') . '/' . $path);
+        // Ensure the parent directory exists for the SQLite file
+        $dir = dirname($path);
+        if (!is_dir($dir)) {
+            mkdir($dir, 0755, true);
+        }
 
-        $this->pdo = new PDO('sqlite:' . $fullName, '', '', [
+        $this->pdo = new PDO('sqlite:' . $path, '', '', [
             PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
             PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
             PDO::ATTR_PERSISTENT         => false,

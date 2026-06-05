@@ -14,25 +14,23 @@ use LaswitchTech\Core\Abstracts\Connector;
 class NullConnector extends Connector
 {
     /**
-     * @return bool Always false
+     * @return false Always (no-op)
      */
-    public function connect(): bool
+    public function connect(): void
     {
-        return false;
     }
 
     /**
-     * @return bool Always false
+     * @return false Always (no-op)
+     */
+    public function close(): void
+    {
+    }
+
+    /**
+     * @return false Always false
      */
     public function isConnected(): bool
-    {
-        return false;
-    }
-
-    /**
-     * @return bool Always false
-     */
-    public function close(): bool
     {
         return false;
     }
@@ -72,7 +70,7 @@ class NullConnector extends Connector
     /**
      * @return false Never prepares a real statement
      */
-    public function prepare(string $sql, array $params = []): bool
+    public function prepare(string $sql, array $params = []): mixed
     {
         return false;
     }
