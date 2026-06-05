@@ -5,6 +5,7 @@ namespace LaswitchTech\Core\Connectors;
 use PDO;
 use PDOException;
 use Exception;
+use LaswitchTech\Core\Abstracts\Connector;
 
 /**
  * SQLite database connector using PDO.
@@ -37,12 +38,10 @@ class SQLite extends Connector
             throw new Exception("SQLite connector requires 'path' in database.cfg");
         }
 
-        $dir = dirname($path);
-        if (!is_dir($dir)) {
-            mkdir($dir, 0755, true);
-        }
+        // If path is relative, resolve it from the current working directory
+        $fullName = ($path[0] === '/') ? $path : (realpath('.') . '/' . $path);
 
-        $this->pdo = new PDO('sqlite:' . realpath('.') . '/' . ($path), '', '', [
+        $this->pdo = new PDO('sqlite:' . $fullName, '', '', [
             PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
             PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
             PDO::ATTR_PERSISTENT         => false,

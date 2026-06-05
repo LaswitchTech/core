@@ -16,12 +16,16 @@ class SQLiteConnectorTest extends TestCase
     {
         parent::setUp();
         $this->dbPath = sys_get_temp_dir() . '/smoketest_sqlite_' . uniqid() . '.db';
-        $GLOBALS['CONFIG'] = new class {
+        
+        // Pass the actual temp path so SQLite can open the file
+        $GLOBALS['CONFIG'] = new class($this->dbPath) {
+            private string $dbPath;
+            public function __construct(string $dbPath) { $this->dbPath = $dbPath; }
             public function get(?string $key = null, ?string $sub = null): mixed {
-                return [
-                    'connector' => 'sqlite',
-                    'path' => realpath('.') . '/' . str_replace(realpath('.'), '', (function() use(){ echo __DIR__; })()),
-                ][$key] ?? match([$key,$sub]) {
+                if ($key === 'database') {
+                    return ['connector' => 'sqlite', 'path' => $this->dbPath];
+                }
+                return match([$key,$sub]) {
                     ['application','installed'] => true,
                     default => null,
                 };

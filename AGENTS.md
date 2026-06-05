@@ -1,5 +1,23 @@
 # Core-Web — Agent Quick Reference
 
+## Working Loop
+
+When given a development task:
+
+1. Read the current git status.
+2. Review the relevant files.
+3. Create or update a TODO list.
+4. Implement one small safe change.
+5. Run the relevant tests.
+6. Fix failures.
+7. Commit only when explicitly asked.
+8. If the task is not complete, continue with the next TODO instead of stopping.
+9. Only stop when:
+   - the task is fully complete,
+   - user approval is required,
+   - tests cannot proceed,
+   - or a blocker is clearly documented.
+
 ## Setup
 
 ```sh

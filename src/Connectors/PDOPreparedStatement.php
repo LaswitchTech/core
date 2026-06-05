@@ -12,7 +12,7 @@ use PDOStatement;
  */
 class PDOPreparedStatement
 {
-    private PDOStatement $stmt;
+    private ?PDOStatement $stmt;
 
     public function __construct(PDOStatement $stmt)
     {
