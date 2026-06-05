@@ -689,7 +689,12 @@ class Query {
      */
     public function autoIncrement(int $int): void
     {
-        $sql = "ALTER TABLE `{$this->table}` AUTO_INCREMENT = {$int}";
+        if (method_exists($this->connector, 'autoIncrementSQL')) {
+            $sql = $this->connector->autoIncrementSQL($this->table, $int);
+        } else {
+            // MySQL default
+            $sql = "ALTER TABLE `{$this->table}` AUTO_INCREMENT = {$int}";
+        }
         $this->connector->query($sql);
     }
 }

@@ -124,18 +124,31 @@ class Schema {
             // Load the table definition
             $definitions = $this->connector->describe($table);
 
-            // Retrieve the table engine, charset and collation
-            $sql = "SHOW TABLE STATUS LIKE '{$table}'";
-            $result = $this->connector->query($sql);
-            $row = $result->fetch_assoc();
+            // Retrieve the table engine, charset and collation (dialect-aware)
+            if ($this->connector->getDefaultCharset() !== '') {
+                $sql = "SHOW TABLE STATUS LIKE '{$table}'";
+                $result = $this->connector->query($sql);
+                if ($result !== null && method_exists($result, 'fetch_assoc') && ($row = $result->fetch_assoc()) && !empty($row['Engine'])) {
+                    // Set the table engine
+                    $this->engine = $row['Engine'];
 
-            // Set the table engine
-            $this->engine = $row['Engine'];
+                    // Set the table charset and collation
+                    $Collation = explode('_', $row['Collation']);
+                    $this->charset = $Collation[0];
+                    $this->collation = str_replace($this->charset.'_','',$row['Collation']);
+                } else {
+                    // Connector doesn't support SHOW TABLE STATUS — fall back to defaults
+                    $this->engine = $this->connector->getDefaultEngine();
+                    $this->charset = $this->connector->getDefaultCharset();
+                    $this->collation = $this->connector->getDefaultCollation();
+                }
+            } else {
+                // Charset-less connector (e.g. SQLite) — use defaults from the connector
+                $this->engine = $this->connector->getDefaultEngine();
+                $this->charset = $this->connector->getDefaultCharset();
+                $this->collation = $this->connector->getDefaultCollation();
+            }
 
-            // Set the table charset and collation
-            $Collation = explode('_', $row['Collation']);
-            $this->charset = $Collation[0];
-            $this->collation = str_replace($this->charset.'_','',$row['Collation']);
         } else {
 
             // Retrieve the definition from the file
@@ -411,6 +424,10 @@ class Schema {
      */
     private function buildModifyColumnQuery(string $colName, array $memDef): string
     {
+        // SQLite doesn't support MODIFY COLUMN; return a warning instead
+        if (!$this->connector->supportsModifyColumn()) {
+            return "/* MODIFY_COLUMN_NOT_SUPPORTED: ALTER TABLE `{$this->table}` ADD COLUMN _sqlite_mod_hack */";
+        }
         $colDefSQL = $this->buildColumnSQL($memDef, $colName);
         return "ALTER TABLE `{$this->table}` MODIFY COLUMN {$colDefSQL}";
     }
@@ -477,14 +494,22 @@ class Schema {
     {
         $columnLines = [];
         foreach ($this->definitions as $definition) {
-            $columnLines[] = $this->buildColumnSQL($definition->define(), $definition->define()['Field']);
+            // Apply connector-specific type mappings before building SQL
+            // (e.g. ENUM → TEXT, tinyint(1) → BOOLEAN for SQLite)
+            if (method_exists($this->connector, 'defineColumn')) {
+                $def = $this->connector->defineColumn($definition->define());
+            } else {
+                $def = $definition->define();
+            }
+            $columnLines[] = $this->buildColumnSQL($def, $def['Field']);
         }
 
         // Check if we have primary keys
         $primaryKeys = [];
         foreach ($this->definitions as $definition) {
-            if (isset($definition->define()['Key']) && $definition->define()['Key'] === 'PRI') {
-                $primaryKeys[] = $definition->define()['Field'];
+            $mappedDef = method_exists($this->connector, 'defineColumn') ? $this->connector->defineColumn($definition->define()) : $definition->define();
+            if (isset($mappedDef['Key']) && $mappedDef['Key'] === 'PRI') {
+                $primaryKeys[] = $mappedDef['Field'];
             }
         }
 
@@ -494,10 +519,14 @@ class Schema {
             $columnLines[] = "PRIMARY KEY ($pk)";
         }
 
-        // For demonstration, assume InnoDB engine
-        // In real usage, you might store the engine in definition or config
+        // Build CREATE TABLE with dialect-aware suffix
         $columnsSQL = implode(",\n  ", $columnLines);
-        $sql = "CREATE TABLE `{$this->table}` (\n  {$columnsSQL}\n) ENGINE={$this->engine} DEFAULT CHARSET={$this->charset} COLLATE={$this->charset}_{$this->collation}";
+        if ($this->connector->getDefaultCharset() !== '') {
+            $sql = "CREATE TABLE `{$this->table}` (\n  {$columnsSQL}\n) ENGINE={$this->engine} DEFAULT CHARSET={$this->charset} COLLATE={$this->charset}_{$this->collation}";
+        } else {
+            // SQLite and other charset-less connectors
+            $sql = "CREATE TABLE `{$this->table}` (\n  {$columnsSQL})";
+        }
         return $sql;
     }
 
@@ -568,9 +597,26 @@ class Schema {
      */
     public function exists(): bool
     {
+        if (!$this->canExecute()) {
+            return false;
+        }
+
+        // Connector-aware: delegate to the connector's own SQL generation
+        if (method_exists($this->connector, 'tableExistsSQL')) {
+            $sql = $this->connector->tableExistsSQL($this->table);
+            $result = $this->connector->query($sql);
+
+            if ($result instanceof PDOResult) {
+                return !empty($result->fetch_assoc());
+            }
+            // mysqli_result path
+            return $result->num_rows > 0;
+        }
+
+        // Legacy fallback: MySQL-style
         $sql = "SHOW TABLES LIKE '{$this->table}'";
         $result = $this->connector->query($sql);
-        return $result->num_rows > 0;
+        return method_exists($result, 'num_rows') ? $result->num_rows > 0 : false;
     }
 
     /**
@@ -584,8 +630,21 @@ class Schema {
             return [];
         }
 
-        $sql = "SHOW TABLES";
+        // Connector-aware: delegate to the connector's own SQL generation
+        $showTablesSQL = null;
+        if (method_exists($this->connector, 'showTablesSQL')) {
+            $showTablesSQL = $this->connector->showTablesSQL();
+        }
+
+        $sql = $showTablesSQL ?? 'SHOW TABLES';
         $result = $this->connector->query($sql);
+
+        if ($result instanceof PDOResult) {
+            // PDO returns fetchAll rows as associative or indexed arrays
+            return array_column($result->fetchAll(), 0);
+        }
+
+        // mysqli_result path (SHOW TABLES returns a single column)
         $tables = [];
         while ($row = $result->fetch_row()) {
             $tables[] = $row[0];

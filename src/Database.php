@@ -137,20 +137,38 @@ class Database {
         $status = [];
 
         // Check if the config includes all the required fields
-        if(isset($config['connector'],$config['host'],$config['database'],$config['username'],$config['password'])){
+        $connector = $config['connector'] ?? 'mysql';
 
-            // Save the settings
-            $this->Config->set('database', 'connector', $config['connector']);
+        if ($connector === 'sqlite') {
+            // SQLite only needs 'path'
+            if (isset($config['path'])) {
+                $this->Config->set('database', 'connector', 'sqlite');
+                $this->Config->set('database', 'path', $config['path']);
+
+                $this->connect();
+
+                if ($this->isConnected()) {
+                    foreach ($this->schema()->tables() as $table) {
+                        $this->schema()->define($table)->drop();
+                    }
+                } else {
+                    $this->Config->delete('database');
+                    return ["Could not connect to the database file"];
+                }
+            } else {
+                return [ "SQLite requires a 'path' config key" ];
+            }
+        } elseif (isset($config['host'],$config['database'],$config['username'],$config['password'])) {
+            // MySQL-style credentials
+            $this->Config->set('database', 'connector', $connector);
             $this->Config->set('database', 'host', $config['host']);
             $this->Config->set('database', 'database', $config['database']);
             $this->Config->set('database', 'username', $config['username']);
             $this->Config->set('database', 'password', $config['password']);
 
-            // Connect to the database server
             $this->connect();
 
-            // Check if the database server is connected
-            if($this->isConnected()){
+            if ($this->isConnected()) {
 
                 // Loop through the tables in the database
                 foreach ($this->schema()->tables() as $table) {

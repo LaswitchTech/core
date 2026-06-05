@@ -165,4 +165,99 @@ class SQLite extends Connector
             throw new Exception($e->getMessage(), (int) $e->getCode());
         }
     }
+
+    // -------------------------------------------------------------------------
+    // Connector dialect introspection
+    // -------------------------------------------------------------------------
+
+    public function getDefaultEngine(): string
+    {
+        return 'SQLite';
+    }
+
+    public function getDefaultCharset(): string
+    {
+        return '';
+    }
+
+    public function getDefaultCollation(): string
+    {
+        return '';
+    }
+
+    public function supportsModifyColumn(): bool
+    {
+        return false;
+    }
+
+    public function showTablesSQL(?string $like = null): string
+    {
+        $sql = "SELECT name FROM sqlite_master WHERE type='table'";
+        if ($like !== null) {
+            // SQLite LIKE is case-insensitive for ASCII
+            $escaped = addcslashes($like, '%_\\');
+            $sql .= " AND name LIKE '" . $escaped . "' ESCAPE '\\'";
+        }
+        return $sql;
+    }
+
+    public function tableExistsSQL(string $table): string
+    {
+        $escaped = addcslashes($table, '%_\\');
+        return "SELECT name FROM sqlite_master WHERE type='table' AND name LIKE '" . $escaped . "' ESCAPE '\\'";
+    }
+
+    public function autoIncrementSQL(string $table, int $int): string
+    {
+        // SQLite uses sqlite_sequence to manage AUTOINCREMENT counters
+        $escaped = addcslashes($table, '\\');
+        return "INSERT INTO sqlite_sequence (name, seq) VALUES ('{$escaped}', {$int}) ON CONFLICT(name) DO UPDATE SET seq = {$int}";
+    }
+
+    /**
+     * Returns the list of tables directly from SQLite (not via raw SQL),
+     * used by Schema.php for column introspection in SHOW TABLE STATUS.
+     */
+    public function describeTableStatus(): array
+    {
+        if (!$this->isConnected()) {
+            return [];
+        }
+        try {
+            $result = $this->pdo->query(
+                "SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%'"
+            );
+            return (array) $result->fetchAll(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            return [];
+        }
+    }
+
+    /**
+     * Convert a column definition for SQLite dialect.
+     * Mapping rules:
+     *   - ENUM(...)/SET(...) → TEXT (SQLite has no ENUM/SET; preserve values in comment)
+     *   - tinyint(1) → BOOLEAN
+     *   - AUTO_INCREMENT → AUTOINCREMENT (no underscore)
+     */
+    public function defineColumn(array $def): array
+    {
+        // ENUM / SET → TEXT for SQLite
+        if (preg_match('/^(enum|set)\(/i', $def['Type'] ?? '')) {
+            $def['Type'] = 'TEXT';
+            $def['Extra'] = ($def['Extra'] === '' ? '' : $def['Extra'] . ', ') . "ENUM(" . $def['Type'] . ")";
+        }
+
+        // tinyint(1) → BOOLEAN (maps to numeric in SQLite, but clearer for tooling)
+        if (preg_match('/^tinyint\(1\)$/', $def['Type'] ?? '')) {
+            $def['Type'] = 'BOOLEAN';
+        }
+
+        // AUTO_INCREMENT → AUTOINCREMENT
+        if (stripos($def['Extra'] ?? '', 'auto_increment') !== false) {
+            $def['Extra'] = preg_replace('/auto_increment/i', 'AUTOINCREMENT', $def['Extra']);
+        }
+
+        return $def;
+    }
 }

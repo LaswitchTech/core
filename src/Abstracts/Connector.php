@@ -119,4 +119,83 @@ abstract class Connector {
         // Implementation in child classes
         return false;
     }
+
+    /**
+     * Default engine name for CREATE TABLE (InnoDB, SQLite, etc.).
+     */
+    public function getDefaultEngine(): string
+    {
+        return 'InnoDB';
+    }
+
+    /**
+     * Default charset for tables.
+     */
+    public function getDefaultCharset(): string
+    {
+        return 'utf8mb4';
+    }
+
+    /**
+     * Default collation suffix (without the charset prefix).
+     */
+    public function getDefaultCollation(): string
+    {
+        return 'general_ci';
+    }
+
+    /**
+     * Whether this connector supports column ALTER/MODIFY.
+     * SQLite does not support MODIFY COLUMN; it requires a create-deny-rename pattern.
+     */
+    public function supportsModifyColumn(): bool
+    {
+        return true;
+    }
+
+    /**
+     * SQL to list tables. Override in connectors that use a dialect other than MySQL's SHOW TABLES.
+     */
+    public function showTablesSQL(?string $like = null): string
+    {
+        if ($like !== null) {
+            return "SHOW TABLES LIKE '" . $this->escapeLike($like) . "'";
+        }
+        return 'SHOW TABLES';
+    }
+
+    /**
+     * SQL to check if a specific table exists.
+     */
+    public function tableExistsSQL(string $table): string
+    {
+        return "SHOW TABLES LIKE '" . $this->escapeLike($table) . "'";
+    }
+
+    /**
+     * Escape LIKE wildcards (% and _) in table/column names.
+     */
+    protected function escapeLike(string $value): string
+    {
+        return addcslashes($value, '%_\\');
+    }
+
+    /**
+     * Generate the SQL to set AUTO_INCREMENT start value.
+     * SQLite uses UPDATE sqlite_sequence; MySQL uses ALTER TABLE AUTO_INCREMENT.
+     */
+    public function autoIncrementSQL(string $table, int $int): string
+    {
+        return "ALTER TABLE `{$table}` AUTO_INCREMENT = {$int}";
+    }
+
+    /**
+     * Transform a column definition for this connector's dialect.
+     * Example: ENUM → TEXT for SQLite; tinyint(1) → BOOLEAN; AUTO_INCREMENT → AUTOINCREMENT.
+     */
+    public function defineColumn(array $def): array
+    {
+        // MySQL default — no transformations
+        return $def;
+    }
 }
