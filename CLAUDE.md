@@ -309,6 +309,12 @@ When contributing to this repository:
 
 ---
 
+## Output Discipline
+
+Keep all outputs concise. Maximum 500 lines per file you create/write. Never dump full file contents in responses — use summaries, diffs, or targeted excerpts only. In plan mode: write to the plan file directly, do not produce verbose exploration reports. If a planned implementation will exceed 10 files or 2000 lines total, break it into sequential tasks and commit each batch.
+
+---
+
 ## Current Development Context
 
 The repository has been pulled locally and Apache has been configured for:
