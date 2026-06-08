@@ -535,101 +535,122 @@ class Auth {
                 $user->session()->clear();
             } else {
 
-                // Validate Password
-                $load = ($password) ? (bool) $user->backend()->validate($password) : true;
+        // Validate Password
+        $load = ($password) ? (bool) $user->backend()->validate($password) : true;
 
-                // Check if the user can be loaded
-                if($load){
+        // Check if the user can be loaded
+        if($load){
 
-                    // Load User
-                    $this->user = $user;
+            // Load User
+            $this->user = $user;
 
-                    // Check if the user is deleted
-                    $status = !$this->user->deleted();
+            // Check if the user is deleted
+            $status = !$this->user->deleted();
 
-                    // Check if the user's organization is active
-                    $status = ($status && $this->user->organization['isActive'] > 0);
+            // Check if the user's organization is active
+            $status = ($status && $this->user->organization['isActive'] > 0);
 
-                    // Check the user status
-                    if($status){
+            // Check the user status
+            if($status){
 
-                        // Set User Last Login
-                        $this->user->lastLogin();
+                // Set User Last Login
+                $this->user->lastLogin();
 
-                        // Set Session
-                        $this->user->session()->create();
+                // Set Session
+                $this->user->session()->create();
 
-                        // Check if TOTP is enabled for this user and not yet verified in this session
-                        if ($this->user->setting('totp_enabled') === true) {
-                            $twoFaVerified = $REQUEST->getParams('SESSION', 'auth-2fa-' . session_id());
-                            if (!$twoFaVerified) {
-                                $this->needs_2fa = true;
-                                return true;  // password OK — middleware intercepts after this returns
-                            }
+                // Import Global Variables - need AuditLogger here
+                global $AUDIT;
+
+                // Log successful authentication
+                if (isset($AUDIT) && $AUDIT instanceof \LaswitchTech\Core\Objects\AuditLogger) {
+                    $AUDIT->logAuth('login', [
+                        'username' => $user->username,
+                        'method' => $this->method ?? 'unknown',
+                        'ip' => $_SERVER['REMOTE_ADDR'] ?? 'unknown'
+                    ]);
+                }
+
+                // Check if TOTP is enabled for this user and not yet verified in this session
+                if ($this->user->setting('totp_enabled') === true) {
+                    $twoFaVerified = $REQUEST->getParams('SESSION', 'auth-2fa-' . session_id());
+                    if (!$twoFaVerified) {
+                        $this->needs_2fa = true;
+                        return true;  // password OK — middleware intercepts after this returns
+                    } else {
+                        // Log successful TOTP verification
+                        if (isset($AUDIT) && $AUDIT instanceof \LaswitchTech\Core\Objects\AuditLogger) {
+                            $AUDIT->logAuth('2fa_success', [
+                                'username' => $user->username,
+                                'method' => 'totp',
+                                'ip' => $_SERVER['REMOTE_ADDR'] ?? 'unknown'
+                            ]);
                         }
-
-                        // Check if the user is verified
-                        if(!$this->user->verified()){
-
-                            // Check if username is in request params
-                            if(is_null($REQUEST->getParams('REQUEST','username'))){
-
-                                // Redirect to verification page (?username='.$user->username.')
-                                header('Location: ?username='.$user->username);
-                            } else {
-
-                                // Check if we should resend the verification pin
-                                if(is_null($user->pin['id']) || !is_null($REQUEST->getParams('REQUEST','resend'))){
-
-                                    // Set a new pin
-                                    $this->setPin($user->username, function(object $user, string $pin){
-
-                                        // Import Global Variables
-                                        global $SMTP, $REQUEST;
-
-                                        // Write the email
-                                        $body = '';
-                                        $body .= '<p>Here is your verification code:</p>';
-                                        $body .= '<pre style="background-color: #F5F5F5; font-weight: 700; font-size: 28px; text-align: center; letter-spacing: 16px; margin: 20px 20px; padding: 20px 0; font-family: Courier, monospace">'.($pin ?? 'ERROR!').'</pre>';
-                                        $body .= '<p>Please follow the link below to verify your acount.</p>';
-                                        $body .= '<p style="text-align:center;margin-top: 40px;margin-bottom:40px;">';
-                                        $body .= '<a href="'.$REQUEST->getHostAddress().'?username='.$user->username.'&verify='.$pin.'" target="_blank" style="margin-left: 6px; margin-right: 6px; text-decoration:none; background-color: #528fb3;color: #fff;font-size: 24px;padding: 20px 40px;text-align: center;margin: 20px 20px;border-radius: 8px;">Verify</a>';
-                                        $body .= '</p>';
-                                        $body .= '<p>If you did not request this code, please contact your system administrator immediately.</p>';
-
-                                        // Create a new message
-                                        $eml = $SMTP->message()
-                                            ->subject('Account Verification')
-                                            ->body($body);
-
-                                        // Return the message
-                                        return $eml;
-                                    });
-                                } else {
-
-                                    // Check if code is in request params
-                                    if(!is_null($REQUEST->getParams('REQUEST','code'))){
-
-                                        // Verify the pin
-                                        $this->verifyPin($user->username, $REQUEST->getParams('REQUEST','code'),function(object $user){
-
-                                            // Import Global Variables
-                                            global $REQUEST;
-
-                                            // Verify the user
-                                            $user->verify();
-
-                                            // Redirect to original page
-                                            header('Location: '.$REQUEST->getHostAddress() . $REQUEST->getUri());
-                                        });
-                                    }
-                                }
-                            }
-                        }
-
-                        return true;
                     }
                 }
+
+                // Check if the user is verified
+                if(!$this->user->verified()){
+
+                    // Check if username is in request params
+                    if(is_null($REQUEST->getParams('REQUEST','username'))){
+
+                        // Redirect to verification page (?username='.$user->username.')
+                        header('Location: ?username='.$user->username);
+                    } else {
+
+                        // Check if we should resend the verification pin
+                        if(is_null($user->pin['id']) || !is_null($REQUEST->getParams('REQUEST','resend'))){
+
+                            // Set a new pin
+                            $this->setPin($user->username, function(object $user, string $pin){
+
+                                // Import Global Variables
+                                global $SMTP, $REQUEST;
+
+                                // Write the email
+                                $body = '';
+                                $body .= '<p>Here is your verification code:</p>';
+                                $body .= '<pre style="background-color: #F5F5F5; font-weight: 700; font-size: 28px; text-align: center; letter-spacing: 16px; margin: 20px 20px; padding: 20px 0; font-family: Courier, monospace">'.($pin ?? 'ERROR!').'</pre>';
+                                $body .= '<p>Please follow the link below to verify your acount.</p>';
+                                $body .= '<p style="text-align:center;margin-top: 40px;margin-bottom:40px;">';
+                                $body .= '<a href="'.$REQUEST->getHostAddress().'?username='.$user->username.'&verify='.$pin.'" target="_blank" style="margin-left: 6px; margin-right: 6px; text-decoration:none; background-color: #528fb3;color: #fff;font-size: 24px;padding: 20px 40px;text-align: center;margin: 20px 20px;border-radius: 8px;">Verify</a>';
+                                $body .= '</p>';
+                                $body .= '<p>If you did not request this code, please contact your system administrator immediately.</p>';
+
+                                // Create a new message
+                                $eml = $SMTP->message()
+                                    ->subject('Account Verification')
+                                    ->body($body);
+
+                                // Return the message
+                                return $eml;
+                            });
+                        } else {
+
+                            // Check if code is in request params
+                            if(!is_null($REQUEST->getParams('REQUEST','code'))){
+
+                                // Verify the pin
+                                $this->verifyPin($user->username, $REQUEST->getParams('REQUEST','code'),function(object $user){
+
+                                    // Import Global Variables
+                                    global $REQUEST;
+
+                                    // Verify the user
+                                    $user->verify();
+
+                                    // Redirect to original page
+                                    header('Location: '.$REQUEST->getHostAddress() . $REQUEST->getUri());
+                                });
+                            }
+                        }
+                    }
+                }
+
+                return true;
+            }
+        }
             }
         }
 
@@ -697,6 +718,9 @@ class Auth {
      */
     public function verifyTotp(int $userId, string $code): bool
     {
+        // Import Global Variables
+        global $AUDIT;
+        
         // Retrieve the user's TOTP secret
         $user = $this->Database->query()
             ->table('users')
@@ -714,7 +738,18 @@ class Auth {
         
         // Create a new pin with TOTP support
         $Pin = new Objects\Pin();
-        return $Pin->verifyTotp($secret, $code);
+        $result = $Pin->verifyTotp($secret, $code);
+        
+        // Log verification attempt
+        if (isset($AUDIT) && $AUDIT instanceof \LaswitchTech\Core\Objects\AuditLogger) {
+            $AUDIT->logAuth($result ? '2fa_verify_success' : '2fa_verify_failed', [
+                'user_id' => $userId,
+                'code' => $code,
+                'ip' => $_SERVER['REMOTE_ADDR'] ?? 'unknown'
+            ]);
+        }
+        
+        return $result;
     }
     
     /**
