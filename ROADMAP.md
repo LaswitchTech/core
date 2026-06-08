@@ -420,12 +420,14 @@ Features that make the kernel production-ready.
 - `routes.cfg` — phpMyAdmin link under developer location
 - `Developer` role defined in Auth system
 
+**Status**: Complete
+
 **Tasks:**
-- [ ] Create `/admin/developer` page
-- [ ] Scaffold generator (plugins, endpoints, models, controllers, layouts)
-- [ ] Templates stored in `resources/scaffolds/`
-- [ ] Developer mode toggle (APP_DEBUG equivalent for admin)
-- [ ] Test tool availability and scaffold output
+- [x] Create `/admin/developer` page
+- [x] Scaffold generator (plugins, endpoints, models, controllers, layouts)
+- [x] Templates stored in `resources/scaffolds/`
+- [x] Developer mode toggle (APP_DEBUG equivalent for admin)
+- [x] Test tool availability and scaffold output
 
 ### 3.2 Documentation Plugin (P2)
 
