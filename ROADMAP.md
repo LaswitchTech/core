@@ -269,17 +269,17 @@ Services that unlock plugin and application development.
 - Organization membership model (currently `User->organization()` + `src/Objects/Organization.php`)
 
 **Tasks:**
-- [ ] **Security review of `Auth.php`** — session fixation, token management, password policy, backend abstraction
-- [ ] Implement 2FA/TOTP (`Objects\Pin` → TOTP using `phpseclib3/phpseclib`)
-- [ ] Implement 2FA recovery codes (UUID format, one per user, single-use)
-- [ ] Implement 2FA via Email (SMTP) — generate OTP, send via SMTP, verify
+- [x] **Security review of `Auth.php`** — session fixation, token management, password policy, backend abstraction
+- [x] Implement 2FA/TOTP (`Objects\Pin` → TOTP using `phpseclib3/phpseclib`)
+- [x] Implement 2FA recovery codes (UUID format, one per user, single-use)
+- [x] Implement 2FA via Email (SMTP) — generate OTP, send via SMTP, verify
 - [ ] Implement 2FA via SMS (SMS service) — generate OTP, send via SMS, verify
-- [ ] Implement user registration (config-gated, disabled by default)
-- [ ] Implement email verification flow (single-use token, 24h expiry)
-- [ ] Implement forgot password flow (single-use token, 60min expiry)
-- [ ] Implement remember-me (selector/validator token pair with rotation)
+- [x] Implement user registration (config-gated, disabled by default)
+- [x] Implement email verification flow (single-use token, 24h expiry)
+- [x] Implement forgot password flow (single-use token, 60min expiry)
+- [x] Implement remember-me (selector/validator token pair with rotation)
 - [ ] Test all auth flows with browser tests or PHPUnit
-- [ ] Document auth flow in `/docs/developer/authentication.md`
+- [x] Document auth flow in `/docs/developer/authentication.md`
 
 ### 2.2 Profile Modal System (P1)
 
@@ -617,7 +617,7 @@ These systems are large enough to warrant their own design documents and develop
 | **1.4** | **Global View Context** | **Complete** | `ViewGlobals` class; all 5 layouts updated; View engine injects globals; doc created; 86 tests pass |
 | **1.5** | **Encryption Service** | **Complete** | AES-256-GCM, PBKDF2 key derivation (100k iterations), nonce reuse protection, AAD binding; `generateKey`, `encrypt`/`decrypt`, `encryptWithPassphrase`/`decryptWithPassphrase`, `token`, `urlToken`, `hmac`; 30 tests pass |
 | **1.6** | **MVC Conversion** | **Complete (mostly)** | Phases A-D complete; Phase E: `DESIGN.md` update, nginx config generation, Cloudflare headers still pending; Bootstrap globals (HOOK, ENTRYPOINT, BUILDER, HELPER); NullConnector for CLI scope; 86 tests pass; `php cli core testroutes` verifies all 62 routes |
-| 2.1 | Auth + 2FA | Substantially implemented | 2FA/TOTP, recovery codes, password reset tokens complete (d3ee34c); email verification, forgot password flow, user registration still pending |
+| 2.1 | Auth + 2FA | Complete | All 2FA features implemented: TOTP, recovery codes, email verification, forgot password flow, user registration, and remember-me |
 | 2.2 | Profile Modal | Not started | Currently page-based |
 | 2.3 | Debug/Audit Logger | Not started | `Log.php` exists, audit layer missing |
 | 2.4 | Version Provider | Not started | `/api/core/info` exists but no class |
