@@ -327,14 +327,16 @@ Services that unlock plugin and application development.
 
 ### 2.5 Dependency Resolver (P2)
 
-**Why**: Plugin install/enable/disable needs to resolve dependencies and block incompatible operations. Currently services are loaded flat in `Bootstrap.php`.
+**Why**: Plugin install/enable/disable needs to resolve dependencies and block incompatible operations. Currently services are loaded flat in Bootstrap.php.
+
+**Status**: Complete
 
 **Tasks:**
-- [ ] Create `DependencyResolver` class
-- [ ] Support dependency format: `plugin-name >=1.0.0`, `plugin-name <2.0.0`
-- [ ] Check install/enable/disable/uninstall for blocked operations
-- [ ] Add to extension catalog UI (block reason display)
-- [ ] Test dependency resolution with conflicting versions
+- [x] Create DependencyResolver class
+- [x] Support dependency format: plugin-name >=1.0.0, plugin-name <2.0.0
+- [x] Check install/enable/disable/uninstall for blocked operations
+- [x] Add to extension catalog UI (block reason display)
+- [x] Test dependency resolution with conflicting versions
 
 ### 2.6 Migration System Improvement (P2)
 
