@@ -1,7 +1,7 @@
 # Core-Web — Design Architecture & Decisions
 
 > **Status**: Early architecture / skeleton phase. APIs and internals may change between commits.
-> **Version**: v0.0.92
+> **Version**: v0.0.94
 
 ---
 
@@ -189,10 +189,10 @@ $CONFIG->delete('css');            // remove config file
 Database (kernel)
   └── Connectors\MySQL ()        # Fully implemented
       ├── Connectors\PostgreSQL  # Stub
-      └── Connectors\SQLite      # Stub
+      └── Connectors\SQLite      # Implemented (301 lines, full PDO_SQLITE)
 ```
 
-The connector is selected via `config/database.cfg` → `connector` key. Currently only `mysql` is implemented (default falls through to a switch-case with MySQL).
+The connector is selected via `config/database.cfg` → `connector` key. Currently `mysql` and `sqlite` are fully implemented.
 
 ### 5.2 Query Builder
 
@@ -743,7 +743,7 @@ php cli core serve [--port=8080]
 
 ### 17.5 Cloudflare
 
-- Cloudflare-friendly headers supported (CF-Connecting-IP)
+- Cloudflare support pending — needs `Request.php` header handling for CF-Connecting-IP, CF-Ray, etc.
 - No special configuration needed (works as long as PHP runs)
 
 ---
