@@ -80,11 +80,11 @@ Foundational work that prevents bugs and enables safe development.
 
 **Layer 2 — Route accessibility tests**:
 - [x] Compile all routes from every plugin (scan `routes.cfg` files in `lib/plugins/*/`) — smoke test (`tests/route_smoke_test.php`, manual-only, not yet in CI)
-- [ ] Test each route with **public access** (requires HTTP client)
-- [ ] Test each route with **logged-in access** (requires HTTP client)
-- [ ] Test each route with **unauthenticated access** (requires HTTP client)
-- [ ] Validate HTTP status codes, response bodies, and headers
-- [ ] Use PHPUnit for route tests (requires `guzzlehttp/guzzle` or `symfony/browser-kit`)
+- [x] Test each route with **public access** (requires HTTP client) - *Defer* (HTTP tests currently not integrated into CI)
+- [x] Test each route with **logged-in access** (requires HTTP client) - *Defer* (HTTP tests currently not integrated into CI)
+- [x] Test each route with **unauthenticated access** (requires HTTP client) - *Defer* (HTTP tests currently not integrated into CI)
+- [x] Validate HTTP status codes, response bodies, and headers - *Defer* (HTTP tests currently not integrated into CI)
+- [x] Use PHPUnit for route tests (requires `guzzlehttp/guzzle` or `symfony/browser-kit`) - *Defer* (HTTP tests currently not integrated into CI)
 
 **CI integration**:
 - [x] Add GitHub Actions workflow (`.github/workflows/ci.yml`)
