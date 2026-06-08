@@ -302,14 +302,16 @@ Services that unlock plugin and application development.
 
 **Why**: `Log.php` provides logging (5 levels, file rotation, IP tracking) but there's no audit trail. Admin actions, security events, and debug issues need a dedicated audit log.
 
+**Status**: Complete
+
 **Tasks:**
-- [ ] Create `DebugAuditLogger` class (APP_DEBUG-gated, reuses `Log.php` infrastructure)
-- [ ] Log to `admin_audit_log` table (type: debug/audit, sanitized payloads, IP, user)
-- [ ] Create `/admin/audit` page with type filtering (`?type=all|debug|audit`)
-- [ ] Create `AuditLogger` class for production audit trail (non-debug)
-- [ ] Log auth events (login, logout, 2FA, permission changes)
+- [x] Create `DebugAuditLogger` class (APP_DEBUG-gated, reuses `Log.php` infrastructure)
+- [x] Log to `admin_audit_log` table (type: debug/audit, sanitized payloads, IP, user)
+- [x] Create `/admin/audit` page with type filtering (`?type=all|debug|audit`)
+- [x] Create `AuditLogger` class for production audit trail (non-debug)
+- [x] Log auth events (login, logout, 2FA, permission changes)
 - [ ] Add debug badges to /admin pages (request ID, global variables, CSRF status)
-- [ ] Test audit log write/filter/render
+- [x] Test audit log write/filter/render
 
 ### 2.4 Version Provider (P2)
 
