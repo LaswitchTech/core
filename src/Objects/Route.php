@@ -592,4 +592,21 @@ class Route {
 
         return $this;
     }
+    
+    /**
+     * Special case handler for when rendering fails due to configuration issues
+     */
+    public function renderWithErrorHandling(bool $full = true): self
+    {
+        try {
+            return $this->render($full);
+        } catch (Error $e) {
+            // If the render fails specifically because of config issues 
+            // (like the $config variable being null), show a graceful message
+            echo "<h1>System Configuration Required</h1>";
+            echo "<p>Please configure the framework before accessing this page.</p>";
+            echo "<p><small>Error details: " . htmlspecialchars($e->getMessage()) . "</small></p>";
+            return $this;
+        }
+    }
 }

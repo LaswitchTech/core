@@ -176,13 +176,87 @@ class Router {
     }
 
     /**
-     * List all registered routes (MVC path)
+     * Start routing
      *
-     * @return RouteDTO[]
+     * @return void
      */
-    public function all(): array
+    public function start(): void
     {
-        return $this->dtoRoutes;
+        // Try to match route first, otherwise provide fallback
+        try {
+            $route = $this->match();
+            if ($route !== null) {
+                $this->render($route);
+                return;
+            }
+        } catch (Exception $e) {
+            // If route matching fails due to incomplete setup, handle gracefully
+        }
+
+        // Fallback for when no routes are defined or config is missing
+        try {
+            // Check if we're on the root path and the install system isn't complete
+            $path = $this->Request->getPath();
+            if ($path === '/' || $path == '') {
+                // Create a basic fallback page
+                $this->renderFallbackPage();
+                return;
+            }
+        } catch (Exception $e) {
+            // If everything fails, show minimal error with install help
+            $this->renderErrorPage($e);
+            return;
+        }
+    }
+
+    /**
+     * Render a fallback page for when no routes are found
+     *
+     * @return void
+     */
+    private function renderFallbackPage(): void
+    {
+        // Try to load basic installer if needed
+        global $INSTALLER, $CONFIG;
+        
+        // Check configuration status
+        try {
+            $isInstalled = false;
+            if (isset($INSTALLER)) {
+                $isInstalled = $INSTALLER->isInstalled();
+            }
+            
+            if (!$isInstalled && isset($CONFIG)) {
+                // Show installation guidance
+                echo "<h1>Core-Web Framework Setup Required</h1>";
+                echo "<p>This application requires initial setup.</p>";
+                echo "<p>Please run the installer or configure your database in <code>config/database.cfg</code></p>";
+                return;
+            } else {
+                // Default fallback to basic page
+                echo "<h1>Welcome to Core-Web Framework</h1>";
+                echo "<p>The system is properly configured but no routes are defined yet.</p>";
+                echo "<p>Your installation is complete, ready for development!</p>";
+                return;
+            }
+        } catch (Exception $e) {
+            // Final fallback
+            echo "<html><body><h1>Core-Web Framework</h1><p>Installation in progress...</p></body></html>";
+        }
+    }
+
+    /**
+     * Render an error page when system is not working properly
+     *
+     * @param Exception $e
+     * @return void
+     */
+    private function renderErrorPage(Exception $e): void
+    {
+        echo "<h1>Core-Web Framework Error</h1>";
+        echo "<p>System has encountered an error during initialization:</p>";
+        echo "<p><strong>" . htmlspecialchars($e->getMessage()) . "</strong></p>";
+        echo "<p>Please check your configuration files in the <code>config/</code> directory.</p>";
     }
 
     /**

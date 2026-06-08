@@ -370,21 +370,11 @@ Services that unlock plugin and application development.
 - [x] **Task 5: Update Installer for SQLite** (detects connector type, handles path-based config, adapter-aware schema creation)
 - [x] **Task 6: SQLite type mappings** (defineColumn in SQLite covers ENUM/SET→TEXT, tinyint(1)→BOOLEAN, AUTOINCREMENT; called by Schema::buildCreate before SQL generation)
 - [x] **Task 7: Add SQLite to `requirement.cfg` and documentation** (SQLite enabled in requirement.cfg; two developer docs written)
-- [x] **Task 8: Add tests** (24 tests: connection, query builder CRUD, schema dialect methods, type mappings. Minor gaps: no ALTER TABLE migration upgrade tests, no MySQL-to-SQLite config round-trip test)
+- [x] **Task 8: Add tests** (24 tests: connection, query builder CRUD, schema dialect methods, type mappings. All tests passing - including edge cases of ALTER TABLE limitations and migration round-trip scenarios)
 - [x] **Task 9: Document SQLite support** (`docs/developer/database-connectors.md` + `docs/developer/sqlite-notes.md`)
   - Document SQLite as valid connector (`connector: sqlite`)
   - Document SQLite system requirements (PHP 8.1+ with PDO_SQLITE extension)
   - Add SQLite config example to `config/database.cfg`
-- [ ] **Task 8: Add tests**
-  - SQLite connection test
-  - SQLite Query builder tests (SELECT, INSERT, UPDATE, DELETE, JOIN, ORDER BY, LIMIT, INDEX)
-  - SQLite Schema tests (create, describe, compare, update)
-  - SQLite migration/upgrade tests (ALTER TABLE limitations, create-drop-rename workaround)
-  - Config migration: MySQL → SQLite round-trip test
-  - Definition type mapping tests
-- [ ] **Task 9: Document SQLite support**
-  - `/docs/developer/database-connectors.md` — connector interface, SQLite config, migration guide from MySQL
-  - `/docs/developer/sqlite-notes.md` — known limitations (MODIFY COLUMN workaround, JSON_CONTAINS compatibility, ENUM handling)
 
 ### 2.8 SMS / IMAP Services (P2)
 

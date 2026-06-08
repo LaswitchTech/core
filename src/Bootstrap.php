@@ -239,6 +239,19 @@ class Bootstrap {
         $CONFIG = new Config('bootstrap');
         $this->Config = $CONFIG;
         $this->Config->add('application');
+        
+        // Check if we should redirect to installer
+        $installer = new \LaswitchTech\Core\Installer();
+        if (!$installer->isInstalled()) {
+            // Set up basic configuration for installation
+            try {
+                // Attempt to configure minimal environment for installer
+                $this->Config->add('database');
+                $this->Config->add('application');
+            } catch (Exception $e) {
+                // If config fails, proceed anyway to let installer work
+            }
+        }
 
         // Set the scope
         $this->scope = strtoupper($scope);
