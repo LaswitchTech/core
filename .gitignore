@@ -65,3 +65,6 @@ TOKEN
 # composer.lock
 .venv
 rag_index.json
+
+# Debug scripts
+debug_*.php
