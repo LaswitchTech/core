@@ -79,7 +79,7 @@ Foundational work that prevents bugs and enables safe development.
 - [x] Include all PHP files in `src/`, `lib/plugins/*/`, and `lib/modules/*/`
 
 **Layer 2 — Route accessibility tests**:
-- [x] Compile all routes from every plugin (scan `routes.cfg` files in `lib/plugins/*/`) — via `php cli core testroutes`
+- [x] Compile all routes from every plugin (scan `routes.cfg` files in `lib/plugins/*/`) — smoke test (`tests/route_smoke_test.php`, manual-only, not yet in CI)
 - [ ] Test each route with **public access** (requires HTTP client)
 - [ ] Test each route with **logged-in access** (requires HTTP client)
 - [ ] Test each route with **unauthenticated access** (requires HTTP client)
@@ -231,7 +231,8 @@ Hook          — plugin extension points (register/fire pattern)
 - [x] Add CoreCommand test commands (`test:routes` via `CoreCommand::testRoutesAction()`)
 - [x] Create unit tests for all new components (6 test files, 86 tests: Router, Response, View, Controller, Middleware, Hook, EntryPoint, ViewGlobals)
 - [x] Create test traits (`tests/Traits/MockGlobals.php`)
-- [x] Run all tests: `php vendor/bin/phpunit` (86 tests, 198 assertions, all pass)
+- [x] Add CoreCommand test commands (`test:routes` via `CoreCommand::testRoutesAction()`)
+- [x] Run all tests: `php vendor/bin/phpunit` (110 tests, all pass)
 
 #### Phase E — Documentation & Cleanup
 - [x] Update `ROADMAP.md` — add Phase 1.6, mark Complete
