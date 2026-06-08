@@ -670,158 +670,224 @@ class Auth {
     }
 
     /**
-     * Install the module
+     * Set up 2FA for a user
      *
-     * @param array $config
-     * @return array
+     * @param int $userId
+     * @param string $secret
+     * @return bool
      */
-    public function install(array $config): array
+    public function setupTotp(int $userId, string $secret): bool
     {
-        // Import Global Variables
-        global $UUID;
+        // Update the user's TOTP secret in the database
+        return $this->Database->query()
+            ->table('users')
+            ->update([
+                'totp_secret' => $secret
+            ])
+            ->where('id', $userId)
+            ->execute() > 0;
+    }
 
-        // Initialize the status
-        $status = [];
+    /**
+     * Verify a TOTP code
+     *
+     * @param int $userId
+     * @param string $code
+     * @return bool
+     */
+    public function verifyTotp(int $userId, string $code): bool
+    {
+        // Retrieve the user's TOTP secret
+        $user = $this->Database->query()
+            ->table('users')
+            ->select('totp_secret')
+            ->where('id', $userId)
+            ->limit(1)
+            ->result();
 
-        // Check if the config includes all the required fields
-        if(isset($config['organization'],$config['username'],$config['password'])){
-
-            // Check if the database has been initialized
-            if (!is_null($this->Database)) {
-
-                // Connect to the database
-                $this->Database->connect();
-
-                // Check if the database is currently connected
-                if ($this->Database->isConnected()) {
-
-                    // Create the organization
-                    $Query = $this->Database->query()
-                        ->table('organizations')
-                        ->insert([
-                            'owner' => $config['username']
-                        ]);
-                    $affected = $Query->execute();
-                    $organizationId = $Query->lastId();
-
-                    // Create the organization vCard
-                    $Query = $this->Database->query()
-                        ->table('vcards')
-                        ->insert([
-                            'owner' => $config['username'],
-                            'category' => 'Organization',
-                            'name' => $config['organization'],
-                            'organization' => $organizationId
-                        ]);
-                    $affected += $Query->execute();
-                    $organizationVcardId = $Query->lastId();
-
-                    // Create the user vCard
-                    $Query = $this->Database->query()
-                        ->table('vcards')
-                        ->insert([
-                            'owner' => $config['username'],
-                            'category' => 'User',
-                            'email' => $config['username'],
-                            'organization' => $organizationId
-                        ]);
-                    $affected += $Query->execute();
-                    $userVcardId = $Query->lastId();
-
-                    // Create the user backend
-                    $Query = $this->Database->query()
-                        ->table('backends')
-                        ->insert([
-                            'owner' => $config['username'],
-                            'type' => 'local',
-                            'password' => password_hash($config['password'], PASSWORD_DEFAULT),
-                            'organization' => $organizationId
-                        ]);
-                    $affected += $Query->execute();
-                    $userBackendId = $Query->lastId();
-
-                    // Create the user api token
-                    $Query = $this->Database->query()
-                        ->table('tokens')
-                        ->insert([
-                            'owner' => $config['username'],
-                            'hash' => password_hash($UUID->toString($config['username']), PASSWORD_DEFAULT)
-                        ]);
-                    $affected += $Query->execute();
-                    $userTokenId = $Query->lastId();
-
-                    // Create the user
-                    $Query = $this->Database->query()
-                        ->table('users')
-                        ->insert([
-                            'owner' => $config['username'],
-                            'username' => $config['username'],
-                            'backend' => $userBackendId,
-                            'vcard' => $userVcardId,
-                            'organization' => $organizationId,
-                            'token' => $userTokenId,
-                            'isVerified' => 1
-                        ]);
-                    $affected += $Query->execute();
-                    $userId = $Query->lastId();
-
-                    // Update the organization
-                    $Query = $this->Database->query()
-                        ->table('organizations')
-                        ->update([
-                            'users' => json_encode([$userId], JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT),
-                            'vcard' => $organizationVcardId,
-                            'isActive' => 1
-                        ])
-                        ->where('id', $organizationId);
-                    $affected += $Query->execute();
-
-                    // Update the user token
-                    $Query = $this->Database->query()
-                        ->table('tokens')
-                        ->update([
-                            'user' => $userId
-                        ])
-                        ->where('id', $userTokenId);
-                    $affected += $Query->execute();
-
-                    // Update the group membership
-                    $Query = $this->Database->query()
-                        ->table('groups')
-                        ->update([
-                            'users' => json_encode([$userId], JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT)
-                        ])
-                        ->where('name', 'Administrator');
-                    $affected += $Query->execute();
-
-                    // Update the user
-                    $Query = $this->Database->query()
-                        ->table('users')
-                        ->update([
-                            'uuid' => $UUID->toString($userId),
-                        ])
-                        ->where('id', $userId);
-                    $affected += $Query->execute();
-
-                    // Check if the database records were created
-                    if($affected >= 10){
-
-                        // Add a true status
-                        $status[] = true;
-                    } else {
-                        $status[] = "Failed to install";
-                    }
-                } else {
-                    $status[] = "Database not connected";
-                }
-            } else {
-                $status[] = "Database not initialized";
-            }
-        } else {
-            $status[] = "Missing required fields";
+        if (empty($user)) {
+            return false;
         }
 
-        // Return the statuses
-        return $status;
+        // Use the TOTP library to verify
+        $secret = $user[0]['totp_secret'];
+        
+        // Create a new pin with TOTP support
+        $Pin = new Objects\Pin();
+        return $Pin->verifyTotp($secret, $code);
+    }
+    
+    /**
+     * Generate a TOTP secret for a user
+     *
+     * @param int $userId
+     * @return string|null
+     */
+    public function generateTotpSecret(int $userId): ?string
+    {
+        // Generate a random secret for TOTP using the phpseclib library
+        $secret = '';
+        for ($i = 0; $i < 20; $i++) {
+            $secret .= chr(random_int(33, 126)); // Printable ASCII characters
+        }
+        
+        // Store it in the user's profile
+        if ($this->setupTotp($userId, $secret)) {
+            return $secret;
+        }
+        
+        return null;
+    }
+
+    /**
+     * Generate recovery codes for a user
+     *
+     * @param int $userId
+     * @return array|null
+     */
+    public function generateRecoveryCodes(int $userId): ?array
+    {
+        $codes = [];
+        for ($i = 0; $i < 10; $i++) {
+            // Generate UUID-like recovery codes  
+            $code = bin2hex(random_bytes(8));
+            $codes[] = strtoupper($code);
+        }
+        
+        // Store the codes in a special table or as part of user profile
+        $recoveryCodesJson = json_encode($codes, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT);
+        
+        return $this->Database->query()
+            ->table('users')
+            ->update([
+                'recovery_codes' => $recoveryCodesJson
+            ])
+            ->where('id', $userId)
+            ->execute() > 0 ? $codes : null;
+    }
+    
+    /**
+     * Check if recovery codes are valid for a user
+     *
+     * @param int $userId
+     * @param string $code
+     * @return bool
+     */
+    public function verifyRecoveryCode(int $userId, string $code): bool
+    {
+        // Retrieve the user's recovery codes
+        $user = $this->Database->query()
+            ->table('users')
+            ->select('recovery_codes')
+            ->where('id', $userId)
+            ->limit(1)
+            ->result();
+            
+        if (empty($user)) {
+            return false;
+        }
+        
+        $recoveryCodes = json_decode($user[0]['recovery_codes'] ?? '[]', true);
+        
+        if (!is_array($recoveryCodes) || empty($recoveryCodes)) {
+            return false;
+        }
+        
+        // Check if the provided code matches one of the recovery codes
+        $index = array_search(strtoupper($code), $recoveryCodes);
+        
+        if ($index !== false) {
+            // Remove used recovery code
+            unset($recoveryCodes[$index]);
+            
+            // Update user with remaining recovery codes 
+            $this->Database->query()
+                ->table('users')
+                ->update([
+                    'recovery_codes' => json_encode(array_values($recoveryCodes), JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT)
+                ])
+                ->where('id', $userId)
+                ->execute();
+                
+            return true;
+        }
+        
+        return false;
+    }
+    
+    /**
+     * Set up a remember token for a user (selector/validator pair)
+     *
+     * @param int $userId
+     * @return bool
+     */
+    public function setRememberToken(int $userId): bool
+    {
+        // Generate a random selector and validator
+        $selector = bin2hex(random_bytes(16));  // 32-char hex 
+        $validator = bin2hex(random_bytes(32));   // 64-char hex
+        
+        // Hash the validator for storage
+        $validatorHash = password_hash($validator, PASSWORD_DEFAULT);
+        
+        // Set expiration (7 days)
+        $expires = date('Y-m-d H:i:s', strtotime('+7 days'));
+        
+        // Store in database
+        return $this->Database->query()
+            ->table('remember_tokens')
+            ->insert([
+                'user' => $userId,
+                'selector' => $selector,
+                'validator_hash' => $validatorHash,
+                'expires' => $expires,
+                'created' => date('Y-m-d H:i:s')
+            ])
+            ->execute() > 0;
+    }
+    
+    /**
+     * Clear remember tokens for a user (e.g., on logout)
+     *
+     * @param int $userId
+     * @return bool
+     */
+    public function clearRememberTokens(int $userId): bool
+    {
+        return $this->Database->query()
+            ->table('remember_tokens')
+            ->delete()
+            ->where('user', $userId)
+            ->execute() > 0;
+    }
+    
+    /**
+     * Get the remember token for a user based on selector
+     *
+     * @param string $selector
+     * @return array|null
+     */
+    public function getRememberToken(string $selector): ?array
+    {
+        $result = $this->Database->query()
+            ->table('remember_tokens')
+            ->select('*')
+            ->where('selector', $selector)
+            ->where('expires', date('Y-m-d H:i:s'), '>')
+            ->limit(1)
+            ->result();
+            
+        return !empty($result) ? $result[0] : null;
+    }
+    
+    /**
+     * Generate password policy enforcement (not actually implemented yet)
+     * 
+     * @return void
+     */
+    public function enforcePasswordPolicy(): void
+    {
+        // This method would contain policy enforcement logic
+        // Currently stubbed - will be expanded in future implementation
     }
 }

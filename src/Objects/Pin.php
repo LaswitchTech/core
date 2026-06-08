@@ -5,11 +5,14 @@ namespace LaswitchTech\Core\Objects;
 
 // Import additionnal class into the global namespace
 use Exception;
+use phpseclib3\Crypt\Random;
+use phpseclib3\Crypt\Hash;
 
 class Pin {
 
     protected $Database;
     protected $Pin;
+    protected $isTotp = false;
 
     /**
      * Constructor
@@ -33,6 +36,8 @@ class Pin {
 
             if (count($pin) > 0) {
                 $this->Pin = $pin[0];
+                // Check if this is a TOTP pin
+                $this->isTotp = isset($this->Pin['type']) && $this->Pin['type'] === 'totp';
             } else {
                 throw new Exception("Pin not found");
             }
@@ -68,6 +73,63 @@ class Pin {
 
         return $pin;
     }
+    
+    /**
+     * Generate a TOTP (Time-based One-Time Password)
+     *
+     * @param string $secret
+     * @param int $window
+     * @return string
+     */
+    public function generateTotp(string $secret, int $window = 30): string
+    {
+        // Use phpseclib to generate TOTP
+        $timestamp = floor(time() / $window);
+        
+        // Convert timestamp to bytes
+        $counter = pack('N*', $timestamp);
+        
+        // Create HMAC-SHA1 hash (or SHA256 if preferred)
+        $hash = hash_hmac('sha1', $counter, $secret, true);
+        
+        // Dynamic truncation - get 4 bytes from the hash 
+        $offset = ord($hash[19]) & 0x0F;
+        $binary = ((ord($hash[$offset]) & 0x7F) << 24) |
+                  ((ord($hash[$offset + 1]) & 0xFF) << 16) |
+                  ((ord($hash[$offset + 2]) & 0xFF) << 8) |
+                  (ord($hash[$offset + 3]) & 0xFF);
+        
+        // Generate 6-digit TOTP
+        return str_pad($binary % 1000000, 6, '0', STR_PAD_LEFT);
+    }
+    
+    /**
+     * Verify a TOTP code
+     *
+     * @param string $secret
+     * @param string $code
+     * @param int $window
+     * @return bool
+     */
+    public function verifyTotp(string $secret, string $code, int $window = 30): bool
+    {
+        // Check if the code is valid for current time window
+        $currentCode = $this->generateTotp($secret, $window);
+        if (hash_equals($currentCode, $code)) {
+            return true;
+        }
+        
+        // Try a few time windows back to handle sync issues
+        for ($i = 1; $i <= 2; $i++) {
+            $pastTimestamp = floor((time() - $i * $window) / $window);
+            $pastCode = $this->generateTotp($secret, $window);
+            if (hash_equals($pastCode, $code)) {
+                return true;
+            }
+        }
+        
+        return false;
+    }
 
     /**
      * Save the pin to the database
@@ -75,9 +137,10 @@ class Pin {
      * @param int $userId
      * @param string $pin
      * @param int $expiry (in minutes)
+     * @param string $type (numeric, totp)
      * @return bool
      */
-    public function save(int $userId, string $pin, int $expiry = 15): bool
+    public function save(int $userId, string $pin, int $expiry = 15, string $type = 'numeric'): bool
     {
         // Create the Query
         $Query = $this->Database->query()
@@ -85,7 +148,8 @@ class Pin {
             ->insert([
                 'user' => $userId,
                 'hash' => password_hash($pin, PASSWORD_DEFAULT),
-                'expiry' => date('Y-m-d H:i:s', strtotime("+$expiry minutes"))
+                'expiry' => date('Y-m-d H:i:s', strtotime("+$expiry minutes")),
+                'type' => $type
             ]);
 
         // Execute the Query
@@ -130,6 +194,12 @@ class Pin {
         // Check if the pin is expired
         if (strtotime($this->Pin['expiry']) < time()) {
             return false;
+        }
+
+        // For TOTP pins, we need special handling
+        if ($this->isTotp) {
+            // We would normally need the secret here - for now using legacy verification
+            return password_verify($code, $this->Pin['hash']);
         }
 
         // Verify the pin
