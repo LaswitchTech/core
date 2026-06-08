@@ -35,6 +35,15 @@ class SQLiteQueryTest extends TestCase
         $this->conn = new SQLite();
         $this->conn->connect();
         $this->query = new Query($this->conn);
+
+        // Create all tables used by this test class
+        $this->conn->query('CREATE TABLE users (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, email TEXT)');
+        $this->conn->query('CREATE TABLE items (id INTEGER PRIMARY KEY AUTOINCREMENT, title TEXT, price REAL)');
+        $this->conn->query('CREATE TABLE products (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, price REAL)');
+        $this->conn->query('CREATE TABLE temp (id INTEGER PRIMARY KEY AUTOINCREMENT, val TEXT)');
+        $this->conn->query('CREATE TABLE nums (id INTEGER PRIMARY KEY AUTOINCREMENT, num INTEGER)');
+        $this->conn->query('CREATE TABLE auto_test (id INTEGER PRIMARY KEY AUTOINCREMENT, val TEXT)');
+        $this->conn->query('CREATE TABLE prepared (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT)');
     }
 
     protected function tearDown(): void

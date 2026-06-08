@@ -148,6 +148,9 @@ class SQLite extends Connector
         return (int) $this->pdo->query('SELECT changes()')->fetchColumn();
     }
 
+    /** @var PDOStatement|null reference to last-insert statement for affectedRows() */
+    private ?PDOStatement $_lastInsertStmt = null;
+
     /**
      * Prepare a parameterized query and return a PDOPreparedStatement adapter.
      */
@@ -158,11 +161,44 @@ class SQLite extends Connector
         }
 
         try {
+            // Non-SELECT queries: bind params inline (matching MySQL connector behavior)
+            // so that Query.result() → affectedRows() sees the correct count afterward.
+            $isSelect = preg_match('/^\s*SELECT/i', $sql);
+            
+            if ($isSelect) {
+                $stmt = $this->pdo->prepare($sql);
+                if ($stmt === false) {
+                    throw new Exception('SQLite prepare failed');
+                }
+                return new PDOPreparedStatement($stmt);
+            }
+
+            // For non-SELECT statements, bind and execute inline.
             $stmt = $this->pdo->prepare($sql);
             if ($stmt === false) {
                 throw new Exception('SQLite prepare failed');
             }
-            return new PDOPreparedStatement($stmt);
+
+            if (!empty($params)) {
+                foreach ($params as $i => $value) {
+                    switch (true) {
+                        case is_int($value):            $stmt->bindValue($i + 1, $value, PDO::PARAM_INT); break;
+                        case is_float($value):          $stmt->bindValue($i + 1, $value, PDO::PARAM_STR); break;
+                        case is_null($value):           $stmt->bindValue($i + 1, null, PDO::PARAM_NULL); break;
+                        case is_bool($value):           $stmt->bindValue($i + 1, (int) $value, PDO::PARAM_INT); break;
+                        default:                        $stmt->bindValue($i + 1, strval($value), PDO::PARAM_STR); break;
+                    }
+                }
+            }
+
+            $result = $stmt->execute();
+            if ($result === false) {
+                throw new Exception('SQLite execute failed');
+            }
+
+            // Store reference for affectedRows() / lastId() queries to see the write.
+            $this->_lastInsertStmt = $stmt;
+            return null; // no PDOResult needed — client calls affectedRows(), not get_result()
         } catch (PDOException $e) {
             throw new Exception($e->getMessage(), (int) $e->getCode());
         }
