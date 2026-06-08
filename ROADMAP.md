@@ -345,12 +345,12 @@ Services that unlock plugin and application development.
 **Existing: `Schema::compare()` compares in-memory column definitions vs DB structure, returns descriptive diffs or SQL queries. `Schema::update()` executes the queries. Used by plugin installation.**
 
 **Tasks:**
-- [ ] Create `MigrationRunner` class with versioned migrations
-- [ ] Support versioned migrations (`migrations/001_create_users.php`, etc.)
-- [ ] Track applied migrations in `migrations` table
-- [ ] Integrate with plugin lifecycle (install → run migrations, uninstall → reverse migrations)
-- [ ] Test migration apply/reverse
-- [ ] Document migration format in `/docs/developer/migrations.md`
+- [x] Create `MigrationRunner` class with versioned migrations
+- [x] Support versioned migrations (`migrations/001_create_users.php`, etc.)
+- [x] Track applied migrations in `migrations` table
+- [x] Integrate with plugin lifecycle (install → run migrations, uninstall → reverse migrations)
+- [x] Test migration apply/reverse
+- [x] Document migration format in `/docs/developer/migrations.md`
 
 ### 2.7 Database Connector Expansion (MySQL + SQLite) (P1)
 

@@ -5,6 +5,7 @@ namespace LaswitchTech\Core\Objects;
 
 // Import additionnal classes into the global namespace
 use Exception;
+use DirectoryIterator;
 use stdClass;
 
 class DependencyResolver {
