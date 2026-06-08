@@ -317,11 +317,13 @@ Services that unlock plugin and application development.
 
 **Why**: `/api/core/info` (`CoreEndpoint::infoAction()`) provides version, name, owner, copyright, changelog, logo, license, authors. But no dedicated `VersionProvider` class exists for programmatic version comparison (e.g., kernel/app version resolution, extension compatibility checks).
 
+**Status**: Complete
+
 **Tasks:**
-- [ ] Create `VersionProvider` class with kernel and application version resolution
-- [ ] Support semver comparison (`>=`, `<=`, `^`, `~`, exact)
-- [ ] Add admin overview card showing kernel version, app version, update status
-- [ ] Test version resolution and comparison logic
+- [x] Create `VersionProvider` class with kernel and application version resolution
+- [x] Support semver comparison (`>=`, `<=`, `^`, `~`, exact)
+- [x] Add admin overview card showing kernel version, app version, update status
+- [x] Test version resolution and comparison logic
 
 ### 2.5 Dependency Resolver (P2)
 
