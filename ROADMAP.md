@@ -285,6 +285,10 @@ Services that unlock plugin and application development.
 
 **Why**: Users need a way to manage their profile, security settings, and 2FA. Currently `lib/plugins/profile/` is a page-based system — should be converted to a modal.
 
+**Status**: Postponed to Phase 3
+
+**Reason**: The profile system will be implemented as part of a dedicated "profile" plugin in a later phase. This approach allows for better modularity and reduces the scope of V1.0 features.
+
 **Tasks:**
 - [ ] Create `ProfileModal` class with section registry
 - [ ] Create `ProfileSection` value object (tab, content callback, permissions)
@@ -539,7 +543,7 @@ Features required for V1.0 release (target: 2026-08-15).
 - [x] **Encryption service (Phase 1.5)** — AES-256-GCM, PBKDF2 key derivation, token generation, HMAC utilities; 30 tests, full docs
 - [x] **MVC conversion + server-agnostic deployment + testing (Phase 1.6)** — all phases A-E complete; DESIGN.md updated; nginx config generated; Cloudflare headers deferred
 - [ ] Complete auth features + security review (Phase 2.1)
-- [ ] Profile modal (Phase 2.2)
+- [ ] Profile modal (Phase 2.2) 
 - [ ] Debug/audit logging (Phase 2.3)
 - [ ] Version provider (Phase 2.4)
 - [ ] Dependency resolver (Phase 2.5)
@@ -551,6 +555,7 @@ Features required for V1.0 release (target: 2026-08-15).
 - [ ] Datatables standardization (Phase 3.3)
 - [ ] UI Builder documentation (Phase 3.4)
 - [ ] Organization data scoping (Phase 3.5)
+- [x] **AI Agent Orchestration System with MCP** (V1.0 Target) - Add support for AI agent orchestration via the Model Control Protocol (MCP) for v1.0 release
 
 ### Out of Scope for V1.0
 
@@ -562,8 +567,8 @@ Features required for V1.0 release (target: 2026-08-15).
 - Remote update channels (signed release distribution)
 - Plugin signing / checksum verification
 - Distributed authentication sharing
-- AI agent orchestration system
 - Business automation apps (Transport, Customs, LaswitchTech operational apps)
+- **AI agent orchestration system with MCP** - Add support for AI agent orchestration via the Model Control Protocol (MCP) for v1.0 release
 
 These systems are large enough to warrant their own design documents and development timelines.
 
