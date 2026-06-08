@@ -390,13 +390,15 @@ Services that unlock plugin and application development.
 
 **Why**: `src/SMS.php` and `src/IMAP.php` are 0-byte stubs. Needed for 2FA via SMS, email verification, account recovery, and inbox integration.
 
+**Status**: Complete
+
 **Tasks:**
-- [ ] Implement `SMS.php` — send SMS via provider (Twilio, Vonage, etc.)
-- [ ] Implement `IMAP.php` — connect to mail server, read/parse emails
-- [ ] Add SMS as a 2FA channel (generate OTP, send via SMS, verify)
-- [ ] Add IMAP for email verification (parse incoming verification emails)
-- [ ] Test SMS/IMAP flows with mock providers
-- [ ] Document in `/docs/developer/sms-imap.md`
+- [x] Implement `SMS.php` — send SMS via provider (Twilio, Vonage, etc.)
+- [x] Implement `IMAP.php` — connect to mail server, read/parse emails
+- [x] Add SMS as a 2FA channel (generate OTP, send via SMS, verify)
+- [x] Add IMAP for email verification (parse incoming verification emails)
+- [x] Test SMS/IMAP flows with mock providers
+- [x] Document in `/docs/developer/sms-imap.md`
 
 ### 2.9 SLS Service (P3)
 
