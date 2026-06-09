@@ -198,7 +198,9 @@ class SQLite extends Connector
 
             // Store reference for affectedRows() / lastId() queries to see the write.
             $this->_lastInsertStmt = $stmt;
-            return null; // no PDOResult needed — client calls affectedRows(), not get_result()
+            
+            // Return a PDOPreparedStatement to match Query.php expectation
+            return new PDOPreparedStatement($stmt);
         } catch (PDOException $e) {
             throw new Exception($e->getMessage(), (int) $e->getCode());
         }
