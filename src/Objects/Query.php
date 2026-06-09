@@ -357,6 +357,12 @@ class Query {
     {
         $sql = $this->buildQuery();
         $statement = $this->connector->prepare($sql, $this->params);
+        
+        // Verify that we successfully prepared the statement for all cases
+        if (!is_object($statement)) {
+            throw new Exception("Failed to prepare query");
+        }
+        
         if ($this->type === 'select') {
             $result = $statement->get_result();
             $rows = [];
@@ -371,8 +377,8 @@ class Query {
             return (int) ($row['t__count'] ?? 0);
         }
         
-        // For non-SELECT statements, we have to execute in order for affectedRows() to return correct values
-        if (is_object($statement) && method_exists($statement, 'execute')) {
+        // For non-SELECT statements, we must execute to ensure data is written
+        if (method_exists($statement, 'execute')) {
             $statement->execute();
         }
         return $this->connector->affectedRows();
