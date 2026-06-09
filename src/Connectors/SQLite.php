@@ -148,8 +148,8 @@ class SQLite extends Connector
         return (int) $this->pdo->query('SELECT changes()')->fetchColumn();
     }
 
-    /** @var PDOStatement|null reference to last-insert statement for affectedRows() */
-    private ?PDOStatement $_lastInsertStmt = null;
+    /** @var ?\PDOStatement reference to last-insert statement for affectedRows() */
+    private ?\PDOStatement $_lastInsertStmt = null;
 
     /**
      * Prepare a parameterized query and return a PDOPreparedStatement adapter.
