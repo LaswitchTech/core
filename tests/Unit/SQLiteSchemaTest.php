@@ -46,9 +46,8 @@ class SQLiteSchemaTest extends TestCase
             public function table(): string { return ''; }
         };
 
+        // Create a mock class for testing without direct PDO access issues
         $pdoClass = new class {
-            private PDO $pdo;
-            public function __construct(PDO $pdo) { $this->pdo = $pdo; }
             public function showTablesSQL(?string $like = null): string {
                 $sql = "SELECT name FROM sqlite_master WHERE type='table'";
                 if ($like !== null) {
