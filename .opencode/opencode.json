@@ -1,0 +1,30 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "instructions": [
+    "AGENTS.md",
+    "ROADMAP.md",
+    "DESIGN.md"
+  ],
+  "permission": {
+    "edit": "allow",
+    "write": "allow",
+    "bash": {
+      "*": "ask",
+      "git status*": "allow",
+      "git diff*": "allow",
+      "git add*": "allow",
+      "git commit*": "allow",
+      "git push*": "allow",
+      "composer test*": "allow",
+      "vendor/bin/phpunit*": "allow",
+      "php -l*": "allow"
+    }
+  },
+  "command": {
+    "fix-ci": {
+      "description": "Fix CI failure, test, commit, and push",
+      "agent": "build",
+      "template": "Fix the CI failure below. Treat /home/runner/work/core/core as the same repository as the current working directory. Find the first meaningful failure, patch the smallest correct fix, run relevant tests, run git diff --check, commit, and push.\n\n$ARGUMENTS"
+    }
+  }
+}
