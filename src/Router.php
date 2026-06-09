@@ -417,29 +417,6 @@ class Router {
     }
 
     /**
-     * Start the router
-     *
-     * @return self
-     */
-    public function start(): self
-    {
-        // Import Global Variables
-        global $HELPER;
-
-        // Initialize the Core Framework
-        $HELPER->Core->init();
-
-        // Render the route
-        if($this->Config->get('application','installed') || $this->Request->getNamespace() == '/css'){
-            $this->render($this->Request->getNamespace());
-        } else {
-            $this->render('/install');
-        }
-
-        // Return the instance
-        return $this;
-    }
-
     /**
      * Start the router using the MVC architecture
      *
