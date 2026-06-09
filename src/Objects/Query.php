@@ -159,6 +159,17 @@ class Query {
     public function table(string $table): self
     {
         $this->table = $table;
+        $this->type = null;
+        $this->fields = '*';
+        $this->values = [];
+        $this->params = [];
+        $this->where = [];
+        $this->filter = null;
+        $this->join = [];
+        $this->order = [];
+        $this->limit = null;
+        $this->index = null;
+        $this->countDistinct = false;
         return $this;
     }
 
@@ -364,6 +375,8 @@ class Query {
         }
         
         if ($this->type === 'select') {
+            // Execute ensures bound params are applied before reading results
+            $statement->execute();
             $result = $statement->get_result();
             $rows = [];
             while ($row = $result->fetch_assoc()) {
@@ -372,6 +385,7 @@ class Query {
             return $this->buildRows($rows);
         }
         if ($this->type === 'count') {
+            $statement->execute();
             $result = $statement->get_result();
             $row = $result->fetch_assoc();
             return (int) ($row['t__count'] ?? 0);

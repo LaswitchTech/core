@@ -12,11 +12,24 @@ use PDOStatement;
  */
 class PDOPreparedStatement
 {
-    private ?PDOStatement $stmt;
+    private ?\PDOStatement $stmt;
+    /** @var array values stored for execute() to re-bind */
+    private array $boundValues = [];
 
-    public function __construct(PDOStatement $stmt)
+    public function __construct(\PDOStatement $stmt)
     {
         $this->stmt = $stmt;
+    }
+
+    /**
+     * Accept raw parameters to use during execute().
+     * Keys should match parameter positions (0-indexed).
+     */
+    public function setParams(array $params): void
+    {
+        foreach ($params as $i => $value) {
+            $this->boundValues[$i] = $value;
+        }
     }
 
     /**
@@ -40,15 +53,27 @@ class PDOPreparedStatement
         foreach ($params as $i => $value) {
             $this->stmt->bindValue($i + 1, $value);
         }
+
+        // Also store for execute() to re-bind (so params survive get_result())
+        foreach ($params as $i => $value) {
+            $this->boundValues[$i] = $value;
+        }
     }
 
-    /** Execute the prepared statement. */
+    /** Execute the prepared statement with re-bound values. */
     public function execute(): bool
     {
         try {
+            // Re-bind any stored values so params survive get_result() calls
+            if (!empty($this->boundValues)) {
+                foreach ($this->boundValues as $i => $value) {
+                    $this->stmt->bindValue($i + 1, $value);
+                }
+            }
+
             // Ensure execution happens without any transaction issues
             $result = $this->stmt->execute();
-            
+
             return $result;
         } catch (\PDOException $e) {
             throw new \Exception($e->getMessage(), (int) $e->getCode());

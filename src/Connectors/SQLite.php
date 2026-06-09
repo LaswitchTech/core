@@ -161,40 +161,16 @@ class SQLite extends Connector
         }
 
         try {
-            // Non-SELECT queries: bind params but don't execute inline to allow for 
-            // chained execution (matching MySQL connector behavior and Query.php expectations)
-            $isSelect = preg_match('/^\s*SELECT/i', $sql);
-            
-            if ($isSelect) {
-                $stmt = $this->pdo->prepare($sql);
-                if ($stmt === false) {
-                    throw new Exception('SQLite prepare failed');
-                }
-                return new PDOPreparedStatement($stmt);
-            }
-
-            // For non-SELECT statements, we prepare and bind parameters, but don't execute yet.
-            // This matches the behavior expected by Query.php and enables proper chaining.
             $stmt = $this->pdo->prepare($sql);
             if ($stmt === false) {
                 throw new Exception('SQLite prepare failed');
             }
-
+            // Pass params so Query builder parameters get bound on execute()
+            $adapter = new PDOPreparedStatement($stmt);
             if (!empty($params)) {
-                foreach ($params as $i => $value) {
-                    switch (true) {
-                        case is_int($value):            $stmt->bindValue($i + 1, $value, PDO::PARAM_INT); break;
-                        case is_float($value):          $stmt->bindValue($i + 1, $value, PDO::PARAM_STR); break;
-                        case is_null($value):           $stmt->bindValue($i + 1, null, PDO::PARAM_NULL); break;
-                        case is_bool($value):           $stmt->bindValue($i + 1, (int) $value, PDO::PARAM_INT); break;
-                        default:                        $stmt->bindValue($i + 1, strval($value), PDO::PARAM_STR); break;
-                    }
-                }
+                $adapter->setParams($params);
             }
-
-            // For non-SELECT queries, we return the statement but don't execute it yet.
-            // This matches the behavior expected by Query.php and enables proper chaining.
-            return new PDOPreparedStatement($stmt);
+            return $adapter;
         } catch (PDOException $e) {
             throw new Exception($e->getMessage(), (int) $e->getCode());
         }
