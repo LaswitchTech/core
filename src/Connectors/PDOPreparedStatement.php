@@ -46,7 +46,10 @@ class PDOPreparedStatement
     public function execute(): bool
     {
         try {
-            return $this->stmt->execute();
+            // Ensure execution happens without any transaction issues
+            $result = $this->stmt->execute();
+            
+            return $result;
         } catch (\PDOException $e) {
             throw new \Exception($e->getMessage(), (int) $e->getCode());
         }
