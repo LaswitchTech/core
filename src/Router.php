@@ -449,4 +449,12 @@ class Router {
         $response->send();
         return $response;
     }
+
+    /**
+     * Returns all registered routes.
+     */
+    public function all(): array
+    {
+        return array_values($this->dtoRoutes);
+    }
 }
