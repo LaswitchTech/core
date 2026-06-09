@@ -36,6 +36,11 @@ jobs:
           php-version: '8.2'
           coverage: none
           extensions: pdo_sqlite,sqlite3
+      - name: Clear test environment
+        run: |
+          rm -rf /tmp/*sqlite* || true
+          mkdir -p /tmp/test-db
+          chmod 777 /tmp/test-db
       - name: Install dependencies
         run: composer install --no-interaction
       - name: Run PHPUnit
