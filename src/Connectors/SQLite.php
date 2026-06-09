@@ -173,7 +173,8 @@ class SQLite extends Connector
                 return new PDOPreparedStatement($stmt);
             }
 
-            // For non-SELECT statements, prepare but don't execute yet.
+            // For non-SELECT statements, we prepare and bind parameters, but don't execute yet.
+            // This matches the behavior expected by Query.php and enables proper chaining.
             $stmt = $this->pdo->prepare($sql);
             if ($stmt === false) {
                 throw new Exception('SQLite prepare failed');

@@ -370,6 +370,11 @@ class Query {
             $row = $result->fetch_assoc();
             return (int) ($row['t__count'] ?? 0);
         }
+        
+        // For non-SELECT statements, we have to execute in order for affectedRows() to return correct values
+        if (is_object($statement) && method_exists($statement, 'execute')) {
+            $statement->execute();
+        }
         return $this->connector->affectedRows();
     }
 
