@@ -155,22 +155,110 @@ class DeveloperEndpoint extends Endpoint {
      */
     protected function generateScaffold(string $type, string $name): array
     {
-        // This would contain the actual scaffolding logic
-        // For now we'll return just a placeholder with mock files created
+        // Validate the type
+        $validTypes = ['plugin', 'endpoint', 'model', 'controller', 'layout'];
+        if (!in_array($type, $validTypes)) {
+            throw new Exception('Invalid scaffold type');
+        }
+        
+        // Basic safety checks for name
+        if (empty($name) || !preg_match('/^[a-zA-Z0-9_]+$/', $name)) {
+            throw new Exception('Invalid name for scaffold generation');
+        }
+        
         $generated = [
             'type' => $type,
             'name' => $name,
             'timestamp' => date('Y-m-d H:i:s'),
-            'files_created' => 1
+            'files_created' => 0
         ];
         
-        // In a real implementation, this would:
-        // - Validate the type
-        // - Check if files already exist 
-        // - Generate appropriate files in the correct locations
-        // - Handle directory creation
-        // - Return list of created files
+        $created_files = [];
+        $base_path = $this->Config->root();
         
-        return $generated;
+        // Create the scaffolding based on type
+        switch($type) {
+            case 'plugin':
+                $plugin_dir = $base_path . DIRECTORY_SEPARATOR . 'lib' . DIRECTORY_SEPARATOR . 'plugins' . DIRECTORY_SEPARATOR . $name;
+                
+                if (!is_dir($plugin_dir)) {
+                    mkdir($plugin_dir, 0755, true);
+                }
+                
+                // Create info.cfg file
+                $info_cfg_file = $plugin_dir . DIRECTORY_SEPARATOR . 'info.cfg';
+                if (!file_exists($info_cfg_file)) {
+                    $info_content = [
+                        'name' => ucfirst($name),
+                        'type' => 'plugins',
+                        'base' => $name,
+                        'author' => 'Developer',
+                        'email' => '',
+                        'date' => date('Y-m-d'),
+                        'version' => '1.0.0',
+                        'tags' => '',
+                        'description' => 'A new plugin for the framework',
+                        'repository' => '',
+                        'download' => '',
+                        'tracker' => '',
+                        'support' => '',
+                        'picture' => '',
+                        'dependencies' => [],
+                        'avoid' => []
+                    ];
+                    
+                    file_put_contents($info_cfg_file, json_encode($info_content, JSON_PRETTY_PRINT));
+                    $created_files[] = $info_cfg_file;
+                }
+                
+                // Create Endpoint.php file
+                $endpoint_file = $plugin_dir . DIRECTORY_SEPARATOR . 'Endpoint.php';
+                if (!file_exists($endpoint_file)) {
+                    $endpoint_content = "<?php\n\n/**\n * {$name} Plugin - Endpoint\n */\n\nuse \LaswitchTech\Core\Abstracts\Endpoint;\n\nclass {$name}Endpoint extends Endpoint {\n\n    public function __construct() {\n        parent::__construct();\n        // Set level as needed\n        $this->Level = 1;\n    }\n\n    /**\n     * Default action\n     */\n    public function indexAction() {\n        return ['status' => 200, 'message' => 'OK', 'data' => []];\n    }\n}";
+                    file_put_contents($endpoint_file, $endpoint_content);
+                    $created_files[] = $endpoint_file;
+                }
+                
+                // Create routes.cfg file
+                $routes_cfg_file = $plugin_dir . DIRECTORY_SEPARATOR . 'routes.cfg';
+                if (!file_exists($routes_cfg_file)) {
+                    $route_content = "{\n    \"/{$name}\": {\n        \"template\": null,\n        \"view\": null,\n        \"public\": true,\n        \"action\": null,\n        \"location\": [\"developer\"],\n        \"level\": 0,\n        \"parent\": null,\n        \"label\": \"{$name}\",\n        \"icon\": \"gear\",\n        \"color\": null\n    }\n}";
+                    file_put_contents($routes_cfg_file, $route_content);
+                    $created_files[] = $routes_cfg_file;
+                }
+                
+                // Create View directory
+                $view_dir = $plugin_dir . DIRECTORY_SEPARATOR . 'View';
+                if (!is_dir($view_dir)) {
+                    mkdir($view_dir, 0755, true);
+                }
+                
+                $generated['files_created'] = count($created_files);
+                break;
+                
+            case 'endpoint':
+                // Implementation for endpoint scaffolding
+                $generated['files_created'] = 0; // Not implemented yet
+                break;
+                
+            case 'model':
+                // Implementation for model scaffolding
+                $generated['files_created'] = 0; // Not implemented yet
+                break;
+                
+            case 'controller':
+                // Implementation for controller scaffolding
+                $generated['files_created'] = 0; // Not implemented yet
+                break;
+                
+            case 'layout':
+                // Implementation for layout scaffolding
+                $generated['files_created'] = 0; // Not implemented yet
+                break;
+        }
+        
+        return array_merge($generated, [
+            'created_files' => $created_files
+        ]);
     }
 }

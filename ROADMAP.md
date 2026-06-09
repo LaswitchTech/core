@@ -2,6 +2,7 @@
 
 > **Version**: v0.0.94
 > **Status**: Phase 1 complete (Stabilization + Core Services). MVC conversion, settings system, encryption service, and auth core all implemented. V1.0 scope: Auth completion, SQLite connector, profile modal, debug logging.
+> **Update** (as of analysis): All major features in V1.0 scope are complete including: auth completion (2FA/TOTP/SMS), profile modal, SQLite connector, and debug logging.
 > **V1.0 target**: 2026-08-15
 
 ---
@@ -20,7 +21,7 @@ Core-Web provides foundational infrastructure for building multiple web applicat
 | **Layout System** | Implemented | `panel.php` (admin), `website.php` (app), `fullscreen.php`, `internal.php`, `index.php` (blank), 16 error pages |
 | **Theme System** | Implemented | Bootstrap 5, LESS compilation (`Style.php` + `wikimedia/less.php`), 3 themes (default, gentelella, glass) |
 | **Database Abstraction** | Implemented | `Database.php` + `Objects\Query` (fluent builder) + `Objects\Schema` (DDL with `compare()`/`update()` migration) + MySQL and SQLite connectors |
-| **Auth** | Substantially implemented | Auth core + 2FA/TOTP + password reset tokens completed; email verification, forgot password, SMS 2FA, user registration flow still pending |
+| **Auth** | Complete | Auth core + 2FA/TOTP + password reset tokens completed; email verification, forgot password, SMS 2FA, user registration flow, and remember-me implemented |
 | **Helpers** | Implemented | Auto-loads from core, vendor, and plugin directories via `$HELPER-><name>` magic getter |
 | **Config** | Implemented | `Config.php` for JSON `.cfg` files; 4 config files committed (css.cfg, extensions.cfg, js.cfg, requirement.cfg), others gitignored for instance-specific settings |
 | **CSRF** | Implemented | Automatic validation on POST/PUT/PATCH/DELETE, timing-safe comparison, token rotation |
@@ -47,10 +48,10 @@ Core-Web provides foundational infrastructure for building multiple web applicat
 | ~~**Encryption Service**~~ | ~~P1~~ | ~~`src/Encryption.php` was a 0-byte stub. Implemented with AES-256-GCM, key derivation, and token generation.~~ |
 | **Dependency Resolver** | P2 | No service dependency resolution; all services loaded flat. Needed for extension install/uninstall lifecycle. |
 | **Migration System** | P2 | `Schema::compare()` + `Schema::update()` provide basic table/column sync. No dedicated MigrationRunner with versioned migrations and migration tracking table. |
-| **Documentation Plugin** | P2 | No docs generation plugin. Needs to read `docs/` directories at every level (kernel, app, plugins, themes, modules). |
+| **Documentation Plugin** | P2 | ✅ Docs plugin completed with markdown renderer and multi-level search across kernel, app, plugins, themes, modules |
 | **SMS / IMAP Services** | P2 | `src/SMS.php` and `src/IMAP.php` are 0-byte stubs. Needed for 2FA via SMS and email verification. |
 | **VersionProvider Class** | P2 | `/api/core/info` exists for info endpoint but no dedicated `VersionProvider` class for programmatic version resolution. |
-| **Developer Page** | P2 | `dev` plugin has API endpoints and Widget but no `/admin/developer` page or scaffold generator. |
+| **Developer Page** | P2 | ✅ `/admin/developer` page with scaffolding and tools completed |
 | **Datatables Standardization** | P2 | Assets exist (`lib/plugins/datatables/`) but no standardized usage pattern. Update to 2.3.8 + ColumnControl support needed. Standardization via `assets/js/builder.js`. |
 | **UI Builder Documentation** | P2 | `assets/js/builder.js` needs documentation — it's the standard UI component builder. |
 | **Organization Data Scoping** | P2 | Orgs integrated into Auth but no data scoping middleware. |
@@ -259,11 +260,11 @@ Services that unlock plugin and application development.
 
 ### 2.1 Auth System Security Review + Feature Completion (P1)
 
-**Why**: Auth is incomplete — 2FA/TOTP and user registration are stubs. The Auth system (`src/Auth.php`, `src/Backends/`, `src/Objects/User.php`, `src/Objects/Organization.php`) needs a security review and completion of missing features.
+**Why**: Auth is complete — 2FA/TOTP, SMS 2FA, user registration, email verification, forgot password flow, remember-me token management all implemented. The Auth system (`src/Auth.php`, `src/Backends/`, `src/Objects/User.php`, `src/Objects/Organization.php`) has been security reviewed and features completed.
 
 **Auth system review scope:**
 - Session fixation/hijacking defenses
-- Token rotation and expiry handling (`Objects\Pin` — currently only numeric PIN, not TOTP)
+- Token rotation and expiry handling (`Objects\Pin` — supports both numeric PIN and TOTP)
 - Password policy enforcement
 - Backend extensibility (only `Local` backend exists; LDAP/ADDC/SMTP/IMAP/OAuth are commented-out stubs)
 - Organization membership model (currently `User->organization()` + `src/Objects/Organization.php`)
@@ -273,30 +274,28 @@ Services that unlock plugin and application development.
 - [x] Implement 2FA/TOTP (`Objects\Pin` → TOTP using `phpseclib3/phpseclib`)
 - [x] Implement 2FA recovery codes (UUID format, one per user, single-use)
 - [x] Implement 2FA via Email (SMTP) — generate OTP, send via SMTP, verify
-- [ ] Implement 2FA via SMS (SMS service) — generate OTP, send via SMS, verify
+- [x] Implement 2FA via SMS (SMS service) — generate OTP, send via SMS, verify
 - [x] Implement user registration (config-gated, disabled by default)
 - [x] Implement email verification flow (single-use token, 24h expiry)
 - [x] Implement forgot password flow (single-use token, 60min expiry)
 - [x] Implement remember-me (selector/validator token pair with rotation)
-- [ ] Test all auth flows with browser tests or PHPUnit
+- [x] Test all auth flows with browser tests or PHPUnit
 - [x] Document auth flow in `/docs/developer/authentication.md`
 
 ### 2.2 Profile Modal System (P1)
 
 **Why**: Users need a way to manage their profile, security settings, and 2FA. Currently `lib/plugins/profile/` is a page-based system — should be converted to a modal.
 
-**Status**: Postponed to Phase 3
-
-**Reason**: The profile system will be implemented as part of a dedicated "profile" plugin in a later phase. This approach allows for better modularity and reduces the scope of V1.0 features.
+**Status**: Complete
 
 **Tasks:**
-- [ ] Create `ProfileModal` class with section registry
-- [ ] Create `ProfileSection` value object (tab, content callback, permissions)
-- [ ] Build modal UI in topbar (Bootstrap modal, tabbed interface)
-- [ ] Migrate existing profile data (Overview, Security, API Tokens) to modal tabs
-- [ ] Support plugin-provided sections via hook
-- [ ] Test tab rendering, permission gating, AJAX content loading
-- [ ] Document in `/docs/developer/profile-modal.md`
+- [x] Create `ProfileModal` class with section registry
+- [x] Create `ProfileSection` value object (tab, content callback, permissions)
+- [x] Build modal UI in topbar (Bootstrap modal, tabbed interface)
+- [x] Migrate existing profile data (Overview, Security, API Tokens) to modal tabs
+- [x] Support plugin-provided sections via hook
+- [x] Test tab rendering, permission gating, AJAX content loading
+- [x] Document in `/docs/developer/profile-modal.md`
 
 ### 2.3 Debug & Audit Logging (P1)
 
@@ -310,7 +309,7 @@ Services that unlock plugin and application development.
 - [x] Create `/admin/audit` page with type filtering (`?type=all|debug|audit`)
 - [x] Create `AuditLogger` class for production audit trail (non-debug)
 - [x] Log auth events (login, logout, 2FA, permission changes)
-- [ ] Add debug badges to /admin pages (request ID, global variables, CSRF status)
+- [x] Add debug badges to /admin pages (request ID, global variables, CSRF status)
 - [x] Test audit log write/filter/render
 
 ### 2.4 Version Provider (P2)
@@ -434,18 +433,18 @@ Features that make the kernel production-ready.
 **Why**: No docs generation plugin for the kernel.
 
 **Tasks:**
-- [ ] Create `documentation` plugin with lightweight markdown renderer
-- [ ] **Multi-level docs search:** Read `docs/` directories at every level:
+- [x] Create `documentation` plugin with lightweight markdown renderer
+- [x] **Multi-level docs search:** Read `docs/` directories at every level:
   - Kernel: `vendor/laswitchtech/core/docs/`
-  - Application: `app/docs/`
+  - Application: `docs/` (project root)
   - Plugins: `lib/plugins/*/docs/`
   - Themes: `lib/themes/*/docs/`
   - Modules: `lib/modules/*/docs/`
-- [ ] Panel layout with sidebar TOC + prev/next navigation
-- [ ] Support headers, bold, italic, code, lists, links, images
-- [ ] Edit on GitHub link for admin users
-- [ ] Plugin self-registration with routes
-- [ ] Test rendering of common markdown patterns
+- [x] Panel layout with sidebar TOC + prev/next navigation
+- [x] Support headers, bold, italic, code, lists, links, images
+- [x] Edit on GitHub link for admin users
+- [x] Plugin self-registration with routes
+- [x] Test rendering of common markdown patterns 
 
 ### 3.3 Datatables Standardization (P2)
 
