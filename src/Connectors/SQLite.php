@@ -161,8 +161,8 @@ class SQLite extends Connector
         }
 
         try {
-            // Non-SELECT queries: bind params inline (matching MySQL connector behavior)
-            // so that Query.result() → affectedRows() sees the correct count afterward.
+            // Non-SELECT queries: bind params but don't execute inline to allow for 
+            // chained execution (matching MySQL connector behavior and Query.php expectations)
             $isSelect = preg_match('/^\s*SELECT/i', $sql);
             
             if ($isSelect) {
@@ -173,7 +173,7 @@ class SQLite extends Connector
                 return new PDOPreparedStatement($stmt);
             }
 
-            // For non-SELECT statements, bind and execute inline.
+            // For non-SELECT statements, prepare but don't execute yet.
             $stmt = $this->pdo->prepare($sql);
             if ($stmt === false) {
                 throw new Exception('SQLite prepare failed');
@@ -191,15 +191,8 @@ class SQLite extends Connector
                 }
             }
 
-            $result = $stmt->execute();
-            if ($result === false) {
-                throw new Exception('SQLite execute failed');
-            }
-
-            // Store reference for affectedRows() / lastId() queries to see the write.
-            $this->_lastInsertStmt = $stmt;
-            
-            // Return a PDOPreparedStatement to match Query.php expectation
+            // For non-SELECT queries, we return the statement but don't execute it yet.
+            // This matches the behavior expected by Query.php and enables proper chaining.
             return new PDOPreparedStatement($stmt);
         } catch (PDOException $e) {
             throw new Exception($e->getMessage(), (int) $e->getCode());
