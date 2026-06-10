@@ -6,7 +6,7 @@ Validate and document the existing Core-Web architecture.
 
 ## Tasks
 
-- [ ] Verify bootstrap flow
+- [x] Verify bootstrap flow
 - [ ] Verify request lifecycle
 - [ ] Verify routing flow
 - [ ] Update DESIGN.md with findings
