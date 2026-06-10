@@ -6,11 +6,11 @@ Establish Phase 1.3 Baseline Test Strategy: identify available test commands, do
 
 ## Tasks
 
-- [ ] Identify currently available test commands
-- [ ] Document test commands in `docs/developer/testing.md`
-- [ ] Confirm syntax linting process
-- [ ] Confirm PHPUnit coverage
-- [ ] Confirm CI workflow behavior
+- [x] Identify currently available test commands
+- [x] Document test commands in `docs/developer/testing.md`
+- [x] Confirm syntax linting process
+- [x] Confirm PHPUnit coverage
+- [x] Confirm CI workflow behavior
 
 ## Definition of Done
 

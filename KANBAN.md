@@ -17,12 +17,12 @@
 - [ ] Create routing guide
 - [ ] Create authentication guide
 
-## Ready
-- [ ] Identify currently available test commands
-- [ ] Document test commands in `docs/developer/testing.md`
-- [ ] Confirm syntax linting process
-- [ ] Confirm PHPUnit coverage
-- [ ] Confirm CI workflow behavior
+## In Progress
+- [x] Identify currently available test commands
+- [x] Document test commands in `docs/developer/testing.md`
+- [x] Confirm syntax linting process
+- [x] Confirm PHPUnit coverage
+- [x] Confirm CI workflow behavior
 - [ ] Validate `DESIGN.md` against implementation
 
 ## In Progress
@@ -43,3 +43,5 @@
 - [x] Verify CLI flow
 - [x] Verify plugin, module, and theme loading behavior
 - [x] Verify configuration loading behavior
+
+## Testing
