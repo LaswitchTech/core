@@ -53,7 +53,7 @@
   "agent": {
     "build": {
       "mode": "primary",
-      "model": "ollama/qwen3.6:35b",
+      "model": "ollama/qwen3.6:35b-128k",
       "temperature": 0.1,
       "prompt": "You are the Core-Web build/debug agent. Focus on diagnosis, small patches, tests, commits, and pushes. Prefer correctness over speed."
     },
