@@ -20,7 +20,6 @@
 ## Ready
 - [ ] Verify API endpoint flow
 - [ ] Verify CLI flow
-- [ ] Verify configuration loading behavior
 - [ ] Document current test strategy
 
 ## In Progress
@@ -32,6 +31,7 @@
 ## Done
 - [x] Validate `DESIGN.md` against implementation
 - [x] Verify plugin, module, and theme loading behavior
+- [x] Verify configuration loading behavior
 - [x] Create `ROADMAP.md`
 - [x] Create `DESIGN.md`
 - [x] Create `KANBAN.md`

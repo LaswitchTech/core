@@ -638,4 +638,27 @@ Based on framework code analysis of how extensions are loaded:
 - Theme metadata comes from info.cfg files 
 - Theme assets and templates integrate via the Builder and Style systems
 - Active theme determined by configuration settings in application.cfg
+
+## 18. Configuration Loading Behavior
+
+Based on analysis of `src/Config.php`:
+
+Configuration loading works as follows:
+1. Config files are stored under `/config/` directory with `.cfg` extension
+2. Configuration files contain JSON data structures
+3. The Config class uses `add()` method to read configuration files on demand 
+4. Missing config files are automatically initialized as empty JSON objects
+5. Values can be read by file/key convention using the `get()` method
+6. Values can be added, set, reloaded, deleted, or versioned using corresponding methods
+7. Configuration loading is driven by bootstrap process and can be triggered for application settings
+8. Bootstrap configuration (`bootstrap.cfg`) determines initial setup and service loading rules
+9. Core configuration files include: `application.cfg`, `auth.cfg`, `database.cfg`, `routes.cfg` etc.
+10. New configuration files can be added dynamically with the `add()` method
+
+The Config class provides methods for:
+- Loading and reading configuration values (`get()`)
+- Setting configuration values (`set()`) 
+- Adding new configuration files (`add()`)
+- Reloading existing configuration files (`reload()`)
+- Listing available configuration files (`list()`)
 - Whether `ROADMAP.md`, `KANBAN.md`, and `NEXT.md` are populated and authoritative.
