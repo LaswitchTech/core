@@ -18,10 +18,14 @@
 - [ ] Create authentication guide
 
 ## Ready
+- [ ] Identify currently available test commands
+- [ ] Document test commands in `docs/developer/testing.md`
+- [ ] Confirm syntax linting process
+- [ ] Confirm PHPUnit coverage
+- [ ] Confirm CI workflow behavior
+- [ ] Validate `DESIGN.md` against implementation
 
 ## In Progress
-- [ ] Document current test strategy
-- [ ] Validate `DESIGN.md` against implementation
 
 ## Done
 - [x] Create `ROADMAP.md`

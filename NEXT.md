@@ -2,18 +2,18 @@
 
 ## Goal
 
-Complete Phase 1.1 remaining architecture verification items from DESIGN.md section 6 (Routing), section 7 (Endpoints, Models, Helpers), section 14 (CLI), and section 18 (To Verify). Validate that every "To verify" entry in DESIGN.md is supported by the code or removed with a finding noted.
+Establish Phase 1.3 Baseline Test Strategy: identify available test commands, document the testing workflow, and confirm existing verification tooling so future phases have a known quality gate.
 
 ## Tasks
 
-- [x] Verify API endpoint flow
-- [x] Verify CLI flow
-- [x] Verify plugin, module, and theme loading behavior
-- [x] Verify configuration loading behavior
+- [ ] Identify currently available test commands
+- [ ] Document test commands in `docs/developer/testing.md`
+- [ ] Confirm syntax linting process
+- [ ] Confirm PHPUnit coverage
+- [ ] Confirm CI workflow behavior
 
 ## Definition of Done
 
-- Each verification item above has findings documented in DESIGN.md section 18 or removed if already confirmed
-- Each ROADMAP Phase 1.1 remaining sub-item is checked off where verified
-- DESIGN.md "To Verify" section updated: items either confirmed, rejected, or deferred with reason
-- Findings committed
+- All five sub-items above are completed and documented
+- Testing documentation is committed alongside confirmed observations
+- No speculative or unverified test information remains in the docs
