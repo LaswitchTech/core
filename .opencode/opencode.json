@@ -11,18 +11,43 @@
     "edit": "allow",
     "write": "allow",
     "bash": {
-      "*": "ask",
-      "git status*": "allow",
-      "git diff*": "allow",
-      "git log*": "allow",
-      "git branch*": "allow",
-      "git add*": "allow",
-      "git commit*": "allow",
-      "git push*": "allow",
-      "composer install*": "allow",
-      "composer test*": "allow",
-      "vendor/bin/phpunit*": "allow",
-      "php -l*": "allow"
+        "*": "ask",
+
+        "pwd*": "allow",
+        "ls*": "allow",
+        "tree*": "allow",
+        "find*": "allow",
+        "grep*": "allow",
+        "egrep*": "allow",
+        "fgrep*": "allow",
+        "cat*": "allow",
+        "head*": "allow",
+        "tail*": "allow",
+        "less*": "allow",
+        "more*": "allow",
+        "wc*": "allow",
+        "sed*": "allow",
+        "awk*": "allow",
+        "sort*": "allow",
+        "uniq*": "allow",
+        "cut*": "allow",
+
+        "git status*": "allow",
+        "git diff*": "allow",
+        "git log*": "allow",
+        "git show*": "allow",
+        "git branch*": "allow",
+        "git add*": "allow",
+        "git commit*": "allow",
+        "git push*": "allow",
+
+        "composer install*": "allow",
+        "composer test*": "allow",
+
+        "vendor/bin/phpunit*": "allow",
+
+        "php -l*": "allow",
+        "php cli*": "allow"
     }
   },
   "agent": {
