@@ -601,9 +601,9 @@ The CLI command flow works as follows:
 2. Arguments are parsed from `$REQUEST->getArguments()` (typically argv)
 3. Command class name is constructed by uppercasing the first argument + "Command"
 4. CLI looks for command files in this order:
-    - vendor/laswitchtech/core/Command/{Command}.php
-    - Command/{Command}.php
-    - lib/plugins/{pluginname}/Command.php
+   - vendor/laswitchtech/core/Command/{Command}.php
+   - Command/{Command}.php
+   - lib/plugins/{pluginname}/Command.php
 5. Loads and instantiates the command class via require_once
 6. Parses action from second argument + "Action"
 7. Checks if action method exists in the loaded command
@@ -617,4 +617,25 @@ The convention follows the command/action pattern where:
 - Commands must end with "Command" class suffix
 - Actions must end with "Action" method suffix
 - Plugin commands are discovered by namespace conversion (removing "Command" suffix, converting to lowercase)
+
+## 18. Plugin/Module/Theme Loading Behavior
+
+Based on framework code analysis of how extensions are loaded:
+
+**Plugin Loading**:
+- Plugins are discovered by scanning `lib/plugins/{plugin-name}/` directories using directory traversal 
+- Each plugin contributes routes.cfg files that are loaded into the router at runtime
+- Plugin endpoints, helpers, commands and models are discovered via naming conventions 
+- Plugin path resolution order: core default → app location → lib/plugins/{plugin-name}/
+
+**Module Loading**:
+- Modules serve as packaging/grouping mechanisms rather than dynamic runtime loading
+- Module structures can be loaded by convention but are primarily used for application organization
+- Module loading behavior is more static compared to plugins and themes
+
+**Theme Loading**:
+- Themes are discovered by scanning `lib/themes/{theme-name}/` directories
+- Theme metadata comes from info.cfg files 
+- Theme assets and templates integrate via the Builder and Style systems
+- Active theme determined by configuration settings in application.cfg
 - Whether `ROADMAP.md`, `KANBAN.md`, and `NEXT.md` are populated and authoritative.
