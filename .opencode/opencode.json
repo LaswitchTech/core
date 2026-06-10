@@ -68,7 +68,12 @@
     "next": {
       "description": "Work on the next task from NEXT.md",
       "agent": "coder",
-      "template": "Read NEXT.md and complete only the first unchecked task that is ready. Follow AGENTS.md. Keep the change small, run relevant tests, run git diff --check, commit, and push."
+      "template": "Read NEXT.md and complete only the first unchecked task that is ready. Follow AGENTS.md. Keep the change small. After the task is successfully completed and validated, update NEXT.md by marking the completed task as checked ([x]). Then update KANBAN.md so the matching task moves to the correct column: In Progress while active, Testing if validation is still pending, or Done when completed and validated. If completing the task unlocks follow-up work, move the next logical task into the active section in NEXT.md and the appropriate column in KANBAN.md. Run relevant tests, run git diff --check, update NEXT.md, update KANBAN.md, commit all task-related changes, and push."
+    },
+    "plan": {
+      "description": "Review ROADMAP.md and KANBAN.md, then update NEXT.md",
+      "agent": "build",
+      "template": "Read ROADMAP.md, KANBAN.md, DESIGN.md, NEXT.md, and AGENTS.md. Act as the project planning agent only. Do not implement code. Do not refactor. Do not modify ROADMAP.md. Use ROADMAP.md for strategic priorities, KANBAN.md for current project state, DESIGN.md for architectural constraints, and AGENTS.md for workflow rules. Select the highest-priority task that is not blocked, has prerequisites completed, aligns with the current roadmap phase, can be completed incrementally, and is suitable for the next focused sprint. Prefer tasks from In Progress or Ready in KANBAN.md before selecting items from Backlog. Update NEXT.md with a single sprint goal, a short active task list, and a clear definition of done. Update KANBAN.md so selected tasks move to In Progress and completed planning tasks move to Done when appropriate. Keep NEXT.md small enough for the next command to execute without ambiguity. Run git diff --check, commit the planning changes, and push."
     },
     "fix-ci": {
       "description": "Fix a GitHub Actions CI failure",
