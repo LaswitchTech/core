@@ -144,6 +144,49 @@ If a service cannot be loaded, the framework appears to fall back to a `Module` 
 
 Design constraint: code should use bootstrapped services rather than manually instantiating kernel services when possible.
 
+The framework uses a global service pattern where all bootstrapped services are available in the global namespace using uppercase names. The bootstrap process determines which services to load based on the current execution scope (ROUTER, API, or CLI), and each scope loads its appropriate set of services.
+
+## 5. Bootstrap and Service Globals
+
+`src/Bootstrap.php` acts as the service loader and runtime bootstrapper.
+
+Observed responsibilities:
+
+- Start PHP session for web scopes when needed.
+- Load bootstrap and application configuration.
+- Load services from a static default service map.
+- Apply runtime scope rules.
+- Instantiate services by class name.
+- Expose services through global variables.
+- Start the active runtime dispatcher.
+
+Services observed in the bootstrap map include:
+
+- `UUID`
+- `ENCRYPTION`
+- `REQUEST`
+- `OUTPUT`
+- `LOG`
+- `LOCALE`
+- `NET`
+- `DATABASE`
+- `SMS`
+- `SMTP`
+- `AUTH`
+- `CSRF`
+- `STYLE`
+- `BUILDER`
+- `HELPER`
+- `MODEL`
+- `IMAP`
+- `SLS`
+- `INSTALLER`
+- `UPDATER`
+
+If a service cannot be loaded, the framework appears to fall back to a `Module` stub object.
+
+Design constraint: code should use bootstrapped services rather than manually instantiating kernel services when possible.
+
 ## 6. Routing
 
 `src/Router.php` handles web routing.
