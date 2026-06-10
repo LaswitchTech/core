@@ -557,4 +557,39 @@ The following areas require a later verification pass:
 - Whether route smoke tests exist and how they should be run.
 - Whether documentation plugin support exists in this branch.
 - Whether extension installation, enable, disable, uninstall, and dependency handling are implemented in this branch.
+
+## 18. API Endpoint Flow Verification Findings
+
+Based on analysis of `src/API.php`:
+
+The API endpoint flow works as follows:
+1. Entry point is via `/webroot/endpoint.php`, which initializes Bootstrap with 'API' scope
+2. The API class's `start()` method is called
+3. It parses the namespace from request using `$REQUEST->getNamespace()`
+4. It parses the namespace into endpoint and action (method) parts
+5. It determines the endpoint class path by checking:
+   - Core default location at vendor/laswitchtech/core/Endpoint/
+   - Application specific location at Endpoint/
+   - Plugin specific location at lib/plugins/pluginname/Endpoint.php
+6. Loads the endpoint class
+7. Verifies that endpoint class and action method exist
+8. Performs authorization checks against:
+   - Authentication state (user loaded, not deleted/banned, verified)
+   - Authorization level based on endpoint path
+   - Maintenance mode if configured
+9. Executes the corresponding `Action()` method from the endpoint class
+10. Returns JSON response via `$OUTPUT->print()`
+
+BaseEndpoint provides common CRUD actions:
+- countAction
+- fetchAllAction
+- fetchAction
+- createAction
+- updateAction
+- deleteAction
+- archiveAction
+- recoverAction
+- describeAction
+
+This matches the documented API lifecycle in DESIGN.md section 7.1 which was previously incomplete.
 - Whether `ROADMAP.md`, `KANBAN.md`, and `NEXT.md` are populated and authoritative.

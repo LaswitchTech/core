@@ -25,7 +25,6 @@
 - [ ] Document current test strategy
 
 ## In Progress
-- [ ] Verify API endpoint flow
 - [ ] Verify CLI flow
 - [ ] Verify plugin, module, and theme loading behavior
 - [ ] Verify configuration loading behavior
@@ -45,3 +44,4 @@
 - [x] Verify routing flow
 - [x] Complete `DESIGN.md` architecture verification pass
 - [x] Establish planning workflow (`ROADMAP.md`, `KANBAN.md`, `NEXT.md`, `DESIGN.md`)
+- [x] Verify API endpoint flow
