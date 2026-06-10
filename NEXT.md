@@ -2,17 +2,18 @@
 
 ## Goal
 
-Validate and document the existing Core-Web architecture.
+Complete Phase 1.1 remaining architecture verification items from DESIGN.md section 6 (Routing), section 7 (Endpoints, Models, Helpers), section 14 (CLI), and section 18 (To Verify). Validate that every "To verify" entry in DESIGN.md is supported by the code or removed with a finding noted.
 
 ## Tasks
 
-- [x] Verify bootstrap flow
-- [x] Verify request lifecycle
-- [x] Verify routing flow
-- [x] Update DESIGN.md with findings
+- [ ] Verify API endpoint flow
+- [ ] Verify CLI flow
+- [ ] Verify plugin, module, and theme loading behavior
+- [ ] Verify configuration loading behavior
 
 ## Definition of Done
 
-- DESIGN.md verified against code
-- No speculative documentation remains
+- Each verification item above has findings documented in DESIGN.md section 18 or removed if already confirmed
+- Each ROADMAP Phase 1.1 remaining sub-item is checked off where verified
+- DESIGN.md "To Verify" section updated: items either confirmed, rejected, or deferred with reason
 - Findings committed
