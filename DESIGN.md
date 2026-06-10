@@ -570,7 +570,6 @@ The API endpoint flow works as follows:
 5. It determines the endpoint class path by checking:
    - Core default location at vendor/laswitchtech/core/Endpoint/
    - Application specific location at Endpoint/
-   - Plugin specific location at lib/plugins/pluginname/Endpoint.php
 6. Loads the endpoint class
 7. Verifies that endpoint class and action method exist
 8. Performs authorization checks against:
@@ -592,4 +591,30 @@ BaseEndpoint provides common CRUD actions:
 - describeAction
 
 This matches the documented API lifecycle in DESIGN.md section 7.1 which was previously incomplete.
+
+## 18. CLI Flow Verification Findings
+
+Based on analysis of `cli` entry point and `src/CLI.php`:
+
+The CLI command flow works as follows:
+1. Entry point is `cli`, which bootstraps Bootstrap with 'CLI' scope
+2. Arguments are parsed from `$REQUEST->getArguments()` (typically argv)
+3. Command class name is constructed by uppercasing the first argument + "Command"
+4. CLI looks for command files in this order:
+    - vendor/laswitchtech/core/Command/{Command}.php
+    - Command/{Command}.php
+    - lib/plugins/{pluginname}/Command.php
+5. Loads and instantiates the command class via require_once
+6. Parses action from second argument + "Action"
+7. Checks if action method exists in the loaded command
+8. If maintenance mode is enabled, displays a warning
+9. Executes the action method
+10. Returns without output (CLI handles terminal formatting through Output service)
+
+If maintenance mode is active during CLI execution, a warning is shown about features being unavailable.
+
+The convention follows the command/action pattern where:
+- Commands must end with "Command" class suffix
+- Actions must end with "Action" method suffix
+- Plugin commands are discovered by namespace conversion (removing "Command" suffix, converting to lowercase)
 - Whether `ROADMAP.md`, `KANBAN.md`, and `NEXT.md` are populated and authoritative.

@@ -25,14 +25,13 @@
 - [ ] Document current test strategy
 
 ## In Progress
-- [ ] Verify CLI flow
 - [ ] Verify plugin, module, and theme loading behavior
 - [ ] Verify configuration loading behavior
 
 ## Testing
-- [ ] Validate `DESIGN.md` against implementation
 
 ## Done
+- [x] Validate `DESIGN.md` against implementation
 - [x] Create `ROADMAP.md`
 - [x] Create `DESIGN.md`
 - [x] Create `KANBAN.md`
@@ -45,3 +44,4 @@
 - [x] Complete `DESIGN.md` architecture verification pass
 - [x] Establish planning workflow (`ROADMAP.md`, `KANBAN.md`, `NEXT.md`, `DESIGN.md`)
 - [x] Verify API endpoint flow
+- [x] Verify CLI flow
