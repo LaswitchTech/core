@@ -18,20 +18,12 @@
 - [ ] Create authentication guide
 
 ## Ready
-- [ ] Verify API endpoint flow
-- [ ] Verify CLI flow
-- [ ] Document current test strategy
 
 ## In Progress
-- [ ] Verify configuration loading behavior
-
-## Testing
+- [ ] Document current test strategy
 - [ ] Validate `DESIGN.md` against implementation
 
 ## Done
-- [x] Validate `DESIGN.md` against implementation
-- [x] Verify plugin, module, and theme loading behavior
-- [x] Verify configuration loading behavior
 - [x] Create `ROADMAP.md`
 - [x] Create `DESIGN.md`
 - [x] Create `KANBAN.md`
@@ -45,3 +37,5 @@
 - [x] Establish planning workflow (`ROADMAP.md`, `KANBAN.md`, `NEXT.md`, `DESIGN.md`)
 - [x] Verify API endpoint flow
 - [x] Verify CLI flow
+- [x] Verify plugin, module, and theme loading behavior
+- [x] Verify configuration loading behavior
