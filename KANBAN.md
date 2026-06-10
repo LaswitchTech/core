@@ -1,25 +1,6 @@
-# Backlog
+# Kanban
 
-- []
-
-# Ready
-
-- []
-
-# In Progress
-
-- []
-
-# Testing
-
-- []
-
-# Done
-
-- []
-
-# Backlog
-
+## Backlog
 - [ ] Implement Encryption Service
 - [ ] Review Auth and optimize authentication flow
 - [ ] Review Router and migrate toward MVC standard
@@ -36,31 +17,28 @@
 - [ ] Create routing guide
 - [ ] Create authentication guide
 
-# Ready
-
-- [ ] Verify bootstrap flow
-- [ ] Verify request lifecycle
-- [ ] Verify routing flow
+## Ready
+- []
 - [ ] Verify API endpoint flow
 - [ ] Verify CLI flow
 - [ ] Verify plugin, module, and theme loading behavior
 - [ ] Verify configuration loading behavior
 - [ ] Document current test strategy
 
-# In Progress
-
+## In Progress
 - [ ] Complete `DESIGN.md` architecture verification pass
 - [ ] Establish planning workflow (`ROADMAP.md`, `KANBAN.md`, `NEXT.md`, `DESIGN.md`)
 
-# Testing
-
+## Testing
 - [ ] Validate `DESIGN.md` against implementation
 
-# Done
-
+## Done
 - [x] Create `ROADMAP.md`
 - [x] Create `DESIGN.md`
 - [x] Create `KANBAN.md`
 - [x] Create `NEXT.md`
 - [x] Reset `dev` branch from `stable`
 - [x] Clean repository ignore issues
+- [x] Verify bootstrap flow
+- [x] Verify request lifecycle
+- [x] Verify routing flow

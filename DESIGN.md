@@ -488,7 +488,63 @@ Observed constraints and design cautions:
 6. Missing or incomplete services may be represented by stubs or fallback modules.
 7. Local generated files, ignored extension folders, vendor dependencies, and environment-specific config should not be committed unless intentionally tracked.
 
-## 17. To Verify
+## 17. Request Lifecycle
+
+### Web Request Flow
+
+After inspection, the HTTP request lifecycle is as follows:
+
+1. **HTTP Request** arrives at web server
+2. **.htaccess rewrite rules** direct request to `webroot/index.php`
+3. **`webroot/index.php`** bootstraps the framework using `Bootstrap("ROUTER")`
+4. **Bootstrap process**: 
+   - Starts PHP session if needed (for web scopes)
+   - Loads configuration files
+   - Instantiates services based on scope (`ROUTER`)
+   - Exposes services globally via `$GLOBALS`
+   - Starts the active runtime dispatcher (`Router::start()`)
+5. **`Router::start()`**:
+   - Initializes Core helper through `Helper->Core->init()`
+   - Determines requested route from URL (via `$REQUEST` service)
+   - If application is installed, renders the matched route
+   - If not installed, redirects to `/install` route
+
+6. **Route Processing**:
+   - Routes loaded from:
+     - Core error routes
+     - Configured routes from `config/routes.cfg`
+     - Plugin routes from `lib/plugins/{plugin}/routes.cfg`
+   - Authorization checks applied based on route properties
+   - Route rendering via Template/View system
+
+### Bootstrap Services (ROUTER Scope)
+
+The following services are loaded during ROUTER scope:
+
+- UUID, REQUEST, OUTPUT, LOG, LOCALE, NET, DATABASE, SMS, SMTP
+- AUTH, CSRF, STYLE, BUILDER, HELPER, MODEL, IMAP, SLS
+- INSTALLER, UPDATER, ROUTER
+
+Each service is initialized and available globally as uppercase variable names in the `$GLOBALS` array.
+
+### Route Authorization
+
+Routes are checked for authorization against user permissions using the `AUTH` service:
+- Unauthenticated users get 430 "Unauthenticated"
+- Unauthorized access gets 403 "Forbidden"
+- Deleted/banned users get specific errors
+- Role-based permission checking via `isAuthorized('Route>' . $this->Routes[$route]->namespace(), intval($this->Routes[$route]->level()))`
+
+### Configuration Dependencies
+
+The routing process depends on:
+- `config/bootstrap.cfg` - Bootstrap configuration
+- `config/application.cfg` - Application settings
+- `config/routes.cfg` - Route definitions
+- `config/auth.cfg` - Authentication parameters
+- Plugin route files in `lib/plugins/{plugin}/routes.cfg`
+
+## 18. To Verify
 
 The following areas require a later verification pass:
 
