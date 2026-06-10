@@ -193,6 +193,7 @@ Purpose: move the routing layer toward a clearer MVC architecture while keeping 
 - [ ] Define response object behavior if introduced.
 - [ ] Document backward compatibility requirements.
 
+
 ### 5.3 Incremental MVC Migration
 
 - [ ] Introduce MVC components without breaking old routes.
@@ -202,6 +203,26 @@ Purpose: move the routing layer toward a clearer MVC architecture while keeping 
 - [ ] Preserve existing `routes.cfg` format.
 - [ ] Add route regression tests.
 - [ ] Validate existing pages and API routes.
+
+### 5.4 Review Builder JavaScript
+
+Purpose: simplify and optimize client-side framework behavior.
+
+#### `assets/js/builder.js`
+
+- [ ] Document current responsibilities.
+- [ ] Document initialization flow.
+- [ ] Document event registration flow.
+- [ ] Identify duplicated logic.
+- [ ] Identify legacy compatibility requirements.
+- [ ] Measure unnecessary DOM operations.
+- [ ] Reduce repeated selectors where safe.
+- [ ] Reduce repeated event bindings where safe.
+- [ ] Improve modularity.
+- [ ] Improve maintainability.
+- [ ] Preserve public JavaScript APIs.
+- [ ] Add regression testing where practical.
+- [ ] Document updated behavior.
 
 ## Phase 6 — SMTP Review and Email Queue
 
@@ -280,11 +301,43 @@ Initial admin sections may include:
 - [ ] Auth status.
 - [ ] Developer information.
 
+
 ### 8.3 Admin Tests and Documentation
 
 - [ ] Add route tests for `/admin`.
 - [ ] Add authorization tests.
 - [ ] Document admin page extension points.
+
+### 8.4 Developer Kanban
+
+Purpose: provide a built-in project management interface for framework and application development.
+
+#### `/dev/kanban`
+
+- [ ] Create route `/dev/kanban`.
+- [ ] Read `KANBAN.md` from the repository root.
+- [ ] Parse Kanban sections:
+  - Backlog
+  - Ready
+  - In Progress
+  - Testing
+  - Done
+- [ ] Render Kanban board using framework UI components.
+- [ ] Support task creation.
+- [ ] Support task editing.
+- [ ] Support task deletion.
+- [ ] Support drag-and-drop movement between columns.
+- [ ] Persist changes back to `KANBAN.md`.
+- [ ] Add authorization controls.
+- [ ] Add developer-only access.
+- [ ] Document Kanban file format.
+
+Future considerations:
+
+- [ ] Support ROADMAP integration.
+- [ ] Support NEXT.md integration.
+- [ ] Support GitHub issue synchronization.
+- [ ] Support AI-assisted task generation.
 
 ## Phase 9 — Default Developer Landing Page
 
@@ -332,12 +385,26 @@ Purpose: make the framework easier to extend and maintain after the core improve
 - [ ] Define minimum tests for database changes.
 - [ ] Define minimum tests for queue services.
 
+
 ### 10.3 Standardize Documentation Expectations
 
 - [ ] Require docs for new public APIs.
 - [ ] Require docs for new services.
 - [ ] Require docs for new extensions.
 - [ ] Require migration notes for compatibility changes.
+
+### 10.4 Developer Experience Documentation
+
+Purpose: make Core-Web easier to understand, extend, and maintain for both humans and coding agents.
+
+- [ ] Create plugin development guide.
+- [ ] Create theme development guide.
+- [ ] Create module development guide.
+- [ ] Create database guide.
+- [ ] Create routing guide.
+- [ ] Create MVC guide.
+- [ ] Create authentication guide.
+- [ ] Create developer tools guide.
 
 ## Deferred / Future Considerations
 
@@ -352,6 +419,7 @@ These items are not part of the immediate roadmap unless promoted later:
 - Background worker daemon beyond CLI queue processors.
 - UI theme management.
 - Distributed update system.
+- Additional developer tools such as `/dev/routes`, `/dev/config`, `/dev/database`, `/dev/plugins`, and `/dev/themes`.
 
 ## Completion Definition
 
