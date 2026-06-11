@@ -551,14 +551,13 @@ The following areas require a later verification pass:
 - Current plugin manifest format and required plugin files.
 - Current module packaging format under `lib/modules/`.
 - Current theme metadata and asset-loading contract.
-- Exact database connector support in this branch.
 - Exact authentication feature completeness in this branch.
 - Exact CI workflow behavior in `.github/workflows/`.
 - Whether route smoke tests exist and how they should be run.
 - Whether documentation plugin support exists in this branch.
 - Whether extension installation, enable, disable, uninstall, and dependency handling are implemented in this branch.
 
-## 18. API Endpoint Flow Verification Findings
+## 19. API Endpoint Flow Verification Findings
 
 Based on analysis of `src/API.php`:
 
@@ -592,7 +591,7 @@ BaseEndpoint provides common CRUD actions:
 
 This matches the documented API lifecycle in DESIGN.md section 7.1 which was previously incomplete.
 
-## 18. CLI Flow Verification Findings
+## 20. CLI Flow Verification Findings
 
 Based on analysis of `cli` entry point and `src/CLI.php`:
 
@@ -618,7 +617,7 @@ The convention follows the command/action pattern where:
 - Actions must end with "Action" method suffix
 - Plugin commands are discovered by namespace conversion (removing "Command" suffix, converting to lowercase)
 
-## 18. Plugin/Module/Theme Loading Behavior
+## 21. Plugin/Module/Theme Loading Behavior
 
 Based on framework code analysis of how extensions are loaded:
 
@@ -639,7 +638,7 @@ Based on framework code analysis of how extensions are loaded:
 - Theme assets and templates integrate via the Builder and Style systems
 - Active theme determined by configuration settings in application.cfg
 
-## 18. Configuration Loading Behavior
+## 22. Configuration Loading Behavior
 
 Based on analysis of `src/Config.php`:
 
