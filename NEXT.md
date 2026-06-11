@@ -2,18 +2,18 @@
 
 ## Goal
 
-Establish Phase 1.3 Baseline Test Strategy: identify available test commands, document the testing workflow, and confirm existing verification tooling so future phases have a known quality gate.
+Validate `DESIGN.md` against current implementation and document any discrepancies before advancing to Phase 2 (Database Review).
 
 ## Tasks
 
-- [x] Identify currently available test commands
-- [x] Document test commands in `docs/developer/testing.md`
-- [x] Confirm syntax linting process
-- [x] Confirm PHPUnit coverage
-- [x] Confirm CI workflow behavior
+- [ ] Audit DESIGN.md sections 17–18 against actual source code
+- [ ] Document any behavioral gaps or stale descriptions found
+- [ ] Update DESIGN.md with corrected observations
+- [ ] Run `php -l` on all files referenced in DESIGN.md to confirm they exist and parse cleanly
 
 ## Definition of Done
 
-- All five sub-items above are completed and documented
-- Testing documentation is committed alongside confirmed observations
-- No speculative or unverified test information remains in the docs
+- All four sub-items above are completed
+- DESIGN.md entries 17 and 18 match observable implementation behavior
+- No speculative or unverified claims remain in DESIGN.md
+- `git diff --check` passes on planning changes
