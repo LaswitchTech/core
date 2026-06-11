@@ -6,7 +6,7 @@ Validate `DESIGN.md` against current implementation and document any discrepanci
 
 ## Tasks
 
-- [ ] Audit DESIGN.md sections 17–18 against actual source code
+- [x] Audit DESIGN.md sections 17–18 against actual source code
 - [ ] Document any behavioral gaps or stale descriptions found
 - [ ] Update DESIGN.md with corrected observations
 - [ ] Run `php -l` on all files referenced in DESIGN.md to confirm they exist and parse cleanly

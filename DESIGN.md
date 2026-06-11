@@ -375,6 +375,8 @@ Observed concepts:
 
 - Connector abstraction through `src/Abstracts/Connector.php`.
 - MySQL connector under `src/Connectors/MySQL.php`.
+- PostgreSQL connector under `src/Connectors/PostgreSQL.php`.
+- SQLite connector under `src/Connectors/SQLite.php`.
 - Query object creation through `$DATABASE->query()`.
 - Schema object creation through `$DATABASE->schema()`.
 - Installer-driven schema creation from definition files.
@@ -384,8 +386,6 @@ Observed installer/database behavior:
 - Table definitions are loaded from definition files.
 - Schema objects can create or update database structure.
 - Required/sample data can be loaded during installation.
-
-To verify: the exact current support level for SQLite, PostgreSQL, and other connectors in this branch.
 
 ## 12. Authentication and Authorization
 
